@@ -1,12 +1,13 @@
 .active {
-  background-color: blue;
+  background-color: #162440;
 }
 
 nav {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  background-color: aqua;
+  background-color: #2C406E;
+  box-shadow: 0 2px 4px 0 rgba(0, 0, 0, .3);
 }
 
 nav ul {
@@ -15,17 +16,16 @@ nav ul {
 
 nav ul li {
   list-style: none;
-
+  padding: 5px 0px;
 }
 
 nav ul li a {
-  display: block;
   text-decoration: none;
-  color: black;
-  padding: 1rem;
-  margin: 0 0.5rem;
+  color: #FFF;
+  padding: 1.5rem;
+  display: initial;
 }
 
 nav ul li a:not(.active):hover {
-  background-color: aquamarine;
+  background-color: #93B4D7;
 }
