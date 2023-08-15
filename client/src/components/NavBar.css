@@ -4,7 +4,6 @@
 
 nav {
   display: flex;
-  justify-content: space-between;
   align-items: center;
   background-color: #2C406E;
   box-shadow: 0 2px 4px 0 rgba(0, 0, 0, .3);
@@ -16,14 +15,13 @@ nav ul {
 
 nav ul li {
   list-style: none;
-  padding: 5px 0px;
 }
 
 nav ul li a {
   text-decoration: none;
   color: #FFF;
   padding: 1.5rem;
-  display: initial;
+  display: block;
 }
 
 nav ul li a:not(.active):hover {
