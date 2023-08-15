@@ -1,3 +1,4 @@
+import './App.css'
 import { BrowserRouter, Route, Routes } from 'react-router-dom'
 
 import NavBar from "./components/NavBar";
@@ -11,13 +12,17 @@ function App() {
   return (
     <BrowserRouter>
       <NavBar />
-      <Routes>
-        <Route path="/" element={<Home />} />
-        <Route path="/products" element={<Products />} />
-        <Route path="/orders" element={<Orders />} />
-        <Route path="/reports" element={<Reports />} />
-        <Route path="/customers-debits" element={<Debits />} />
-      </Routes>
+      <div className='pages'>
+        <div className='page'>
+          <Routes>
+            <Route path="/" element={<Home />} />
+            <Route path="/products" element={<Products />} />
+            <Route path="/orders" element={<Orders />} />
+            <Route path="/reports" element={<Reports />} />
+            <Route path="/customers-debits" element={<Debits />} />
+          </Routes>
+        </div>
+      </div>
     </BrowserRouter>
   )
 }

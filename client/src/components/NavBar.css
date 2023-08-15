@@ -1,0 +1,31 @@
+.active {
+  background-color: blue;
+}
+
+nav {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: aqua;
+}
+
+nav ul {
+  display: flex;
+}
+
+nav ul li {
+  list-style: none;
+
+}
+
+nav ul li a {
+  display: block;
+  text-decoration: none;
+  color: black;
+  padding: 1rem;
+  margin: 0 0.5rem;
+}
+
+nav ul li a:not(.active):hover {
+  background-color: aquamarine;
+}
