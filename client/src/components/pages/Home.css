@@ -1,0 +1,10 @@
+#initial-page>div {
+  background-color: aqua;
+  padding: 2rem;
+}
+
+#initial-page div form {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-around;
+}
