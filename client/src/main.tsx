@@ -22,7 +22,7 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
           TextInput: {
             styles: () => ({
               label: {
-                color: "initial",
+                color: "white",
               },
               input: {
                 border: "none",
@@ -33,11 +33,29 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
           NumberInput: {
             styles: () => ({
               label: {
-                color: "initial",
+                color: "white",
               },
               input: {
                 border: "none",
                 borderRadius: 0
+              }
+            }),
+          },
+          Select: {
+            styles: () => ({
+              label: {
+                color: "white",
+              },
+              input: {
+                border: "none",
+                borderRadius: 0
+              }
+            }),
+          },
+          Checkbox: {
+            styles: () => ({
+              label: {
+                color: "white",
               }
             }),
           }
