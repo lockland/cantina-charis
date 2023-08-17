@@ -1,6 +1,17 @@
-body {
+* {
   margin: 0px;
   padding: 0px;
-  /* background-color: #162440; */
-  background-color: #213547;
+}
+
+:root {
+  margin: 0px;
+  padding: 0px;
+  background-color: var(--primary-background-color);
+
+
+  --navbar-selected-item: #162440;
+  --primary-background-color: #213547;
+  --generic-blue: #2C406E;
+  --orders-card-background-color: #027A7B;
+  --secondary-background-color: #93B4D7;
 }
