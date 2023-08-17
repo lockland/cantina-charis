@@ -8,10 +8,10 @@
   padding: 0px;
   background-color: var(--primary-background-color);
 
-
   --navbar-selected-item: #162440;
   --primary-background-color: #213547;
   --generic-blue: #2C406E;
   --orders-card-background-color: #027A7B;
   --secondary-background-color: #93B4D7;
+  --button-color: #0505b8;
 }
