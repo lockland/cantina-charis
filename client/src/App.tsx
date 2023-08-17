@@ -6,16 +6,24 @@ import Orders from './components/pages/Orders';
 import Reports from './components/pages/Reports';
 import Debits from './components/pages/Debits';
 import Home from './components/pages/home/Home';
-import { Box } from '@mantine/core';
+import { Box, Container, Space } from '@mantine/core';
 
 export const COOKIE_NAME = 'app'
 
 function App() {
-  return (
-    <Box className='App' >
-      <BrowserRouter>
 
-        <NavBar />
+  const maw = "80vw"
+
+  return (
+    <BrowserRouter>
+      <Container style={{
+        backgroundColor: "var(--generic-blue)",
+        boxShadow: "0 2px 4px 0 rgba(0, 0, 0, .3)",
+      }} >
+        <NavBar maw={maw} />
+      </Container>
+      <Space h="md" />
+      <Container maw={maw}>
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/products" element={<Products />} />
@@ -23,8 +31,8 @@ function App() {
           <Route path="/reports" element={<Reports />} />
           <Route path="/customers-debits" element={<Debits />} />
         </Routes>
-      </BrowserRouter>
-    </Box >
+      </Container>
+    </BrowserRouter>
   )
 }
 export default App

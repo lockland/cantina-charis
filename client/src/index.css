@@ -3,13 +3,10 @@
   padding: 0px;
 }
 
-label {
-  color: azure;
-}
-
 :root {
   margin: 0px;
   padding: 0px;
+  color: azure;
   background-color: var(--primary-background-color);
 
   --navbar-selected-item: #162440;
