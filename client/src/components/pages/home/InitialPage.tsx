@@ -2,8 +2,8 @@
 import { TextInput, Button, Box, NumberInput, Center, Space } from '@mantine/core';
 import { useForm } from '@mantine/form';
 import { FormEvent } from 'react';
-import { useCookies } from "react-cookie";
-import { COOKIE_NAME } from '../../App';
+import { COOKIE_NAME } from '../../../App';
+import { useCookiesHook } from "../../../hooks/useCookiesHook"
 
 interface EventType {
   eventName: string,
@@ -12,6 +12,8 @@ interface EventType {
 
 
 function InitialPage() {
+  const [setCookieWithExpire] = useCookiesHook(COOKIE_NAME)
+
   const form = useForm({
     initialValues: {
       eventName: '',
@@ -24,14 +26,12 @@ function InitialPage() {
     }
   });
 
-  const [cookies, setCookie] = useCookies([COOKIE_NAME]);
-
   const handleSubmit = (values: EventType, event: FormEvent<HTMLFormElement>) => {
     console.log(values)
     console.log(event)
 
     const expireTimestamp = new Date().getTime() + (60 * 60 * 24 * 1000)
-    setCookie(COOKIE_NAME, true, { expires: new Date(expireTimestamp) })
+    setCookieWithExpire(JSON.stringify({ event_created: true }), expireTimestamp)
   }
 
   return (

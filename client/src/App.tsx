@@ -5,10 +5,10 @@ import Products from "./components/pages/Products";
 import Orders from './components/pages/Orders';
 import Reports from './components/pages/Reports';
 import Debits from './components/pages/Debits';
-import Home from './components/pages/Home';
+import Home from './components/pages/home/Home';
 import { Box } from '@mantine/core';
 
-export const COOKIE_NAME = 'event_created'
+export const COOKIE_NAME = 'app'
 
 function App() {
   return (

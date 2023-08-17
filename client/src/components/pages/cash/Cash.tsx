@@ -1,5 +1,3 @@
-import "./Cash.css"
-
 function CashPage() {
   return <> Cash Page</>
 }
