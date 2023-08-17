@@ -61,7 +61,7 @@ function InitialPage() {
             size="lg"
           />
 
-          <Button type="submit" mt="md" fullWidth>
+          <Button type="submit" mt="md" size="lg" fullWidth>
             Abrir Caixa
           </Button>
         </form>
