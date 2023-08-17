@@ -3,6 +3,10 @@
   padding: 0px;
 }
 
+label {
+  color: azure;
+}
+
 :root {
   margin: 0px;
   padding: 0px;

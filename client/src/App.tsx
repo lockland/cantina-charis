@@ -6,11 +6,15 @@ import Orders from './components/pages/Orders';
 import Reports from './components/pages/Reports';
 import Debits from './components/pages/Debits';
 import Home from './components/pages/Home';
+import { Box } from '@mantine/core';
+
+export const COOKIE_NAME = 'event_created'
 
 function App() {
   return (
-    <div className='App' >
+    <Box className='App' >
       <BrowserRouter>
+
         <NavBar />
         <Routes>
           <Route path="/" element={<Home />} />
@@ -20,7 +24,7 @@ function App() {
           <Route path="/customers-debits" element={<Debits />} />
         </Routes>
       </BrowserRouter>
-    </div >
+    </Box >
   )
 }
 export default App
