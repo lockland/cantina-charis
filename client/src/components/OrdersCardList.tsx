@@ -9,14 +9,15 @@ interface OrdersCardType {
 
 function OrdersCardList() {
 
-  const { data } = getOrdersHook(5)
+  const { data } = getOrdersHook(14)
 
 
 
   return (
     <SimpleGrid cols={3} m={15}>
-      {data.map((order: OrdersCardType) =>
+      {data.map((order: OrdersCardType, index: number) =>
         <OrdersCard
+          key={index}
           cname={order.customer_name}
           price={order.order_price}
         />
