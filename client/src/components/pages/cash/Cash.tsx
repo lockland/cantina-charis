@@ -1,23 +1,23 @@
 import { Box, Flex, Title } from "@mantine/core"
-import { inherits } from "util"
+import OrdersCardList from "../../OrdersCardList"
 
 function CashPage() {
+  const boxSize = "49%"
   return (
     <Flex
       justify="space-between"
-      maw="inherit"
     >
-
       <Box
-        style={{
-          backgroundColor: "green"
-        }}
-
-        w="50%"
+        w={boxSize}
+        mah={800}
       >
-        <Title align="center">Pedidos</Title>
+        <Title align="center" order={2} >Pedidos</Title>
+        <OrdersCardList />
       </Box>
-      <Box w="50%"><Title align="center">Caixa</Title></Box>
+
+      <Box w={boxSize}>
+        <Title align="center" order={2}>Caixa</Title>
+      </Box>
     </Flex>
   )
 }
