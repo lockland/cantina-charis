@@ -6,7 +6,7 @@ import Orders from './components/pages/Orders';
 import Reports from './components/pages/Reports';
 import Debits from './components/pages/Debits';
 import Home from './components/pages/home/Home';
-import { Box, Container, Space } from '@mantine/core';
+import { Container, Space } from '@mantine/core';
 
 export const COOKIE_NAME = 'app'
 
@@ -15,9 +15,9 @@ function App() {
   const maw = "80vw"
 
   return (
+
     <BrowserRouter>
-      <Container style={{
-        backgroundColor: "var(--generic-blue)",
+      <Container maw="100vw" bg="var(--generic-blue)" style={{
         boxShadow: "0 2px 4px 0 rgba(0, 0, 0, .3)",
       }} >
         <NavBar maw={maw} />
