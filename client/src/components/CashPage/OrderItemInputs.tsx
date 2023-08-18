@@ -25,7 +25,7 @@ function OrderItemInputs({ updateProductsTable, updateTotalAmount }: OrderItemIn
   }
 
   const sumProductPriceWithTotal = (totalAmount: string, productRow: OrderItemRow) => {
-    const newAmount = parseFloat(totalAmount) + parseFloat(productRow.price)
+    const newAmount = parseFloat(totalAmount) + parseFloat(productRow.getTotal())
     return newAmount.toFixed(2)
   }
 
