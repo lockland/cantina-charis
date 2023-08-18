@@ -1,7 +1,8 @@
 import { Box, Button, Flex, Group, NumberInput, Select, Space } from "@mantine/core"
-import OrderItemRow from "../../models/OrderItem"
+import OrderItemRow from "../../models/OrderItemRow"
 import { getCustomerNamesHook, getProductNamesHook } from "../../hooks/useFakeAPI"
 import { useState } from "react"
+import { useFormContext } from "../../hooks/formContext"
 
 interface OrderItemInputsProps {
   updateProductsTable: any,
@@ -19,6 +20,7 @@ function OrderItemInputs({ updateProductsTable, updateTotalAmount }: OrderItemIn
 
   const [qtd, setQtd] = useState(1)
   const [productIndex, setProductIndex] = useState("0")
+  const form = useFormContext()
 
   const addProductToTable = (productRow: OrderItemRow): void => {
     updateProductsTable((currentState: OrderItemRow[]) => [...currentState, productRow])
@@ -31,10 +33,11 @@ function OrderItemInputs({ updateProductsTable, updateTotalAmount }: OrderItemIn
 
   const handleOnClick = () => {
     const product = productNames.filter((el: { value: string }) => el.value === productIndex)
-    const productRow = new OrderItemRow(product[0]["label"], qtd, product[0]["price"])
+    const productRow = new OrderItemRow(productIndex, product[0]["label"], qtd, product[0]["price"])
 
     addProductToTable(productRow)
     updateTotalAmount((currentState: string) => sumProductPriceWithTotal(currentState, productRow))
+    form.insertListItem("products", productRow)
   }
 
   const handleOnChange = (value: number) => setQtd(value)
@@ -49,6 +52,7 @@ function OrderItemInputs({ updateProductsTable, updateTotalAmount }: OrderItemIn
           setCustomerNames((current: any) => [...current, item]);
           return item;
         }}
+
         getCreateLabel={(query) => `+ Adicionar ${query}`}
 
         data={customerNames}
@@ -57,6 +61,7 @@ function OrderItemInputs({ updateProductsTable, updateTotalAmount }: OrderItemIn
         label="Selecione o cliente"
         placeholder="Digite o nome do cliente"
         required
+        {...form.getInputProps("customer_id")}
       />
       <Space mt="md" />
 

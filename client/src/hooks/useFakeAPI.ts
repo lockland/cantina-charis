@@ -23,6 +23,7 @@ export function getOrdersHook(total: number): any {
 }
 
 export function getCustomerNamesHook(): any {
+  // Value is the Customer ID on database
   return {
     data: [
       { value: '1', label: 'Fulano' },
@@ -32,6 +33,7 @@ export function getCustomerNamesHook(): any {
 }
 
 export function getProductNamesHook(): any {
+  // Value is the Product ID on database
 
   return {
     data: [

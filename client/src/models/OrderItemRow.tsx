@@ -1,6 +1,7 @@
 interface OrderItemType {
+  id: string,
   name: string,
-  qtd: number,
+  quantity: number,
   price: string,
 
   getPrice(): string,
@@ -8,13 +9,15 @@ interface OrderItemType {
 }
 
 class OrderItemRow implements OrderItemType {
+  id: string
   name: string
-  qtd: number
+  quantity: number
   price: string
 
-  constructor(name: string, qtd: number, price: string) {
+  constructor(id: string, name: string, qtd: number, price: string) {
+    this.id = id
     this.name = name
-    this.qtd = qtd
+    this.quantity = qtd
     this.price = price
   }
 
@@ -23,7 +26,7 @@ class OrderItemRow implements OrderItemType {
   }
 
   getTotal(): string {
-    return (parseFloat(this.price) * this.qtd).toFixed(2)
+    return (parseFloat(this.price) * this.quantity).toFixed(2)
   }
 
 
