@@ -19,7 +19,7 @@ function ProductsTable({ orderItemList }: ProductsTableProps) {
 
   return (
     <Box bg="var(--secondary-background-color)" mih={250} mah={280} style={{ overflow: "auto" }}>
-      <Table striped >
+      <Table striped withColumnBorders>
         <thead>
           <tr>
             <th>Produto</th>
