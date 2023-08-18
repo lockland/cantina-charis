@@ -7,10 +7,13 @@
   margin: 0px;
   padding: 0px;
   color: azure;
+  width: 100vw;
+  height: 100vh;
   background-color: var(--primary-background-color);
 
   --navbar-selected-item: #162440;
   --primary-background-color: #213547;
+  --initial-page-background: #293d55;
   --generic-blue: #2C406E;
   --orders-card-background-color: #027A7B;
   --secondary-background-color: #93B4D7;

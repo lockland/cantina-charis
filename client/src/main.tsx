@@ -12,7 +12,7 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
       theme={{
         components: {
           Button: {
-            styles: (theme, params: ButtonStylesParams, { variant }) => ({
+            styles: (_theme, _params: ButtonStylesParams, { variant }) => ({
               root: {
                 backgroundColor:
                   variant === 'filled' ? "var(--button-color)" : undefined,

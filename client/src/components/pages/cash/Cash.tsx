@@ -1,44 +1,65 @@
-import { Box, Button, Center, Checkbox, Flex, Group, NumberInput, Select, SimpleGrid, Space, Table, Title } from "@mantine/core"
+import { Box, Button, Flex, Group, NumberInput, Select, SimpleGrid, Space, Table, Title } from "@mantine/core"
 import OrdersCardList from "../../OrdersCardList"
 import { useState } from "react";
-import SummaryCard from "../../SummaryCard";
+import OrderItemRow from "../../../models/OrderItem";
+import { getCustomerNamesHook, getProductNamesHook } from "../../../hooks/useFakeAPI";
+import SummaryCardList from "../../SummaryCardList";
 
 function CashPage() {
-  const [data, setData] = useState([
-    { value: 'react', label: 'React' },
-    { value: 'ng', label: 'Angular' },
-  ]);
 
-  const elements = [
-    { mass: 12.011, symbol: 'C', name: 'Carbon' },
-    { mass: 14.007, symbol: 'N', name: 'Nitrogen' },
-    { mass: 88.906, symbol: 'Y', name: 'Yttrium' },
-    { mass: 137.33, symbol: 'Ba', name: 'Barium' },
-    { mass: 140.12, symbol: 'Ce', name: 'Cerium' },
-  ];
+  const customersResp = getCustomerNamesHook()
+  const [customerNames, setCustomerNames] = useState(customersResp?.data);
+  const [qtd, setQtd] = useState(1)
+  const [productIndex, setProductIndex] = useState("0")
+  const [totalAmount, updateTotalAmount] = useState("1000")
+
+
+  const productsResp = getProductNamesHook()
+  const [productNames, setProductNames] = useState(productsResp?.data);
+
+  const addProductToTable = (): void => {
+    const product = productNames.filter((el: { value: string }) => el.value === productIndex)
+    const productRow = new OrderItemRow(product[0]["label"], qtd, product[0]["price"])
+
+    updateTotalAmount((currentState) => {
+      const newAmount = parseFloat(currentState) + parseFloat(product[0]["price"])
+      return newAmount.toFixed(2)
+    })
+
+    setElements((currentState) => [...currentState, productRow])
+
+  }
+
+
+  const [elements, setElements] = useState<OrderItemRow[]>([])
 
   const rows = elements.map((element) => (
     <tr key={element.name}>
       <td>{element.name}</td>
-      <td>{element.symbol}</td>
-      <td>{element.mass}</td>
+      <td>{element.qtd}</td>
+      <td>{`R$ ${element.getPrice()}`}</td>
+      <td>{`R$ ${element.getTotal()}`}</td>
     </tr>
   ));
 
   const boxSize = "49%"
+
+  const overflow = { overflow: "auto" }
   return (
     <Flex
       justify="space-between"
     >
       <Box
         w={boxSize}
-        mah={800}
+        mah={700}
+        style={overflow}
       >
         <Title align="center" order={2} >Pedidos</Title>
         <OrdersCardList />
       </Box>
 
-      <Box w={boxSize}>
+      <Box w={boxSize} mah={700}
+      >
         <Title align="center" order={2}>Caixa</Title>
         <form>
 
@@ -46,13 +67,14 @@ function CashPage() {
             size="md"
             onChange={console.log}
             onCreate={(query) => {
-              const item = { value: query, label: query };
-              setData((current) => [...current, item]);
+              debugger
+              const item = { value: "0", label: query };
+              setCustomerNames((current: any) => [...current, item]);
               return item;
             }}
             getCreateLabel={(query) => `+ Adicionar ${query}`}
 
-            data={data}
+            data={customerNames}
             creatable
             searchable
             label="Selecione o cliente"
@@ -68,8 +90,8 @@ function CashPage() {
             >
 
               <Select
-                onChange={console.log}
-                data={data}
+                onChange={(value: string) => setProductIndex(value)}
+                data={productNames}
                 searchable
                 label="Selecione o produto"
                 placeholder="Digite o nome do produto"
@@ -78,31 +100,30 @@ function CashPage() {
                 required
               />
 
-              <NumberInput size="md" w="20%" label="Quantidade" required value={0} />
+              <NumberInput size="md" w="20%" label="Quantidade" required value={1} onChange={(value: number) => { setQtd(value) }} />
             </Flex>
           </Group>
 
-          <Button size="md" mt="md" fullWidth>
+          <Button size="md" mt="md" fullWidth onClick={addProductToTable} >
             Adicionar produto
           </Button>
           <Space mt="md" />
-          <Table bg="var(--secondary-background-color)">
-            <thead>
-              <tr>
-                <th>Element name</th>
-                <th>Symbol</th>
-                <th>Atomic mass</th>
-              </tr>
-            </thead>
-            <tbody>{rows}</tbody>
-          </Table>
+          <Box bg="var(--secondary-background-color)" mih={250} mah={280} style={overflow}>
+            <Table striped >
+              <thead>
+                <tr>
+                  <th>Produto</th>
+                  <th>Quantidade</th>
+                  <th>Valor unitário</th>
+                  <th>Total</th>
+                </tr>
+              </thead>
+              <tbody>{rows}</tbody>
+            </Table>
+          </Box>
         </form>
         <Space mt="md" />
-        <SimpleGrid cols={3}>
-          <SummaryCard title="Total" price="1000,00" />
-          <SummaryCard title="Valor pago" price="0" />
-          <SummaryCard title="Troco" price="1000,00" />
-        </SimpleGrid>
+        <SummaryCardList totalAmount={totalAmount} onChange={(event: any) => updateTotalAmount(event.currentTarget.value)} />
         <Space mt="md" />
 
         <Button type="submit" size="lg" mt="md" fullWidth>

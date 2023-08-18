@@ -2,7 +2,14 @@ import { SimpleGrid } from "@mantine/core"
 import SummaryCard from "./SummaryCard"
 import { useState } from "react"
 
-function SummaryCardList(totalAmount: string) {
+interface SummaryCardListProps {
+  totalAmount: string,
+
+  onChange?: any
+}
+
+
+function SummaryCardList({ totalAmount, onChange }: SummaryCardListProps) {
   const [changeOfMoney, setChangeOfMoney] = useState("0.00")
   const [paidAmount, setPaidAmount] = useState("0")
 
@@ -17,7 +24,7 @@ function SummaryCardList(totalAmount: string) {
 
   return (
     <SimpleGrid cols={3}>
-      <SummaryCard title="Total" readonly amount={totalAmount} />
+      <SummaryCard title="Total" readonly amount={totalAmount} onChange={onChange} />
       <SummaryCard
         title="Valor pago"
         placeholder="0"

@@ -40,8 +40,9 @@ function InitialPage() {
         <form
           onSubmit={form.onSubmit(handleSubmit)}
           style={{
-            backgroundColor: "var(--secondary-background-color)",
-            padding: 24
+            backgroundColor: "var(--initial-page-background)",
+            padding: 24,
+            boxShadow: "2px 6px 23px -5px rgba(0,0,0,1)"
           }}
         >
           <TextInput

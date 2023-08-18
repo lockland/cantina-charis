@@ -22,3 +22,21 @@ export function getOrdersHook(total: number): any {
   }
 }
 
+export function getCustomerNamesHook(): any {
+  return {
+    data: [
+      { value: '1', label: 'Fulano' },
+      { value: '2', label: 'Beltrano' },
+    ]
+  }
+}
+
+export function getProductNamesHook(): any {
+
+  return {
+    data: [
+      { value: '1', label: 'Café', price: "2.50" },
+      { value: '2', label: 'Bolo', price: "12.00" },
+    ]
+  }
+}

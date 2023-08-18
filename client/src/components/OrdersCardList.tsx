@@ -9,7 +9,7 @@ interface OrdersCardType {
 
 function OrdersCardList() {
 
-  const { data } = getOrdersHook(14)
+  const { data } = getOrdersHook(50)
 
 
 
