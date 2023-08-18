@@ -1,4 +1,4 @@
-import { Box, Button, Space } from "@mantine/core"
+import { Box, Button } from "@mantine/core"
 import OrderItemInputs from "./OrderItemInputs"
 import ProductsTable from "./ProductsTable"
 import SummaryCardList from "../SummaryCardList"
