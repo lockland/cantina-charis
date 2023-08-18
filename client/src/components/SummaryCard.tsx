@@ -1,17 +1,33 @@
-import { Box, TextInput, Title } from "@mantine/core"
+import { Box, Text, Flex, TextInput, Title, Center } from "@mantine/core"
 
 interface SummaryCardProps {
   title: string,
-  price: string,
+  amount?: string,
+  readonly?: boolean
+  placeholder?: string
+
+  onBlur?: any
+  onChange?: any
 }
 
-function SummaryCard({ title, price }: SummaryCardProps) {
+function SummaryCard({ placeholder, title, amount, readonly, onBlur, onChange }: SummaryCardProps) {
   return (
     <Box bg="var(--orders-card-background-color)" p={4} >
       <Title order={4} align="center">{title}</Title>
-      {(parseInt(price) <= 0) ?
-        <TextInput defaultValue={`${price}`} /> :
-        <TextInput defaultValue={`R$ ${price}`} readOnly />}
+      <Center>
+        <Flex
+          align="center"
+        >
+          <Text size="sm" color="black" bg="white" p={7}>R$</Text>
+          <TextInput
+            value={amount}
+            readOnly={readonly}
+            placeholder={placeholder}
+            onBlur={onBlur}
+            onChange={onChange}
+          />
+        </Flex>
+      </Center>
     </Box>
   )
 }
