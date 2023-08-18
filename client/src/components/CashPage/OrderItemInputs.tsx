@@ -1,0 +1,98 @@
+import { Box, Button, Flex, Group, NumberInput, Select, Space } from "@mantine/core"
+import OrderItemRow from "../../models/OrderItem"
+import { getCustomerNamesHook, getProductNamesHook } from "../../hooks/useFakeAPI"
+import { useState } from "react"
+
+interface OrderItemInputsProps {
+  updateProductsTable: any,
+  updateTotalAmount: any
+
+}
+
+
+function OrderItemInputs({ updateProductsTable, updateTotalAmount }: OrderItemInputsProps) {
+  const customersResp = getCustomerNamesHook()
+  const productsResp = getProductNamesHook()
+
+  const [customerNames, setCustomerNames] = useState(customersResp?.data);
+  const [productNames, _setProductNames] = useState(productsResp?.data);
+
+  const [qtd, setQtd] = useState(1)
+  const [productIndex, setProductIndex] = useState("0")
+
+  const addProductToTable = (productRow: OrderItemRow): void => {
+    updateProductsTable((currentState: OrderItemRow[]) => [...currentState, productRow])
+  }
+
+  const sumProductPriceWithTotal = (totalAmount: string, productRow: OrderItemRow) => {
+    const newAmount = parseFloat(totalAmount) + parseFloat(productRow.price)
+    return newAmount.toFixed(2)
+  }
+
+  const handleOnClick = () => {
+    const product = productNames.filter((el: { value: string }) => el.value === productIndex)
+    const productRow = new OrderItemRow(product[0]["label"], qtd, product[0]["price"])
+
+    addProductToTable(productRow)
+    updateTotalAmount((currentState: string) => sumProductPriceWithTotal(currentState, productRow))
+  }
+
+  const handleOnChange = (value: number) => setQtd(value)
+
+  return (
+    <Box>
+
+      <Select
+        size="md"
+        onCreate={(query) => {
+          const item = { value: "0", label: query };
+          setCustomerNames((current: any) => [...current, item]);
+          return item;
+        }}
+        getCreateLabel={(query) => `+ Adicionar ${query}`}
+
+        data={customerNames}
+        creatable
+        searchable
+        label="Selecione o cliente"
+        placeholder="Digite o nome do cliente"
+        required
+      />
+      <Space mt="md" />
+
+      <Group>
+        <Flex
+          justify="space-between"
+          w="100%"
+        >
+
+          <Select
+            onChange={(value: string) => setProductIndex(value)}
+            data={productNames}
+            searchable
+            label="Selecione o produto"
+            placeholder="Digite o nome do produto"
+            w="75%"
+            size="md"
+            required
+          />
+
+          <NumberInput
+            size="md"
+            w="20%"
+            label="Quantidade"
+            required
+            value={1}
+            onChange={handleOnChange}
+          />
+        </Flex>
+      </Group>
+
+      <Button size="md" mt="md" fullWidth onClick={handleOnClick} >
+        Adicionar produto
+      </Button>
+    </Box>
+  )
+}
+
+export default OrderItemInputs

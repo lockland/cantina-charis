@@ -19,11 +19,11 @@ class OrderItemRow implements OrderItemType {
   }
 
   getPrice(): string {
-    return this.price.toString().padEnd(2)
+    return parseFloat(this.price).toFixed(2)
   }
 
   getTotal(): string {
-    return (parseFloat(this.price) * this.qtd).toString().padEnd(2)
+    return (parseFloat(this.price) * this.qtd).toFixed(2)
   }
 
 
