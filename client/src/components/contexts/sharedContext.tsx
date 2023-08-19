@@ -1,18 +1,33 @@
 import { ReactNode, createContext, useState } from "react";
+import OrderItemRow from "../../models/OrderItemRow";
 
-export const SharedContext = createContext({
+interface ContextProps {
+  orderAmount: number,
+  orderItemList: OrderItemRow[],
+
+  setOrderAmount(value: number): void
+  setOrderItemList(value: any): void
+}
+
+
+export const SharedContext = createContext<ContextProps>({
   orderAmount: 0.00,
-  setOrderAmount: (_value: number) => { }
+  orderItemList: [],
+  setOrderAmount: () => { },
+  setOrderItemList: () => { }
 })
 
 export function SharedContextProvider({ children }: { children: ReactNode }) {
   const [orderAmount, setOrderAmount] = useState(0.00)
+  const [orderItemList, setOrderItemList] = useState<OrderItemRow[]>([])
 
   return (
     <SharedContext.Provider
       value={{
         orderAmount,
-        setOrderAmount
+        setOrderAmount,
+        orderItemList,
+        setOrderItemList
       }}
     >
       {children}

@@ -2,13 +2,12 @@ import { Box, Button } from "@mantine/core"
 import OrderItemInputs from "./OrderItemInputs"
 import ProductsTable from "./ProductsTable"
 import SummaryCardList from "../SummaryCardList"
-import { useState } from "react"
 import OrderItemRow from "../../models/OrderItemRow"
 import { FormProvider, OrderFormValues, useForm } from "../../hooks/formContext"
 import { SharedContextProvider } from "../contexts/sharedContext"
 
 function OrderForm() {
-  const [orderItemList, setOrderItemList] = useState<OrderItemRow[]>([])
+
 
   const handleOnSubmit = (values: OrderFormValues) => {
     console.log(values)
@@ -41,8 +40,8 @@ function OrderForm() {
       <FormProvider form={form}>
         <SharedContextProvider>
           <form onSubmit={form.onSubmit(handleOnSubmit)} onReset={form.onReset}>
-            <OrderItemInputs updateProductsTable={setOrderItemList} />
-            <ProductsTable orderItemList={orderItemList} />
+            <OrderItemInputs />
+            <ProductsTable />
             <SummaryCardList />
             <Button type="submit" size="lg" mt="md" fullWidth>
               Registrar Pedido

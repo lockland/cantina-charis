@@ -5,12 +5,7 @@ import { useState } from "react"
 import { useFormContext } from "../../hooks/formContext"
 import { useSharedContext } from "../../hooks/useSharedContext"
 
-interface OrderItemInputsProps {
-  updateProductsTable: any,
-}
-
-
-function OrderItemInputs({ updateProductsTable }: OrderItemInputsProps) {
+function OrderItemInputs() {
   const customersResp = getCustomerNamesHook()
   const productsResp = getProductNamesHook()
 
@@ -21,10 +16,10 @@ function OrderItemInputs({ updateProductsTable }: OrderItemInputsProps) {
   const [productIndex, setProductIndex] = useState("0")
 
   const form = useFormContext()
-  const { orderAmount, setOrderAmount } = useSharedContext()
+  const { orderAmount, setOrderAmount, setOrderItemList } = useSharedContext()
 
   const addProductToTable = (productRow: OrderItemRow): void => {
-    updateProductsTable((currentState: OrderItemRow[]) => [...currentState, productRow])
+    setOrderItemList((currentState: OrderItemRow[]) => [...currentState, productRow])
   }
 
   const handleOnClick = () => {

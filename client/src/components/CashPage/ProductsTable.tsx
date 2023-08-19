@@ -1,14 +1,10 @@
 import { Box, Table, Text } from "@mantine/core"
-import OrderItemRow from "../../models/OrderItemRow";
 import { useFormContext } from "../../hooks/formContext";
+import { useSharedContext } from "../../hooks/useSharedContext";
 
-interface ProductsTableProps {
-  orderItemList: OrderItemRow[]
-}
-
-
-function ProductsTable({ orderItemList }: ProductsTableProps) {
+function ProductsTable() {
   const form = useFormContext()
+  const { orderItemList } = useSharedContext()
 
   const error = form.getInputProps("products")["error"]
 
