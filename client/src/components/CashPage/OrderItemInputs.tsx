@@ -18,7 +18,7 @@ function OrderItemInputs({ updateProductsTable, updateTotalAmount }: OrderItemIn
   const [customerNames, setCustomerNames] = useState(customersResp?.data);
   const [productNames, _setProductNames] = useState(productsResp?.data);
 
-  const [qtd, setQtd] = useState(1)
+  const [quantity, setQuantity] = useState(1)
   const [productIndex, setProductIndex] = useState("0")
   const form = useFormContext()
 
@@ -27,20 +27,21 @@ function OrderItemInputs({ updateProductsTable, updateTotalAmount }: OrderItemIn
   }
 
   const sumProductPriceWithTotal = (totalAmount: string, productRow: OrderItemRow) => {
-    const newAmount = parseFloat(totalAmount) + parseFloat(productRow.getTotal())
+    const newAmount = parseFloat(totalAmount) + productRow.getTotal()
     return newAmount.toFixed(2)
   }
 
   const handleOnClick = () => {
     const product = productNames.filter((el: { value: string }) => el.value === productIndex)
-    const productRow = new OrderItemRow(productIndex, product[0]["label"], qtd, product[0]["price"])
+    const productRow = new OrderItemRow(productIndex, product[0]["label"], quantity, product[0]["price"])
 
     addProductToTable(productRow)
     updateTotalAmount((currentState: string) => sumProductPriceWithTotal(currentState, productRow))
     form.insertListItem("products", productRow)
+    setQuantity(1)
   }
 
-  const handleOnChange = (value: number) => setQtd(value)
+  const handleOnChange = (value: number) => setQuantity(value)
 
   return (
     <Box>
@@ -83,6 +84,7 @@ function OrderItemInputs({ updateProductsTable, updateTotalAmount }: OrderItemIn
           />
 
           <NumberInput
+            min={1}
             size="md"
             w="20%"
             label="Quantidade"
@@ -93,7 +95,7 @@ function OrderItemInputs({ updateProductsTable, updateTotalAmount }: OrderItemIn
         </Flex>
       </Group>
 
-      <Button size="md" mt="md" fullWidth onClick={handleOnClick} >
+      <Button size="md" mt="md" fullWidth onClick={handleOnClick} disabled={parseInt(productIndex) == 0}>
         Adicionar produto
       </Button>
     </Box>

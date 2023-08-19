@@ -12,8 +12,8 @@ function ProductsTable({ orderItemList }: ProductsTableProps) {
     <tr key={index}>
       <td>{item.name}</td>
       <td>{item.quantity}</td>
-      <td>{`R$ ${item.getPrice()}`}</td>
-      <td>{`R$ ${item.getTotal()}`}</td>
+      <td>{`R$ ${item.getFormattedPrice()}`}</td>
+      <td>{`R$ ${item.getFormattedTotal()}`}</td>
     </tr>
   ));
 
