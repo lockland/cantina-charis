@@ -4,28 +4,27 @@ import { useState } from "react"
 import { useFormContext } from "../hooks/formContext"
 
 interface SummaryCardListProps {
-  totalAmount: string,
+  totalAmount: number,
 
   onChange?: any
 }
 
 
 function SummaryCardList({ totalAmount, onChange }: SummaryCardListProps) {
-  const [changeOfMoney, setChangeOfMoney] = useState("0.00")
-  const [paidAmount, setPaidAmount] = useState("0")
+  const [changeOfMoney, setChangeOfMoney] = useState(0.00)
+  const [paidAmount, setPaidAmount] = useState(0.00)
 
   const form = useFormContext()
 
-  const handleOnChange = (event: any) => {
-    setPaidAmount(event.currentTarget.value)
+  const handleOnChange = (value: number): void => {
+    setPaidAmount(value)
   }
 
-  const handleOnBlur = () => {
-    const changeValue = parseFloat(paidAmount) - parseFloat(totalAmount)
-    setChangeOfMoney(changeValue.toFixed(2))
-
+  const handleOnBlur = (): void => {
+    const changeValue = paidAmount - totalAmount
     const hasPaid = changeValue >= 0
 
+    setChangeOfMoney(changeValue)
     form.setFieldValue("already_paid", hasPaid)
   }
 

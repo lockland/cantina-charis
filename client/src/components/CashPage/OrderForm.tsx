@@ -8,7 +8,7 @@ import { FormProvider, OrderFormValues, useForm } from "../../hooks/formContext"
 
 function OrderForm() {
   const [orderItemList, setOrderItemList] = useState<OrderItemRow[]>([])
-  const [totalAmount, updateTotalAmount] = useState("0.00")
+  const [totalAmount, updateTotalAmount] = useState(0.00)
 
   const handleOnChange = (event: any) => updateTotalAmount(event.currentTarget.value)
   const handleOnSubmit = (values: OrderFormValues) => {

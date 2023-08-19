@@ -1,8 +1,8 @@
-import { Box, Text, Flex, TextInput, Title, Center } from "@mantine/core"
+import { Box, Text, Flex, Title, Center, NumberInput } from "@mantine/core"
 
 interface SummaryCardProps {
   title: string,
-  amount?: string,
+  amount?: number,
   readonly?: boolean
   placeholder?: string
 
@@ -19,12 +19,14 @@ function SummaryCard({ placeholder, title, amount, readonly, onBlur, onChange }:
           align="center"
         >
           <Text size="sm" color="black" bg="white" p={7}>R$</Text>
-          <TextInput
+          <NumberInput
             value={amount}
             readOnly={readonly}
             placeholder={placeholder}
             onBlur={onBlur}
             onChange={onChange}
+            hideControls
+            formatter={(readonly) ? (value) => parseFloat(value).toFixed(2) : undefined}
           />
         </Flex>
       </Center>

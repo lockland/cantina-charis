@@ -26,9 +26,8 @@ function OrderItemInputs({ updateProductsTable, updateTotalAmount }: OrderItemIn
     updateProductsTable((currentState: OrderItemRow[]) => [...currentState, productRow])
   }
 
-  const sumProductPriceWithTotal = (totalAmount: string, productRow: OrderItemRow) => {
-    const newAmount = parseFloat(totalAmount) + productRow.getTotal()
-    return newAmount.toFixed(2)
+  const sumProductPriceWithTotal = (totalAmount: number, productRow: OrderItemRow): number => {
+    return totalAmount + productRow.getTotal()
   }
 
   const handleOnClick = () => {
@@ -36,7 +35,7 @@ function OrderItemInputs({ updateProductsTable, updateTotalAmount }: OrderItemIn
     const productRow = new OrderItemRow(productIndex, product[0]["label"], quantity, product[0]["price"])
 
     addProductToTable(productRow)
-    updateTotalAmount((currentState: string) => sumProductPriceWithTotal(currentState, productRow))
+    updateTotalAmount((currentState: number) => sumProductPriceWithTotal(currentState, productRow))
     form.insertListItem("products", productRow)
     setQuantity(1)
   }
