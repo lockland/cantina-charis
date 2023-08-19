@@ -60,7 +60,7 @@ function OrderItemInputs({ updateProductsTable, updateTotalAmount }: OrderItemIn
         searchable
         label="Selecione o cliente"
         placeholder="Digite o nome do cliente"
-        required
+        withAsterisk
         {...form.getInputProps("customer_id")}
       />
       <Space mt="md" />
