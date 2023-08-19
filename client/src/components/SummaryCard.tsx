@@ -26,7 +26,7 @@ function SummaryCard({ placeholder, title, amount, readonly, onBlur, onChange }:
             onBlur={onBlur}
             onChange={onChange}
             hideControls
-            formatter={(readonly) ? (value) => parseFloat(value).toFixed(2) : undefined}
+            precision={2}
           />
         </Flex>
       </Center>

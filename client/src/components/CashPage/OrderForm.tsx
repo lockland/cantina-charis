@@ -5,12 +5,11 @@ import SummaryCardList from "../SummaryCardList"
 import { useState } from "react"
 import OrderItemRow from "../../models/OrderItemRow"
 import { FormProvider, OrderFormValues, useForm } from "../../hooks/formContext"
+import { SharedContextProvider } from "../contexts/sharedContext"
 
 function OrderForm() {
   const [orderItemList, setOrderItemList] = useState<OrderItemRow[]>([])
-  const [totalAmount, updateTotalAmount] = useState(0.00)
 
-  const handleOnChange = (event: any) => updateTotalAmount(event.currentTarget.value)
   const handleOnSubmit = (values: OrderFormValues) => {
     console.log(values)
     refreshPage()
@@ -40,14 +39,16 @@ function OrderForm() {
     <Box>
 
       <FormProvider form={form}>
-        <form onSubmit={form.onSubmit(handleOnSubmit)} onReset={form.onReset}>
-          <OrderItemInputs updateProductsTable={setOrderItemList} updateTotalAmount={updateTotalAmount} />
-          <ProductsTable orderItemList={orderItemList} />
-          <SummaryCardList totalAmount={totalAmount} onChange={handleOnChange} />
-          <Button type="submit" size="lg" mt="md" fullWidth>
-            Registrar Pedido
-          </Button>
-        </form>
+        <SharedContextProvider>
+          <form onSubmit={form.onSubmit(handleOnSubmit)} onReset={form.onReset}>
+            <OrderItemInputs updateProductsTable={setOrderItemList} />
+            <ProductsTable orderItemList={orderItemList} />
+            <SummaryCardList />
+            <Button type="submit" size="lg" mt="md" fullWidth>
+              Registrar Pedido
+            </Button>
+          </form>
+        </SharedContextProvider>
       </FormProvider>
     </Box >
   )

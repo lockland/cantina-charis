@@ -3,15 +3,14 @@ import OrderItemRow from "../../models/OrderItemRow"
 import { getCustomerNamesHook, getProductNamesHook } from "../../hooks/useFakeAPI"
 import { useState } from "react"
 import { useFormContext } from "../../hooks/formContext"
+import { useSharedContext } from "../../hooks/useSharedContext"
 
 interface OrderItemInputsProps {
   updateProductsTable: any,
-  updateTotalAmount: any
-
 }
 
 
-function OrderItemInputs({ updateProductsTable, updateTotalAmount }: OrderItemInputsProps) {
+function OrderItemInputs({ updateProductsTable }: OrderItemInputsProps) {
   const customersResp = getCustomerNamesHook()
   const productsResp = getProductNamesHook()
 
@@ -20,14 +19,12 @@ function OrderItemInputs({ updateProductsTable, updateTotalAmount }: OrderItemIn
 
   const [quantity, setQuantity] = useState(1)
   const [productIndex, setProductIndex] = useState("0")
+
   const form = useFormContext()
+  const { orderAmount, setOrderAmount } = useSharedContext()
 
   const addProductToTable = (productRow: OrderItemRow): void => {
     updateProductsTable((currentState: OrderItemRow[]) => [...currentState, productRow])
-  }
-
-  const sumProductPriceWithTotal = (totalAmount: number, productRow: OrderItemRow): number => {
-    return totalAmount + productRow.getTotal()
   }
 
   const handleOnClick = () => {
@@ -35,7 +32,7 @@ function OrderItemInputs({ updateProductsTable, updateTotalAmount }: OrderItemIn
     const productRow = new OrderItemRow(productIndex, product[0]["label"], quantity, product[0]["price"])
 
     addProductToTable(productRow)
-    updateTotalAmount((currentState: number) => sumProductPriceWithTotal(currentState, productRow))
+    setOrderAmount((orderAmount + productRow.getTotal()))
     form.insertListItem("products", productRow)
     form.clearFieldError("products")
     setQuantity(1)

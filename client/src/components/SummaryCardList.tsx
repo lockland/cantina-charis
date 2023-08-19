@@ -2,26 +2,21 @@ import { SimpleGrid } from "@mantine/core"
 import SummaryCard from "./SummaryCard"
 import { useState } from "react"
 import { useFormContext } from "../hooks/formContext"
+import { useSharedContext } from "../hooks/useSharedContext"
 
-interface SummaryCardListProps {
-  totalAmount: number,
-
-  onChange?: any
-}
-
-
-function SummaryCardList({ totalAmount, onChange }: SummaryCardListProps) {
+function SummaryCardList() {
   const [changeOfMoney, setChangeOfMoney] = useState(0.00)
   const [paidAmount, setPaidAmount] = useState(0.00)
 
   const form = useFormContext()
+  const { orderAmount, setOrderAmount } = useSharedContext()
 
   const handleOnChange = (value: number): void => {
     setPaidAmount(value)
   }
 
   const handleOnBlur = (): void => {
-    const changeValue = paidAmount - totalAmount
+    const changeValue = paidAmount - orderAmount
     const hasPaid = changeValue >= 0
 
     setChangeOfMoney(changeValue)
@@ -30,14 +25,23 @@ function SummaryCardList({ totalAmount, onChange }: SummaryCardListProps) {
 
   return (
     <SimpleGrid cols={3} mt="md">
-      <SummaryCard title="Total" readonly amount={totalAmount} onChange={onChange} />
+      <SummaryCard
+        title="Total"
+        readonly
+        amount={orderAmount}
+        onChange={setOrderAmount}
+      />
       <SummaryCard
         title="Valor pago"
         placeholder="0"
         onChange={handleOnChange}
         onBlur={handleOnBlur}
       />
-      <SummaryCard title="Troco" readonly amount={changeOfMoney} />
+      <SummaryCard
+        title="Troco"
+        readonly
+        amount={changeOfMoney}
+      />
     </SimpleGrid>
 
   )

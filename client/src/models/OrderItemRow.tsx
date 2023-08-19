@@ -10,12 +10,12 @@ interface OrderItemType {
 }
 
 class OrderItemRow implements OrderItemType {
-  id: string
-  name: string
-  quantity: number
-  price: number
-
-  constructor(id: string, name: string, quantity: any, price: any) {
+  constructor(
+    public id: string,
+    public name: string,
+    public quantity: any,
+    public price: any
+  ) {
     this.id = id
     this.name = name
     this.quantity = parseInt(quantity)
