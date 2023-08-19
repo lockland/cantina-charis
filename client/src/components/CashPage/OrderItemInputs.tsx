@@ -37,6 +37,7 @@ function OrderItemInputs({ updateProductsTable, updateTotalAmount }: OrderItemIn
     addProductToTable(productRow)
     updateTotalAmount((currentState: number) => sumProductPriceWithTotal(currentState, productRow))
     form.insertListItem("products", productRow)
+    form.clearFieldError("products")
     setQuantity(1)
   }
 

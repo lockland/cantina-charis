@@ -29,6 +29,7 @@ function OrderForm() {
 
     validate: {
       customer_id: (value: string) => (parseInt(value) >= 0) ? null : 'Selecione um cliente por favor!',
+      products: (value: OrderItemRow[]) => (value.length > 0) ? null : 'Adicione algum produto para continuar',
     },
   });
 
