@@ -1,6 +1,6 @@
 import { BrowserRouter, Route, Routes } from 'react-router-dom'
 
-import NavBar from "./components/NavBar";
+import NavBar from "./components/navbar/NavBar";
 import Products from "./components/pages/Products";
 import Orders from './components/pages/Orders';
 import Reports from './components/pages/Reports';
