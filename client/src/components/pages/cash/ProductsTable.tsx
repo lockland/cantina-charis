@@ -1,6 +1,6 @@
 import { Box, Table, Text } from "@mantine/core"
-import { useFormContext } from "../../hooks/formContext";
-import { useSharedContext } from "../../hooks/useSharedContext";
+import { useFormContext } from "../../../hooks/formContext";
+import { useSharedContext } from "../../../hooks/useSharedContext";
 
 function ProductsTable() {
   const form = useFormContext()

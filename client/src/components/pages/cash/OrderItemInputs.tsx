@@ -1,9 +1,9 @@
 import { Box, Button, Flex, Group, NumberInput, Select, Space } from "@mantine/core"
-import OrderItemRow from "../../models/OrderItemRow"
-import { getCustomerNamesHook, getProductNamesHook } from "../../hooks/useFakeAPI"
+import OrderItemRow from "../../../models/OrderItemRow"
+import { getCustomerNamesHook, getProductNamesHook } from "../../../hooks/useFakeAPI"
 import { useState } from "react"
-import { useFormContext } from "../../hooks/formContext"
-import { useSharedContext } from "../../hooks/useSharedContext"
+import { useFormContext } from "../../../hooks/formContext"
+import { useSharedContext } from "../../../hooks/useSharedContext"
 
 function OrderItemInputs() {
   const customersResp = getCustomerNamesHook()

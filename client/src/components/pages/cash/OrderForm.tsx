@@ -1,10 +1,10 @@
 import { Box, Button } from "@mantine/core"
 import OrderItemInputs from "./OrderItemInputs"
 import ProductsTable from "./ProductsTable"
-import SummaryCardList from "../SummaryCardList"
-import OrderItemRow from "../../models/OrderItemRow"
-import { FormProvider, OrderFormValues, useForm } from "../../hooks/formContext"
-import { SharedContextProvider } from "../../contexts/sharedContext"
+import SummaryCardList from "../../SummaryCardList"
+import OrderItemRow from "../../../models/OrderItemRow"
+import { FormProvider, OrderFormValues, useForm } from "../../../hooks/formContext"
+import { SharedContextProvider } from "../../../contexts/sharedContext"
 import { useEffect } from "react"
 
 function OrderForm() {

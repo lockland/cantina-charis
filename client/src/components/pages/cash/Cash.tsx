@@ -1,6 +1,6 @@
 import { Box, Flex, Title } from "@mantine/core"
 import OrdersCardList from "../../OrdersCardList"
-import OrderForm from "../../CashPage/OrderForm";
+import OrderForm from "./OrderForm";
 
 function CashPage() {
   return (
