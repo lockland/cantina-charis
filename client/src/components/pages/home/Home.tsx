@@ -2,12 +2,12 @@
 import InitialPage from "./InitialPage";
 import CashPage from "../cash/Cash"
 import { COOKIE_NAME } from "../../../App";
-import { isEventCreated } from "../../../hooks/useCookiesHook"
+import { useCookiesHook } from "../../../hooks/useCookiesHook"
 
 function Home() {
-  const isCreated = isEventCreated(COOKIE_NAME)
+  const { isEventCreated } = useCookiesHook(COOKIE_NAME)
   return (
-    (isCreated) ? <CashPage /> : <InitialPage />
+    (isEventCreated) ? <CashPage /> : <InitialPage />
   );
 }
 

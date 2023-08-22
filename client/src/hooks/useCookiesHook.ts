@@ -1,17 +1,23 @@
 import { useCookies } from "react-cookie";
 
-export function isEventCreated(cookieName: string): boolean {
-  const [cookies, _setCookie] = useCookies([cookieName]);
-  const cookieValues = cookies[cookieName]
-  return cookieValues?.event_created || false
-}
 
-export function useCookiesHook(cookieName: string): any {
-  const [_cookies, setCookie] = useCookies([cookieName]);
+export function useCookiesHook(cookieName: string) {
+  const [cookies, setCookie, removeCookie] = useCookies([cookieName]);
 
-  const setCookieWithExpire = (value: string, expireTimestamp: number) => {
+  const isEventCreated = (function (cookieName: string): boolean {
+    const cookieValues = cookies[cookieName]
+    return cookieValues?.event_created || false
+  }(cookieName))
+
+  const setCookieWithExpire = (value: string, expireTimestamp: number): void => {
     setCookie(cookieName, value, { expires: new Date(expireTimestamp) })
   }
 
-  return [setCookieWithExpire]
+  return {
+    cookies,
+    setCookie,
+    removeCookie,
+    setCookieWithExpire,
+    isEventCreated
+  }
 }
