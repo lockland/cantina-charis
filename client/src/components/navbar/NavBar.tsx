@@ -1,5 +1,6 @@
 import { NavLink } from "react-router-dom";
 import "./NavBar.css"
+import { CloseBtn } from "./CloseBtn";
 import { Container } from "@mantine/core";
 
 interface NavBarProps {
@@ -8,7 +9,7 @@ interface NavBarProps {
 
 function NavBar({ maw }: NavBarProps) {
   return (
-    <Container maw={maw}>
+    <Container maw={maw} className="navbar-container">
       <nav>
         <ul>
           <li>
@@ -28,7 +29,10 @@ function NavBar({ maw }: NavBarProps) {
           </li>
         </ul>
       </nav>
+
+      <CloseBtn />
     </Container>
+
   );
 }
 export default NavBar;

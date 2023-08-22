@@ -17,11 +17,37 @@ nav ul li {
 
 nav ul li a {
   text-decoration: none;
-  color: #FFF;
+  color: white;
   padding: 1.5rem;
   display: block;
 }
 
 nav ul li a:not(.active):hover {
   background-color: var(--secondary-background-color);
+}
+
+.navbar-container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.navbar-container button {
+  border: none;
+  background-color: transparent;
+  height: 100%;
+}
+
+.navbar-container button:hover {
+  background-color: transparent;
+}
+
+.navbar-container button svg {
+  height: 48px;
+  width: 48px;
+  color: white;
+}
+
+.navbar-container button svg:hover {
+  color: red;
 }

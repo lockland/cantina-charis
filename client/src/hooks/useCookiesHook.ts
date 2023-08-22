@@ -1,7 +1,10 @@
 import { useCookies } from "react-cookie";
+import { COOKIE_NAME } from "../App";
 
 
-export function useCookiesHook(cookieName: string) {
+export function useCookiesHook() {
+  const cookieName: string = COOKIE_NAME
+
   const [cookies, setCookie, removeCookie] = useCookies([cookieName]);
 
   const isEventCreated = (function (cookieName: string): boolean {
@@ -13,10 +16,18 @@ export function useCookiesHook(cookieName: string) {
     setCookie(cookieName, value, { expires: new Date(expireTimestamp) })
   }
 
+  const removeAppCookie = () => {
+    removeCookie(cookieName)
+  }
+
+  const setAppCookie = (content: string) => {
+    setCookie(cookieName, content)
+  }
+
   return {
     cookies,
-    setCookie,
-    removeCookie,
+    setAppCookie,
+    removeAppCookie,
     setCookieWithExpire,
     isEventCreated
   }
