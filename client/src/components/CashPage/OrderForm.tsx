@@ -4,9 +4,14 @@ import ProductsTable from "./ProductsTable"
 import SummaryCardList from "../SummaryCardList"
 import OrderItemRow from "../../models/OrderItemRow"
 import { FormProvider, OrderFormValues, useForm } from "../../hooks/formContext"
-import { SharedContextProvider } from "../contexts/sharedContext"
+import { SharedContextProvider } from "../../contexts/sharedContext"
+import { useEffect } from "react"
 
 function OrderForm() {
+
+  useEffect(() => {
+    console.log("Rendered")
+  })
 
 
   const handleOnSubmit = (values: OrderFormValues) => {

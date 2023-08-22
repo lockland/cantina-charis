@@ -1,5 +1,5 @@
 import { ReactNode, createContext, useState } from "react";
-import OrderItemRow from "../../models/OrderItemRow";
+import OrderItemRow from "../models/OrderItemRow";
 
 interface ContextProps {
   orderAmount: number,
