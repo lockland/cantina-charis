@@ -1,11 +1,11 @@
-import { Box, Button } from "@mantine/core"
+import { Box, Button, Group } from "@mantine/core"
 import OrderItemInputs from "./OrderItemInputs"
 import ProductsTable from "./ProductsTable"
 import SummaryCardList from "../../SummaryCardList"
 import OrderItemRow from "../../../models/OrderItemRow"
 import { FormProvider, OrderFormValues, useForm } from "../../../hooks/formContext"
 import { SharedContextProvider } from "../../../contexts/sharedContext"
-import { useEffect } from "react"
+import { FormEvent, useEffect } from "react"
 
 function OrderForm() {
 
@@ -14,9 +14,10 @@ function OrderForm() {
   })
 
 
-  const handleOnSubmit = (values: OrderFormValues) => {
-    console.log(values)
-    refreshPage()
+  const handleOnSubmit = (values: OrderFormValues, event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    console.log(values, event)
+    // refreshPage()
   }
 
   function refreshPage() {
