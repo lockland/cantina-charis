@@ -35,10 +35,11 @@ export function getCustomerNamesHook(): any {
 export function getProductNamesHook(): any {
   // Value is the Product ID on database
 
+
   return {
     data: [
-      { value: '1', label: 'Café', price: "2.50" },
-      { value: '2', label: 'Bolo', price: "12.00" },
+      { value: '1', label: 'Café - R$ 2.50', price: "2.50" },
+      { value: '2', label: 'Bolo - R$ 12.00', price: "12.00" },
     ]
   }
 }
