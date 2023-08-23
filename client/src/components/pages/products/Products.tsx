@@ -5,7 +5,7 @@ import ProductListItem from "../../../models/ProductListItem";
 
 function Products() {
   const { data } = getProducts(20)
-  const list = data.map((product: ProductListItem) => <ProductCard product={product} />)
+  const list = data.map((product: ProductListItem) => <ProductCard key={product.id} product={product} />)
 
   return (
     <CustomSimpleGrid cols={4}>

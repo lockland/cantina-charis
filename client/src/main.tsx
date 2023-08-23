@@ -11,6 +11,17 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
       inherit
       theme={{
         components: {
+          Modal: {
+            styles: {
+              content: {
+                backgroundColor: "var(--generic-blue)"
+              },
+              header: {
+                backgroundColor: "var(--generic-blue)",
+                color: "white"
+              }
+            }
+          },
           Button: {
             styles: (_theme, _params: ButtonStylesParams, { variant }) => ({
               root: {
