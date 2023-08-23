@@ -1,4 +1,4 @@
-import { Box, Button, Group, Space, Table, Text } from "@mantine/core";
+import { Box, Button, Group, Space, Table, Text, Title } from "@mantine/core";
 import { getOrdersHook } from "../../../hooks/useFakeAPI";
 import CustomSimpleGrid from "../../CustomSimpleGrid";
 
@@ -14,16 +14,16 @@ function Orders() {
       {data.map((order: any, index: number) => {
         return (
           <Box key={index}>
-            <Box bg="var(--generic-blue)" py="md">
-              <Text align="center">{order.customer_name}</Text>
+            <Box bg="var(--generic-blue)" py="sm">
+              <Title order={2} align="center">{order.customer_name}</Title>
               <Text align="center">R$ {order.order_price}</Text>
             </Box>
-            <Box bg="white" p="sm" h={350}>
+            <Box bg="var(--generic-blue)" p="sm">
               <Group w="100%" position="right" mb="md">
                 <Button onClick={() => handleOnClick(order.id)}>Pronto</Button>
               </Group>
 
-              <Table striped withColumnBorders>
+              <Table striped withColumnBorders bg="var(--secondary-background-color)">
                 <thead>
                   <tr>
                     <th>Produto</th>
