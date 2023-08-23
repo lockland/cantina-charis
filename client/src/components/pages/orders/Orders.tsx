@@ -5,19 +5,22 @@ import CustomSimpleGrid from "../../CustomSimpleGrid";
 function Orders() {
   const { data } = getOrdersHook(30)
 
+  const handleOnClick = (id: string) => {
+    console.log(id)
+  }
+
   return (
-    <CustomSimpleGrid>
+    <CustomSimpleGrid cols={4}>
       {data.map((order: any, index: number) => {
         return (
-          <Box>
-
+          <Box key={index}>
             <Box bg="var(--generic-blue)" py="md">
               <Text align="center">{order.customer_name}</Text>
               <Text align="center">R$ {order.order_price}</Text>
             </Box>
-            <Box bg="white" p="sm" mih="75%">
+            <Box bg="white" p="sm" h={350}>
               <Group w="100%" position="right" mb="md">
-                <Button>Pronto</Button>
+                <Button onClick={() => handleOnClick(order.id)}>Pronto</Button>
               </Group>
 
               <Table striped withColumnBorders>
@@ -28,14 +31,12 @@ function Orders() {
                   </tr>
                 </thead>
                 <tbody>
-                  {order.products.map((product: any) =>
-                    <tr>
+                  {order.products.map((product: any, index: number) =>
+                    <tr key={index}>
                       <td>{product.name}</td>
                       <td>{product.quantity}</td>
                     </tr>
-
                   )}
-
                 </tbody>
               </Table>
               <Space />

@@ -6,12 +6,45 @@ export function getOrdersHook(total: number): any {
 
   for (let i = 0; i < total; i++) {
     const order = {
+      id: i,
       customer_name: faker.person.fullName(),
       order_price: faker.number.float({
         min: 0,
         max: 100000,
         precision: 0.01
-      })
+      }),
+      products: faker.helpers.arrayElements(
+        [
+          {
+            name: faker.commerce.productName(),
+            quantity: faker.number.int(10)
+          },
+          {
+            name: faker.commerce.productName(),
+            quantity: faker.number.int(10)
+          },
+          {
+            name: faker.commerce.productName(),
+            quantity: faker.number.int(10)
+          },
+          {
+            name: faker.commerce.productName(),
+            quantity: faker.number.int(10)
+          },
+          {
+            name: faker.commerce.productName(),
+            quantity: faker.number.int(10)
+          },
+          {
+            name: faker.commerce.productName(),
+            quantity: faker.number.int(10)
+          },
+          {
+            name: faker.commerce.productName(),
+            quantity: faker.number.int(10)
+          },
+        ]
+      )
     }
 
     list.push(order)
