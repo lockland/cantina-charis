@@ -52,7 +52,28 @@ nav ul li a:not(.active):hover {
   color: red;
 }
 
+div.navbar>button {
+  height: 48px;
+  width: 100%;
+  border: none;
+  background-color: transparent;
+  color: white;
+  display: none;
+}
+
 @media (max-width: 767px) {
+  div.navbar>button {
+    display: block;
+  }
+
+  .navbar-container.opened {
+    display: block;
+  }
+
+  .navbar-container.closed {
+    display: none;
+  }
+
   .navbar-container button {
     display: none;
   }
