@@ -20,7 +20,7 @@ function Orders() {
             </Box>
             <Box bg="var(--generic-blue)" p="sm">
               <Group w="100%" position="right" mb="md">
-                <Button onClick={() => handleOnClick(order.id)}>Pronto</Button>
+                <Button onClick={() => handleOnClick(order.id)} fullWidth>Pronto</Button>
               </Group>
 
               <Table striped withColumnBorders bg="var(--secondary-background-color)">
