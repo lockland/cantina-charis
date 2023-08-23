@@ -24,7 +24,7 @@ function OrderItemInputs() {
 
   const handleOnClick = () => {
     const product = productNames.filter((el: { value: string }) => el.value === productIndex)
-    const productRow = new OrderItemRow(productIndex, product[0]["label"], quantity, product[0]["price"])
+    const productRow = new OrderItemRow(productIndex, product[0]["name"], quantity, product[0]["price"])
 
     addProductToTable(productRow)
     setOrderAmount((orderAmount + productRow.getTotal()))

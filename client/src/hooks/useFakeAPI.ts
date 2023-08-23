@@ -68,11 +68,14 @@ export function getCustomerNamesHook(): any {
 export function getProductNamesHook(): any {
   // Value is the Product ID on database
 
+  const resp = [
+    { id: '1', name: "Café", price: "2.50" },
+    { id: '2', name: "Bolo", price: "12.00" },
+  ]
 
   return {
-    data: [
-      { value: '1', label: 'Café - R$ 2.50', price: "2.50" },
-      { value: '2', label: 'Bolo - R$ 12.00', price: "12.00" },
-    ]
+    data: resp.map((el) => {
+      return { value: el.id, label: `${el.name} - R$ ${el.price}`, name: el.name, price: el.price }
+    })
   }
 }
