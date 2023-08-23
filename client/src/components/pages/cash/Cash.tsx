@@ -1,22 +1,20 @@
-import { Box, Flex, Title } from "@mantine/core"
+import { Grid, Title } from "@mantine/core"
 import OrdersCardList from "../../OrdersCardList"
 import OrderForm from "./OrderForm";
 
 function CashPage() {
   return (
-    <Flex
-      justify="space-between"
-    >
-      <Box w="49%" mah={700} style={{ overflow: "auto" }} >
+    <Grid>
+      <Grid.Col mah={700} md={6} lg={6} orderMd={1} orderSm={1} order={2} style={{ overflow: "auto" }}>
         <Title align="center" order={2} >Pedidos</Title>
         <OrdersCardList />
-      </Box>
+      </Grid.Col>
 
-      <Box w="49%" mah={700} >
+      <Grid.Col md={6} lg={6} orderMd={2} orderSm={2} order={1}>
         <Title align="center" order={2}>Caixa</Title>
         <OrderForm />
-      </Box>
-    </Flex >
+      </Grid.Col>
+    </Grid>
   )
 }
 

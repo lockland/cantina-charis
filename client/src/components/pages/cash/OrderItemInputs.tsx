@@ -1,4 +1,4 @@
-import { Box, Button, Flex, Group, NumberInput, Select, Space } from "@mantine/core"
+import { Box, Button, Grid, NumberInput, Select, Space } from "@mantine/core"
 import OrderItemRow from "../../../models/OrderItemRow"
 import { getCustomerNamesHook, getProductNamesHook } from "../../../hooks/useFakeAPI"
 import { useState } from "react"
@@ -58,34 +58,30 @@ function OrderItemInputs() {
       />
       <Space mt="md" />
 
-      <Group>
-        <Flex
-          justify="space-between"
-          w="100%"
-        >
 
+      <Grid>
+        <Grid.Col md={6} lg={9}>
           <Select
             onChange={(value: string) => setProductIndex(value)}
             data={productNames}
             searchable
             label="Selecione o produto"
             placeholder="Digite o nome do produto"
-            w="75%"
             size="md"
             required
           />
-
+        </Grid.Col>
+        <Grid.Col md={6} lg={3}>
           <NumberInput
             min={1}
             size="md"
-            w="20%"
             label="Quantidade"
             required
             value={1}
             onChange={handleOnChange}
           />
-        </Flex>
-      </Group>
+        </Grid.Col>
+      </Grid>
 
       <Button size="md" mt="md" fullWidth onClick={handleOnClick} disabled={parseInt(productIndex) == 0}>
         Adicionar produto

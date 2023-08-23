@@ -12,7 +12,7 @@ function OrdersCardList() {
   const { data } = getOrdersHook(50)
 
   return (
-    <CustomSimpleGrid m={15}>
+    <CustomSimpleGrid m={10} cols={4}>
       {data.map((order: OrdersCardType, index: number) =>
         <OrdersCard
           key={index}

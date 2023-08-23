@@ -1,8 +1,8 @@
-import { SimpleGrid } from "@mantine/core"
 import SummaryCard from "./SummaryCard"
 import { useState } from "react"
 import { useFormContext } from "../hooks/formContext"
 import { useSharedContext } from "../hooks/useSharedContext"
+import CustomSimpleGrid from "./CustomSimpleGrid"
 
 function SummaryCardList() {
   const [changeOfMoney, setChangeOfMoney] = useState(0.00)
@@ -24,7 +24,7 @@ function SummaryCardList() {
   }
 
   return (
-    <SimpleGrid cols={3} mt="md">
+    <CustomSimpleGrid mt="md" cols={3}>
       <SummaryCard
         title="Total"
         readonly
@@ -42,7 +42,7 @@ function SummaryCardList() {
         readonly
         amount={changeOfMoney}
       />
-    </SimpleGrid>
+    </CustomSimpleGrid >
 
   )
 }
