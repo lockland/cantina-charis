@@ -4,11 +4,7 @@
 }
 
 :root {
-  margin: 0px;
-  padding: 0px;
   color: azure;
-  width: 100vw;
-  height: 100vh;
   background-color: var(--primary-background-color);
 
   --navbar-selected-item: #162440;
