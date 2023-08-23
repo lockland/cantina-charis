@@ -1,17 +1,21 @@
 import { Box, Text, Flex, Title, Center, NumberInput } from "@mantine/core"
 import { KeyboardEvent } from "react"
+import { HelpIcon } from "./pages/cash/HelpIcon"
 
 interface SummaryCardProps {
   title: string,
   amount?: number,
   readonly?: boolean
   placeholder?: string
+  description?: string
 
   onBlur?: any
   onChange?: any
 }
 
-function SummaryCard({ placeholder, title, amount, readonly, onBlur, onChange }: SummaryCardProps) {
+function SummaryCard(
+  { description, placeholder, title, amount, readonly, onBlur, onChange }: SummaryCardProps
+) {
 
   const handleKeyDown = (event: KeyboardEvent<HTMLInputElement>): void => {
     if ('Enter' === event.code) {
@@ -21,7 +25,9 @@ function SummaryCard({ placeholder, title, amount, readonly, onBlur, onChange }:
 
   return (
     <Box bg="var(--orders-card-background-color)" p={4} >
-      <Title order={4} align="center">{title}</Title>
+      <Title order={4} align="center">{title}
+        {(description) ? <span title={description}><HelpIcon /></span> : ""}
+      </Title>
       <Center>
         <Flex
           align="center"

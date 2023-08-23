@@ -5,9 +5,11 @@ import SummaryCardList from "../../SummaryCardList"
 import OrderItemRow from "../../../models/OrderItemRow"
 import { FormProvider, OrderFormValues, useForm } from "../../../hooks/formContext"
 import { SharedContextProvider } from "../../../contexts/sharedContext"
-import { FormEvent, useEffect } from "react"
+import { FormEvent, useEffect, useState } from "react"
 
 function OrderForm() {
+
+  const [buttonDisabled, setButtonDisabled] = useState(true)
 
   useEffect(() => {
     console.log("Rendered")
@@ -47,8 +49,8 @@ function OrderForm() {
           <form onSubmit={form.onSubmit(handleOnSubmit)} onReset={form.onReset}>
             <OrderItemInputs />
             <ProductsTable />
-            <SummaryCardList />
-            <Button type="submit" size="lg" mt="md" fullWidth>
+            <SummaryCardList setButtonDisabled={setButtonDisabled} />
+            <Button type="submit" size="lg" mt="md" fullWidth disabled={buttonDisabled}>
               Registrar Pedido
             </Button>
           </form>
