@@ -79,3 +79,25 @@ export function getProductNamesHook(): any {
     })
   }
 }
+
+export function getProducts(total: number) {
+  const list = []
+
+  for (let i = 0; i < total; i++) {
+    const product = {
+      name: faker.commerce.productName(),
+      enabled: faker.helpers.arrayElement([true, false]),
+      price: faker.number.float({
+        min: 0,
+        max: 100,
+        precision: 0.01
+      }),
+    }
+
+    list.push(product)
+  }
+
+  return {
+    data: list
+  }
+}
