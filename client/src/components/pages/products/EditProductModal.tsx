@@ -56,7 +56,6 @@ function EditProductModal({ product, opened, closeModal }: EditModalProps) {
         <TextInput
           label="Nome do produto"
           withAsterisk
-          defaultValue={product.name}
           {...form.getInputProps('productName')}
         />
         <Space mt="md" />
@@ -65,7 +64,6 @@ function EditProductModal({ product, opened, closeModal }: EditModalProps) {
           label="Valor do produto R$"
           precision={2}
           withAsterisk
-          defaultValue={product.price}
           {...form.getInputProps('productPrice')}
         />
         <Group mt="md">
