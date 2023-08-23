@@ -1,4 +1,5 @@
 import { faker } from '@faker-js/faker';
+import ProductListItem from '../models/ProductListItem';
 
 
 export function getOrdersHook(total: number): any {
@@ -84,7 +85,8 @@ export function getProducts(total: number) {
   const list = []
 
   for (let i = 0; i < total; i++) {
-    const product = {
+    const product = ProductListItem.buildFromData({
+      id: i.toString(),
       name: faker.commerce.productName(),
       enabled: faker.helpers.arrayElement([true, false]),
       price: faker.number.float({
@@ -92,7 +94,7 @@ export function getProducts(total: number) {
         max: 100,
         precision: 0.01
       }),
-    }
+    })
 
     list.push(product)
   }
