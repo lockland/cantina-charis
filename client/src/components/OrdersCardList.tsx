@@ -1,6 +1,6 @@
-import { SimpleGrid } from "@mantine/core"
 import { getOrdersHook } from "../hooks/useFakeAPI"
 import OrdersCard from "./OrdersCard"
+import CustomSimpleGrid from "./CustomSimpleGrid"
 
 interface OrdersCardType {
   customer_name: string,
@@ -11,10 +11,8 @@ function OrdersCardList() {
 
   const { data } = getOrdersHook(50)
 
-
-
   return (
-    <SimpleGrid cols={3} m={15}>
+    <CustomSimpleGrid m={15}>
       {data.map((order: OrdersCardType, index: number) =>
         <OrdersCard
           key={index}
@@ -22,7 +20,7 @@ function OrdersCardList() {
           price={order.order_price}
         />
       )}
-    </SimpleGrid>
+    </CustomSimpleGrid>
   )
 }
 
