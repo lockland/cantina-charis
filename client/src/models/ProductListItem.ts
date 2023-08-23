@@ -8,9 +8,9 @@ interface ProductListItemType {
 
 class ProductListItem {
   constructor(
-    public id: string,
-    public name: string,
-    public price: any,
+    public id: string = '0',
+    public name: string = "",
+    public price?: any,
     public enabled: boolean = false,
   ) {
     this.id = id
