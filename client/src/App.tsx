@@ -3,7 +3,7 @@ import { BrowserRouter, Route, Routes } from 'react-router-dom'
 import NavBar from "./components/navbar/NavBar";
 import Products from "./components/pages/products/Products";
 import Orders from './components/pages/orders/Orders';
-import Reports from './components/pages/Reports';
+import Reports from './components/pages/reports/Reports';
 import Debits from './components/pages/debits/Debits';
 import Home from './components/pages/home/Home';
 import { Container, Space } from '@mantine/core';
