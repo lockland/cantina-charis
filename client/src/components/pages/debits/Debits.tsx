@@ -30,7 +30,7 @@ function Debits() {
         </Accordion.Control>
         <Accordion.Panel>
           <Group position="right">
-            <Button onClick={() => handleOnClick(debit.customer.id)}>Pagar</Button>
+            <Button onClick={() => handleOnClick(debit.customer.id)}>Quitar débito</Button>
           </Group>
           {debit.orders.map((order: any, index: number) => {
             return (
