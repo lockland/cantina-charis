@@ -16,7 +16,7 @@ function Orders() {
           <Box key={index}>
             <Box bg="var(--generic-blue)" py="sm">
               <Title order={2} align="center">{order.customer_name}</Title>
-              <Text align="center">R$ {order.order_price}</Text>
+              <Text align="center">R$ {order.order_amount}</Text>
             </Box>
             <Box bg="var(--generic-blue)" p="sm">
               <Group w="100%" position="right" mb="md">

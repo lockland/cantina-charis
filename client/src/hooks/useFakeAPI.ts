@@ -9,7 +9,7 @@ export function getOrdersHook(total: number): any {
     const order = {
       id: i,
       customer_name: faker.person.fullName(),
-      order_price: faker.number.float({
+      order_amount: faker.number.float({
         min: 0,
         max: 100000,
         precision: 0.01

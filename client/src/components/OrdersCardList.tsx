@@ -4,7 +4,7 @@ import CustomSimpleGrid from "./CustomSimpleGrid"
 
 interface OrdersCardType {
   customer_name: string,
-  order_price: string,
+  order_amount: string,
 }
 
 function OrdersCardList() {
@@ -17,7 +17,7 @@ function OrdersCardList() {
         <OrdersCard
           key={index}
           cname={order.customer_name}
-          price={order.order_price}
+          price={order.order_amount}
         />
       )}
     </CustomSimpleGrid>
