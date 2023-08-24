@@ -2,12 +2,7 @@
 import { TextInput, Button, Box, NumberInput, Center, Space } from '@mantine/core';
 import { useForm } from '@mantine/form';
 import { useCookiesHook } from "../../../hooks/useCookiesHook"
-
-interface EventType {
-  eventName: string,
-  initialCashValue: string
-}
-
+import { RealIcon } from '../cash/RealIcon';
 
 function InitialPage() {
   const { setCookieWithExpire } = useCookiesHook()
@@ -15,16 +10,16 @@ function InitialPage() {
   const form = useForm({
     initialValues: {
       eventName: '',
-      initialCashValue: '',
+      initialCashValue: undefined,
     },
 
     validate: {
       eventName: (value) => (value.length < 3 ? "Preencha o nome do evento por favor!" : null),
-      initialCashValue: (value) => ((parseInt(value) || 0) <= 0 ? "Preencha o valor inicial do caixa!" : null),
+      initialCashValue: (value: number) => ((value || 0) <= 0 ? "Preencha o valor inicial do caixa!" : null),
     }
   });
 
-  const handleSubmit = (values: EventType) => {
+  const handleSubmit = (values: any) => {
 
     const eventData = {
       ...values,
@@ -58,11 +53,14 @@ function InitialPage() {
           />
           <Space h="md" />
           <NumberInput
+            icon={<RealIcon />}
             withAsterisk
-            label="Valor caixa R$"
+            hideControls
+            label="Valor caixa"
             placeholder="10000,00"
             {...form.getInputProps('initialCashValue')}
             size="lg"
+            precision={2}
           />
 
           <Button type="submit" mt="md" size="lg" fullWidth>
