@@ -1,4 +1,4 @@
-import { Accordion, Box, Button, Divider, Flex, Group, Text, Title } from "@mantine/core";
+import { Accordion, Box, Button, Divider, Flex, Group, Text } from "@mantine/core";
 import { getDebits } from "../../../hooks/useFakeAPI";
 
 function Debits() {
