@@ -9,7 +9,7 @@ export function getOrdersHook(total: number): any {
     const order = {
       id: i,
       customer_name: faker.person.fullName(),
-      order_amount: getFloatNumber,
+      order_amount: getFloatNumber(),
       products: faker.helpers.arrayElements(
         [
           {
