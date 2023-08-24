@@ -28,19 +28,24 @@ function Reports() {
         align="center"
         mb={10}
       >
-        <Title>Sumario dos eventos cadastrados</Title>
+        <Title>Sumário dos eventos cadastrados</Title>
         <Title order={2}> Valor apurado até o momento: R$ {liquidFundsOnPeriod.toFixed(2)} </Title>
       </Flex>
-      <Table bg="var(--secondary-background-color)" striped withColumnBorders withBorder>
+      <Table
+        bg="var(--secondary-background-color)"
+        striped
+        withColumnBorders
+        withBorder
+      >
         <thead>
           <tr>
-            <th>Nome do evento</th>
-            <th>Abertura do caixa</th>
-            <th>Data do evento</th>
-            <th>Total entradas</th>
-            <th>Total de despesas</th>
-            <th>Total Bruto</th>
-            <th>Total Líquido</th>
+            <th>NOME DO EVENTO</th>
+            <th>ABERTURA DO CAIXA</th>
+            <th>DATA DO EVENTO</th>
+            <th>TOTAL DE ENTRADAS</th>
+            <th>TOTAL DE DESPESAS</th>
+            <th>TOTAL BRUTO</th>
+            <th>TOTAL LÍQUIDO</th>
           </tr>
         </thead>
         <tbody>{rows}</tbody>
