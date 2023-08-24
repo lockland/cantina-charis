@@ -50,11 +50,9 @@ function Debits() {
   })
 
   return (
-    <Box color="white">
-      <Accordion>
-        {items}
-      </Accordion>
-    </Box>
+    <Accordion variant="separated">
+      {items}
+    </Accordion>
   );
 }
 

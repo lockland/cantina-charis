@@ -13,8 +13,15 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
         components: {
           Accordion: {
             styles: {
+              panel: {
+                backgroundColor: "var(--generic-blue)",
+              },
+              control: {
+                backgroundColor: "var(--generic-blue)",
+              },
               item: {
                 backgroundColor: "var(--generic-blue)",
+                border: "none",
                 color: "white"
               },
               label: {
