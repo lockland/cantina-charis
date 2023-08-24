@@ -1,4 +1,4 @@
-import { Box, Text, Flex, Title, Center, NumberInput } from "@mantine/core"
+import { Box, Text, Title, NumberInput, Group, Popover } from "@mantine/core"
 import { KeyboardEvent } from "react"
 import { HelpIcon } from "./pages/cash/HelpIcon"
 
@@ -24,27 +24,29 @@ function SummaryCard(
   }
 
   return (
-    <Box bg="var(--orders-card-background-color)" p={4} >
-      <Title order={4} align="center">{title}
-        {(description) ? <span title={description}><HelpIcon /></span> : ""}
-      </Title>
-      <Center>
-        <Flex
-          align="center"
-        >
-          <Text size="sm" color="black" bg="white" p={7}>R$</Text>
-          <NumberInput
-            value={amount}
-            readOnly={readonly}
-            placeholder={placeholder}
-            onBlur={onBlur}
-            onChange={onChange}
-            hideControls
-            precision={2}
-            onKeyDown={handleKeyDown}
-          />
-        </Flex>
-      </Center>
+    <Box bg="var(--orders-card-background-color)" p={4}>
+      <Popover width={300}>
+        <Popover.Target>
+          <Title order={4} align="center">{title} {(description) ? <HelpIcon /> : ""}</Title>
+        </Popover.Target>
+        <Popover.Dropdown>
+          <Text size="sm" color="black">{description}</Text>
+        </Popover.Dropdown>
+      </Popover>
+      <Group position="center">
+        <Text size="sm" color="black" bg="white" p={7} mr="-30px">R$</Text>
+        <NumberInput
+          p={7.5}
+          value={amount}
+          readOnly={readonly}
+          placeholder={placeholder}
+          onBlur={onBlur}
+          onChange={onChange}
+          hideControls
+          precision={2}
+          onKeyDown={handleKeyDown}
+        />
+      </Group>
     </Box>
   )
 }
