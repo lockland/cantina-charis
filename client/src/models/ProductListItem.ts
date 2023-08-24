@@ -1,8 +1,8 @@
 
 interface ProductListItemType {
-  id: string,
-  name: string,
-  price: number,
+  product_id: string,
+  product_name: string,
+  product_price: number,
   enabled: boolean,
 }
 
@@ -19,8 +19,8 @@ class ProductListItem {
     this.enabled = enabled
   }
 
-  static buildFromData({ id, name, price, enabled }: ProductListItemType): ProductListItem {
-    return new ProductListItem(id, name, price, enabled)
+  static buildFromData({ product_id, product_name, product_price, enabled }: ProductListItemType): ProductListItem {
+    return new ProductListItem(product_id, product_name, product_price, enabled)
   }
 
   getFormattedPrice(): string {
