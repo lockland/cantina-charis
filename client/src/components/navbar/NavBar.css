@@ -17,7 +17,7 @@ nav ul li {
 
 nav ul li a {
   text-decoration: none;
-  color: white;
+  color: var(--main-color);
   padding: 1.5rem;
   display: block;
 }
@@ -45,7 +45,7 @@ nav ul li a:not(.active):hover {
 .navbar-container button svg {
   height: 48px;
   width: 48px;
-  color: white;
+  color: var(--main-color);
 }
 
 .navbar-container button svg:hover {
@@ -57,7 +57,7 @@ div.navbar>button {
   width: 100%;
   border: none;
   background-color: transparent;
-  color: white;
+  color: var(--main-color);
   display: none;
 }
 

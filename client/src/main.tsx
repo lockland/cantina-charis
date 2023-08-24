@@ -22,10 +22,10 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
               item: {
                 backgroundColor: "var(--generic-blue)",
                 border: "none",
-                color: "white"
+                color: "var(--main-color)"
               },
               label: {
-                color: "white"
+                color: "var(--main-color)"
               }
             }
           },
@@ -36,7 +36,7 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
               },
               header: {
                 backgroundColor: "var(--generic-blue)",
-                color: "white"
+                color: "var(--main-color)"
               }
             }
           },
@@ -51,7 +51,7 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
           TextInput: {
             styles: () => ({
               label: {
-                color: "white",
+                color: "var(--main-color)",
               },
               input: {
                 border: "none",
@@ -62,7 +62,7 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
           NumberInput: {
             styles: () => ({
               label: {
-                color: "white",
+                color: "var(--main-color)",
               },
               input: {
                 border: "none",
@@ -73,7 +73,7 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
           Select: {
             styles: () => ({
               label: {
-                color: "white",
+                color: "var(--main-color)",
               },
               input: {
                 border: "none",
@@ -84,7 +84,7 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
           Checkbox: {
             styles: () => ({
               label: {
-                color: "white",
+                color: "var(--main-color)",
               }
             }),
           }

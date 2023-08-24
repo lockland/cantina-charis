@@ -4,7 +4,7 @@
 }
 
 :root {
-  color: azure;
+  color: var(--main-color);
   background-color: var(--primary-background-color);
 
   --navbar-selected-item: #162440;
@@ -14,4 +14,5 @@
   --orders-card-background-color: #027A7B;
   --secondary-background-color: #93B4D7;
   --button-color: #0505b8;
+  --main-color: azure;
 }
