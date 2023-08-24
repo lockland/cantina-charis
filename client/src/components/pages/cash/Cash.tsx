@@ -1,6 +1,7 @@
 import { Grid, Title } from "@mantine/core"
 import OrdersCardList from "../../OrdersCardList"
 import OrderForm from "./OrderForm";
+import AddOutgoingModal from "./AddOutgoingModal";
 
 function CashPage() {
   return (
@@ -12,6 +13,7 @@ function CashPage() {
 
       <Grid.Col md={6} lg={6} orderMd={2} orderSm={2} order={1}>
         <Title align="center" order={2}>Caixa</Title>
+        <AddOutgoingModal />
         <OrderForm />
       </Grid.Col>
     </Grid>
