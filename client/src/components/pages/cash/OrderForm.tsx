@@ -31,8 +31,7 @@ function OrderForm() {
   const form = useForm({
     initialValues: {
       customer_id: "",
-      products: [],
-      already_paid: false
+      products: []
     },
 
     validate: {
