@@ -11,6 +11,17 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
       inherit
       theme={{
         components: {
+          Accordion: {
+            styles: {
+              item: {
+                backgroundColor: "var(--generic-blue)",
+                color: "white"
+              },
+              label: {
+                color: "white"
+              }
+            }
+          },
           Modal: {
             styles: {
               content: {

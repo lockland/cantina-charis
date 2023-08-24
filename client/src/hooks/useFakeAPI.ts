@@ -103,3 +103,53 @@ export function getProducts(total: number) {
     data: list
   }
 }
+
+export function getDebits(total: number) {
+  const list = []
+
+  for (let i = 0; i < total; i++) {
+    const debit = {
+      customer: {
+        id: i.toString(),
+        name: faker.person.fullName(),
+      },
+      total: faker.number.float({
+        min: 0,
+        max: 100000,
+        precision: 0.01
+      }),
+      orders: faker.helpers.arrayElements([
+        {
+          event_name: faker.commerce.productName(),
+          date: faker.date.recent().toLocaleDateString('pt-BR'),
+          total: faker.finance.accountNumber(5),
+          paid_value: faker.number.int(50)
+        },
+        {
+          event_name: faker.commerce.productName(),
+          date: faker.date.recent().toLocaleDateString('pt-BR'),
+          total: faker.finance.accountNumber(5),
+          paid_value: faker.number.int(50)
+        },
+        {
+          event_name: faker.commerce.productName(),
+          date: faker.date.recent().toLocaleDateString('pt-BR'),
+          total: faker.finance.accountNumber(5),
+          paid_value: faker.number.int(50)
+        },
+        {
+          event_name: faker.commerce.productName(),
+          date: faker.date.recent().toLocaleDateString('pt-BR'),
+          total: faker.finance.accountNumber(5),
+          paid_value: faker.number.int(50)
+        },
+      ])
+    }
+
+    list.push(debit)
+  }
+
+  return {
+    data: list
+  }
+}
