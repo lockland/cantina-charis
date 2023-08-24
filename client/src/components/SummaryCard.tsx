@@ -1,6 +1,7 @@
 import { Box, Text, Title, NumberInput, Group, Popover } from "@mantine/core"
 import { KeyboardEvent } from "react"
 import { HelpIcon } from "./pages/cash/HelpIcon"
+import { RealIcon } from "./pages/cash/RealIcon"
 
 interface SummaryCardProps {
   title: string,
@@ -34,9 +35,8 @@ function SummaryCard(
         </Popover.Dropdown>
       </Popover>
       <Group position="center">
-        <Text size="sm" color="black" bg="white" p={7} mr="-30px">R$</Text>
         <NumberInput
-          p={7.5}
+          icon={<RealIcon />}
           value={amount}
           readOnly={readonly}
           placeholder={placeholder}
