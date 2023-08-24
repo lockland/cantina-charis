@@ -7,7 +7,8 @@ function CustomSimpleGrid(props: any) {
   return (
     <SimpleGrid
       breakpoints={[
-        { minWidth: 'sm', cols },
+        { minWidth: 'sm', cols: 3 },
+        { minWidth: 'md', cols },
       ]}
 
       {...otherProps}
