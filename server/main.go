@@ -7,25 +7,34 @@ import (
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/cors"
 	"github.com/gofiber/fiber/v2/middleware/logger"
+	"github.com/lockland/cantina-charis/server/controllers"
+	"github.com/lockland/cantina-charis/server/models"
 )
 
-type Todo struct {
-	ID    int    `json:"id"`
-	Title string `json:"title"`
-	Done  bool   `json:"done"`
-	Body  string `json:"body"`
-}
+type Todo = models.Todo
 
 func main() {
 	app := fiber.New()
-	app.Use(logger.New())
 	app.Use(logger.New(logger.Config{
 		Format: "[${ip}]:${port} ${status} - ${method} ${path}\n",
 	}))
 
 	app.Use(cors.New(cors.ConfigDefault))
 
-	todos := []Todo{}
+	todos := []models.Todo{
+		// Todo{
+		// 	ID:    1,
+		// 	Title: "Teste",
+		// 	Done:  false,
+		// 	Body:  "Boooddyyyy",
+		// },
+		// Todo{
+		// 	ID:    2,
+		// 	Title: "Teste",
+		// 	Done:  false,
+		// 	Body:  "Boooddyyyy",
+		// },
+	}
 
 	app.Static("/", "./views", fiber.Static{
 		Compress:      true,
@@ -40,7 +49,18 @@ func main() {
 		return c.SendString("ok")
 	})
 
-	app.Post("/api/todos", func(c *fiber.Ctx) error {
+	apiGroup := app.Group("api")
+	// apiGroup.Get("/orders", func(c *fiber.Ctx) error {
+	// 	orders := []map[string]string [
+	// 		{
+	// 			"id": "1",
+	// 		}
+
+	// 	]
+	// 	return c.JSON(orders)
+	// })
+
+	apiGroup.Post("/todos", func(c *fiber.Ctx) error {
 		todo := &Todo{}
 
 		if error := c.BodyParser(todo); error != nil {
@@ -54,11 +74,10 @@ func main() {
 		return c.JSON(todos)
 	})
 
-	app.Get("/api/todos", func(c *fiber.Ctx) error {
-		return c.JSON(todos)
-	})
+	TodoController := controllers.NewTodoController()
+	apiGroup.Get("/todos", TodoController.GetTodos)
 
-	app.Patch("/api/todos/:id/done", func(c *fiber.Ctx) error {
+	apiGroup.Patch("/todos/:id/done", func(c *fiber.Ctx) error {
 		id, err := c.ParamsInt("id")
 
 		if err != nil {
