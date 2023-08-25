@@ -52,7 +52,9 @@ function AddOutgoingModal() {
       </Modal>
 
       <Group position="right">
-        <Button onClick={open}>Registrar despesa</Button>
+        <Button size="md" my="md" bg="red" onClick={open} fullWidth={isMobile}>
+          Registrar despesa
+        </Button>
       </Group>
     </Box>
   )

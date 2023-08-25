@@ -1,5 +1,6 @@
 import { useCookies } from "react-cookie";
 import { COOKIE_NAME } from "../App";
+import { EventType } from "../models/Event";
 
 
 export function useCookiesHook() {
@@ -24,7 +25,7 @@ export function useCookiesHook() {
     setCookie(cookieName, content)
   }
 
-  const setEventData = (eventData: any) => {
+  const setEventData = (eventData: EventType) => {
     const expireTimestamp = new Date().getTime() + (60 * 60 * 24 * 1000)
     setCookieWithExpire(JSON.stringify(eventData), expireTimestamp)
   }
