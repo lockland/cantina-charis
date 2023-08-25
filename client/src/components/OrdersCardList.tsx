@@ -1,4 +1,4 @@
-import { getOrdersHook } from "../hooks/useFakeAPI"
+import { getOrders } from "../hooks/useFakeAPI"
 import OrdersCard from "./OrdersCard"
 import CustomSimpleGrid from "./CustomSimpleGrid"
 
@@ -9,7 +9,7 @@ interface OrdersCardType {
 
 function OrdersCardList() {
 
-  const { data } = getOrdersHook(50)
+  const { data } = getOrders(50)
 
   return (
     <CustomSimpleGrid m={10} cols={4}>

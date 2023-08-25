@@ -1,9 +1,9 @@
 import { Box, Button, Group, Space, Table, Text, Title } from "@mantine/core";
-import { getOrdersHook } from "../../../hooks/useFakeAPI";
+import { getOrders } from "../../../hooks/useFakeAPI";
 import CustomSimpleGrid from "../../CustomSimpleGrid";
 
 function Orders() {
-  const { data } = getOrdersHook(30)
+  const { data } = getOrders(30)
 
   const handleOnClick = (id: string) => {
     console.log(id)

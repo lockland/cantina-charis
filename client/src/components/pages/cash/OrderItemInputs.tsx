@@ -1,13 +1,13 @@
 import { Box, Button, Grid, NumberInput, Select, Space } from "@mantine/core"
 import OrderItemRow from "../../../models/OrderItemRow"
-import { getCustomerNamesHook, getProductNamesHook } from "../../../hooks/useFakeAPI"
+import { getCustomerNames, getProductNames } from "../../../hooks/useFakeAPI"
 import { useState } from "react"
 import { useFormContext } from "../../../hooks/formContext"
 import { useSharedContext } from "../../../hooks/useSharedContext"
 
 function OrderItemInputs() {
-  const customersResp = getCustomerNamesHook()
-  const productsResp = getProductNamesHook()
+  const customersResp = getCustomerNames()
+  const productsResp = getProductNames()
 
   const [customerNames, setCustomerNames] = useState(customersResp?.data);
   const [productNames, _setProductNames] = useState(productsResp?.data);

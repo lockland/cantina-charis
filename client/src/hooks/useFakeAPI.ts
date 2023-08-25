@@ -2,7 +2,7 @@ import { faker } from '@faker-js/faker';
 import ProductListItem from '../models/ProductListItem';
 
 
-export function getOrdersHook(total: number): any {
+export function getOrders(total: number): any {
   const list = []
 
   for (let i = 0; i < total; i++) {
@@ -52,7 +52,7 @@ export function getOrdersHook(total: number): any {
   }
 }
 
-export function getCustomerNamesHook(): any {
+export function getCustomerNames(): any {
   // Value is the Customer ID on database
   return {
     data: [
@@ -62,7 +62,7 @@ export function getCustomerNamesHook(): any {
   }
 }
 
-export function getProductNamesHook(): any {
+export function getProductNames(): any {
   // Value is the Product ID on database
 
   const resp = [
