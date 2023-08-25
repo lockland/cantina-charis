@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v2/middleware/basicauth"
 	"github.com/gofiber/fiber/v2/middleware/cors"
 	"github.com/gofiber/fiber/v2/middleware/logger"
 	"github.com/lockland/cantina-charis/server/controllers"
@@ -19,6 +20,11 @@ func main() {
 		Format: "[${ip}]:${port} ${status} - ${method} ${path}\n",
 	}))
 
+	app.Use(basicauth.New(basicauth.Config{
+		Users: map[string]string{
+			"admin": "123456",
+		},
+	}))
 	app.Use(cors.New(cors.ConfigDefault))
 
 	todos := []models.Todo{
