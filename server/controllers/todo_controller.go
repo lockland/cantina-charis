@@ -11,8 +11,8 @@ func NewTodoController() TodoController {
 	return TodoController{}
 }
 
-func (t *TodoController) GetTodos(c *fiber.Ctx) error {
-	return c.JSON([]models.Todo{
+func (c *TodoController) GetTodos(f *fiber.Ctx) error {
+	return f.JSON([]models.Todo{
 		{
 			ID:    1,
 			Title: "Teste",

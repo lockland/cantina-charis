@@ -27,20 +27,7 @@ func main() {
 	}))
 	app.Use(cors.New(cors.ConfigDefault))
 
-	todos := []models.Todo{
-		// Todo{
-		// 	ID:    1,
-		// 	Title: "Teste",
-		// 	Done:  false,
-		// 	Body:  "Boooddyyyy",
-		// },
-		// Todo{
-		// 	ID:    2,
-		// 	Title: "Teste",
-		// 	Done:  false,
-		// 	Body:  "Boooddyyyy",
-		// },
-	}
+	todos := []models.Todo{}
 
 	app.Static("/", "./views", fiber.Static{
 		Compress:      true,
@@ -56,16 +43,11 @@ func main() {
 	})
 
 	apiGroup := app.Group("api")
-	// apiGroup.Get("/orders", func(c *fiber.Ctx) error {
-	// 	orders := []map[string]string [
-	// 		{
-	// 			"id": "1",
-	// 		}
 
-	// 	]
-	// 	return c.JSON(orders)
-	// })
+	customerController := controllers.NewCustomerController()
+	apiGroup.Get("/customers", customerController.GetCustomer)
 
+	TodoController := controllers.NewTodoController()
 	apiGroup.Post("/todos", func(c *fiber.Ctx) error {
 		todo := &Todo{}
 
@@ -80,7 +62,6 @@ func main() {
 		return c.JSON(todos)
 	})
 
-	TodoController := controllers.NewTodoController()
 	apiGroup.Get("/todos", TodoController.GetTodos)
 
 	apiGroup.Patch("/todos/:id/done", func(c *fiber.Ctx) error {
