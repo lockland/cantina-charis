@@ -24,11 +24,17 @@ export function useCookiesHook() {
     setCookie(cookieName, content)
   }
 
+  const setEventData = (eventData: any) => {
+    const expireTimestamp = new Date().getTime() + (60 * 60 * 24 * 1000)
+    setCookieWithExpire(JSON.stringify(eventData), expireTimestamp)
+  }
+
   return {
     cookies,
     setAppCookie,
     removeAppCookie,
     setCookieWithExpire,
-    isEventCreated
+    isEventCreated,
+    setEventData
   }
 }

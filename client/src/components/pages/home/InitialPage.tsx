@@ -5,7 +5,7 @@ import { useCookiesHook } from "../../../hooks/useCookiesHook"
 import { RealIcon } from '../cash/RealIcon';
 
 function InitialPage() {
-  const { setCookieWithExpire } = useCookiesHook()
+  const { setEventData } = useCookiesHook()
 
   const form = useForm({
     initialValues: {
@@ -27,9 +27,7 @@ function InitialPage() {
     }
 
     console.log(eventData)
-
-    const expireTimestamp = new Date().getTime() + (60 * 60 * 24 * 1000)
-    setCookieWithExpire(JSON.stringify(eventData), expireTimestamp)
+    setEventData(eventData)
   }
 
   return (
