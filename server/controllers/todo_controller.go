@@ -7,6 +7,10 @@ import (
 
 type TodoController struct{}
 
+func NewTodoController() TodoController {
+	return TodoController{}
+}
+
 func (t *TodoController) GetTodos(c *fiber.Ctx) error {
 	return c.JSON([]models.Todo{
 		{
@@ -22,8 +26,4 @@ func (t *TodoController) GetTodos(c *fiber.Ctx) error {
 			Body:  "Boooddyyyy",
 		},
 	})
-}
-
-func NewTodoController() TodoController {
-	return TodoController{}
 }
