@@ -45,7 +45,7 @@ func main() {
 	apiGroup := app.Group("api")
 
 	customerController := controllers.NewCustomerController()
-	apiGroup.Get("/customers", customerController.GetCustomer)
+	apiGroup.Get("/customers", customerController.GetCustomers)
 
 	TodoController := controllers.NewTodoController()
 	apiGroup.Post("/todos", func(c *fiber.Ctx) error {

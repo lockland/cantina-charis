@@ -13,7 +13,7 @@ func NewCustomerController() CustomerController {
 }
 
 // https://pkg.go.dev/github.com/shopspring/decimal#section-readme
-func (c *CustomerController) GetCustomer(f *fiber.Ctx) error {
+func (c *CustomerController) GetCustomers(f *fiber.Ctx) error {
 	return f.JSON([]models.Customer{
 		{
 			Id:         1,
