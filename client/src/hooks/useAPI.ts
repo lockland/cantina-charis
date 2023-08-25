@@ -1,6 +1,18 @@
 import { faker } from '@faker-js/faker';
 import ProductListItem from '../models/ProductListItem';
+import Event from '../models/Event';
 
+const fetcher = (url: string) => fetch(url).then((r) => r.json())
+
+export function getOpenEvent() {
+  return fetcher("api/events?open=true")
+    .then((events) => {
+      if (events.length == 0) {
+        return new Event
+      }
+      return Event.buildFromData(events[0])
+    })
+}
 
 export function getOrders(total: number): any {
   const list = []

@@ -17,7 +17,16 @@ func NewEventController() EventController {
 
 // https://pkg.go.dev/github.com/shopspring/decimal#section-readme
 func (c *EventController) GetEvents(f *fiber.Ctx) error {
-	return f.JSON([]models.Event{})
+	status, _ := strconv.ParseBool(f.Query("open"))
+	return f.JSON([]models.Event{
+		{
+			Id:         1,
+			Name:       "Culto de mulheres",
+			OpenAmount: decimal.NewFromFloat(300),
+			Open:       status,
+			CreatedAt:  time.Now(),
+		},
+	})
 }
 
 func (c *EventController) GetEvent(f *fiber.Ctx) error {

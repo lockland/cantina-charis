@@ -48,6 +48,7 @@ func main() {
 	apiGroup.Get("/customers", customerController.GetCustomers)
 
 	eventController := controllers.NewEventController()
+	apiGroup.Get("/events/", eventController.GetEvents)
 	apiGroup.Get("/events/:id", eventController.GetEvent)
 
 	TodoController := controllers.NewTodoController()
