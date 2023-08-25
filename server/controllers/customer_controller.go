@@ -16,14 +16,14 @@ func NewCustomerController() CustomerController {
 func (c *CustomerController) GetCustomer(f *fiber.Ctx) error {
 	return f.JSON([]models.Customer{
 		{
-			CustomerId:   1,
-			CustomerName: "Name",
-			DebitValue:   decimal.NewFromInt(12),
+			Id:         1,
+			Name:       "Name",
+			DebitValue: decimal.NewFromInt(12),
 		},
 		{
-			CustomerId:   2,
-			CustomerName: "Name2",
-			DebitValue:   decimal.NewFromFloat(12.02),
+			Id:         2,
+			Name:       "Name2",
+			DebitValue: decimal.NewFromFloat(12.02),
 		},
 	})
 }
