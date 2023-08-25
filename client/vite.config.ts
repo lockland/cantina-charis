@@ -6,10 +6,10 @@ export default defineConfig({
   build: {
     outDir: "../server/views"
   },
-  // server: {
-  //   proxy: {
-  //     '/': 'http://localhost:8080',
-  //   }
-  // },
+  server: {
+    proxy: {
+      '/api': 'http://localhost:8080',
+    }
+  },
   plugins: [react()],
 })
