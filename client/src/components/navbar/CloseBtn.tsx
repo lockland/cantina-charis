@@ -11,12 +11,13 @@ export function CloseBtn() {
 
   const handleOnClick = (): void => {
     const answer = confirm("Você deseja realmente fechar o caixa?")
-
-    if (answer) {
-      closeEvent(eventId)
-      removeAppCookie()
-      navigate("reports")
+    if (!answer) {
+      return
     }
+
+    closeEvent(eventId)
+    removeAppCookie()
+    navigate("reports")
   }
 
   return (
