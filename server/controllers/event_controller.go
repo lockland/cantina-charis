@@ -2,11 +2,10 @@ package controllers
 
 import (
 	"strconv"
-	"time"
 
 	"github.com/gofiber/fiber/v2"
+	"github.com/lockland/cantina-charis/server/database"
 	"github.com/lockland/cantina-charis/server/models"
-	"github.com/shopspring/decimal"
 )
 
 type EventController struct{}
@@ -18,24 +17,41 @@ func NewEventController() EventController {
 // https://pkg.go.dev/github.com/shopspring/decimal#section-readme
 func (c *EventController) GetEvents(f *fiber.Ctx) error {
 	status, _ := strconv.ParseBool(f.Query("open"))
-	return f.JSON([]models.Event{
-		{
-			Id:         1,
-			Name:       "Culto de mulheres",
-			OpenAmount: decimal.NewFromFloat(300),
-			Open:       status,
-			CreatedAt:  time.Now(),
-		},
-	})
+	events := new([]models.Event)
+
+	database.Conn.Where("Open = ?", status).Last(&events)
+	return f.JSON(events)
 }
 
 func (c *EventController) GetEvent(f *fiber.Ctx) error {
 	eventId, _ := strconv.Atoi(f.Params("id"))
-	return f.JSON(models.Event{
-		Id:         eventId,
-		Name:       "Culto de mulheres",
-		OpenAmount: decimal.NewFromFloat(300),
-		Open:       true,
-		CreatedAt:  time.Now(),
-	})
+	event := new(models.Event)
+	database.Conn.First(&event, eventId)
+	return f.JSON(event)
+}
+
+func (c *EventController) CloseEvent(f *fiber.Ctx) error {
+	id, err := f.ParamsInt("id")
+	event := &models.Event{
+		ID: id,
+	}
+
+	if err != nil {
+		return f.Status(401).SendString("Invalid id")
+	}
+
+	database.Conn.Model(&event).Update("Open", false)
+	f.Status(fiber.StatusOK).JSON(fiber.Map{"event_id": id})
+	return nil
+}
+
+func (c *EventController) CreateEvent(f *fiber.Ctx) error {
+	event := new(models.Event)
+
+	if error := f.BodyParser(event); error != nil {
+		return error
+	}
+
+	database.Conn.Create(&event)
+	return f.JSON(event)
 }

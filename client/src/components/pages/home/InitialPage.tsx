@@ -3,8 +3,10 @@ import { TextInput, Button, Box, NumberInput, Center, Space } from '@mantine/cor
 import { useForm } from '@mantine/form';
 import { useCookiesHook } from "../../../hooks/useCookiesHook"
 import { RealIcon } from '../cash/RealIcon';
+import Event from '../../../models/Event';
+import { createEvent } from '../../../hooks/useAPI';
 
-function InitialPage() {
+function InitialPage({ setOpened }: any) {
   const { setEventData } = useCookiesHook()
 
   const form = useForm({
@@ -19,15 +21,17 @@ function InitialPage() {
     }
   });
 
-  const handleSubmit = (values: any) => {
-
-    const eventData = {
-      ...values,
-      event_created: true
+  const handleSubmit = async (values: any) => {
+    const eventInfo = {
+      "event_name": values.eventName,
+      "open_amount": values.initialCashValue
     }
 
-    console.log(eventData)
-    setEventData(eventData)
+    console.log(eventInfo)
+
+    const data = await createEvent(eventInfo)
+    setEventData(Event.buildFromData(data))
+    setOpened(true)
   }
 
   return (
@@ -59,6 +63,8 @@ function InitialPage() {
             {...form.getInputProps('initialCashValue')}
             size="lg"
             precision={2}
+            decimalSeparator=','
+            thousandsSeparator='.'
           />
 
           <Button type="submit" mt="md" size="lg" fullWidth>

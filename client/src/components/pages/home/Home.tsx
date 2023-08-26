@@ -25,7 +25,7 @@ function Home() {
   }, [opened])
 
   return (
-    (opened || isEventCreated) ? <CashPage /> : <InitialPage />
+    (opened || isEventCreated) ? <CashPage /> : <InitialPage setOpened={setOpened} />
   );
 }
 

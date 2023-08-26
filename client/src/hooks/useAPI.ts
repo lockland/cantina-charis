@@ -1,18 +1,32 @@
 import { faker } from '@faker-js/faker';
 import ProductListItem from '../models/ProductListItem';
-import Event from '../models/Event';
+import Event, { EventType } from '../models/Event';
 
-const fetcher = (url: string) => fetch(url).then((r) => r.json())
+const fetcher = (url: string, options: any = {}) => {
+  return fetch(url, options)
+    .then((r) => r.json())
+}
 
 export function getOpenEvent() {
   return fetcher("api/events?open=true")
-    .then((events) => {
-      if (events.length == 0) {
-        return new Event
-      }
-      return Event.buildFromData(events[0])
-    })
+    .then((events) => Event.buildFromData(events[0]))
+    .catch(() => new Event)
 }
+
+export function createEvent(values: EventType) {
+  return fetcher("api/events", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(values),
+  })
+}
+
+export function closeEvent(event_id: number) {
+  return fetcher(`api/events/${event_id}/close  `, { method: "PUT" })
+}
+
 
 export function getOrders(total: number): any {
   const list = []

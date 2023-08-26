@@ -10,7 +10,12 @@ export function useCookiesHook() {
 
   const isEventCreated = (function (cookieName: string): boolean {
     const cookieValues = cookies[cookieName]
-    return cookieValues?.event_created || false
+    return cookieValues?.event_id > 0
+  }(cookieName))
+
+  const eventId = (function (cookieName: string): number {
+    const cookieValues = cookies[cookieName]
+    return cookieValues?.event_id
   }(cookieName))
 
   const setCookieWithExpire = (value: string, expireTimestamp: number): void => {
@@ -36,6 +41,7 @@ export function useCookiesHook() {
     removeAppCookie,
     setCookieWithExpire,
     isEventCreated,
-    setEventData
+    setEventData,
+    eventId
   }
 }

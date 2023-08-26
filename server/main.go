@@ -5,26 +5,26 @@ import (
 	"time"
 
 	"github.com/gofiber/fiber/v2"
-	"github.com/gofiber/fiber/v2/middleware/basicauth"
 	"github.com/gofiber/fiber/v2/middleware/cors"
 	"github.com/gofiber/fiber/v2/middleware/logger"
 	"github.com/lockland/cantina-charis/server/controllers"
+	"github.com/lockland/cantina-charis/server/database"
 	"github.com/lockland/cantina-charis/server/models"
 )
 
 type Todo = models.Todo
 
 func main() {
-	app := fiber.New()
-	app.Use(logger.New(logger.Config{
-		Format: "[${ip}]:${port} ${status} - ${method} ${path}\n",
-	}))
+	database.Connect("./cantina.db")
 
-	app.Use(basicauth.New(basicauth.Config{
-		Users: map[string]string{
-			"admin": "123456",
-		},
-	}))
+	app := fiber.New()
+	app.Use(logger.New())
+
+	// app.Use(basicauth.New(basicauth.Config{
+	// 	Users: map[string]string{
+	// 		"admin": "123456",
+	// 	},
+	// }))
 	app.Use(cors.New(cors.ConfigDefault))
 
 	todos := []models.Todo{}
@@ -48,8 +48,10 @@ func main() {
 	apiGroup.Get("/customers", customerController.GetCustomers)
 
 	eventController := controllers.NewEventController()
+	apiGroup.Post("/events/", eventController.CreateEvent)
 	apiGroup.Get("/events/", eventController.GetEvents)
 	apiGroup.Get("/events/:id", eventController.GetEvent)
+	apiGroup.Put("/events/:id/close", eventController.CloseEvent)
 
 	TodoController := controllers.NewTodoController()
 	apiGroup.Post("/todos", func(c *fiber.Ctx) error {
