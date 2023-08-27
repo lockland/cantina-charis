@@ -4,29 +4,28 @@ import CashPage from "../cash/Cash"
 import { useCookiesHook } from "../../../hooks/useCookiesHook"
 import { useEffect, useState } from "react";
 import { getOpenEvent } from "../../../hooks/useAPI";
+import Event from "../../../models/Event";
 
 function Home() {
   const { isEventCreated, setEventData, removeAppCookie } = useCookiesHook()
-  const [opened, setOpened] = useState(true)
+  const [opened, setOpened] = useState("")
 
   useEffect(() => {
-    const fetchEvent = async () => {
-      const event = await getOpenEvent()
+    if (isEventCreated) return setOpened("cashpage")
+
+    getOpenEvent().then((event: Event) => {
       if (event.event_id > 0) {
         setEventData(event)
-        setOpened(true)
+        setOpened("cashpage")
       } else {
         removeAppCookie()
-        setOpened(false)
+        setOpened("initial")
       }
-    }
-
-    fetchEvent()
+    })
   }, [opened])
 
-  return (
-    (opened || isEventCreated) ? <CashPage /> : <InitialPage setOpened={setOpened} />
-  );
+  if (opened === "cashpage") return <CashPage />
+  if (opened === "initial") return <InitialPage setOpened={setOpened} />
 }
 
 export default Home
