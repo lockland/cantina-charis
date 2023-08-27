@@ -1,3 +1,4 @@
+import DecimalFormatter from "../helpers/Decimal"
 
 interface ProductListItemType {
   product_id: string,
@@ -24,7 +25,7 @@ class ProductListItem {
   }
 
   getFormattedPrice(): string {
-    return this.price.toFixed(2)
+    return DecimalFormatter.format(this.price)
   }
 }
 

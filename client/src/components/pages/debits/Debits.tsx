@@ -1,5 +1,6 @@
 import { Accordion, Box, Button, Divider, Flex, Group, Text } from "@mantine/core";
 import { getDebits } from "../../../hooks/useFakeAPI";
+import DecimalFormatter from "../../../helpers/Decimal";
 
 function Debits() {
 
@@ -25,7 +26,7 @@ function Debits() {
             <Text>
               {debit.customer.name}
             </Text>
-            <Text><b>TOTAL: </b>R$ {debit.total}</Text>
+            <Text><b>TOTAL: </b>{DecimalFormatter.format(debit.total)}</Text>
           </Flex>
         </Accordion.Control>
         <Accordion.Panel>
@@ -38,9 +39,9 @@ function Debits() {
                 <Divider mb={20} mt={20} />
                 <Text><b>Evento: </b>{order.event_name}</Text>
                 <Text><b>Data: </b>{order.date}</Text>
-                <Text><b>Total: </b>R$ {order.total}</Text>
-                <Text><b>Valor pago: </b>R$ {order.paid_value}</Text>
-                <Text><b>Valor remanescente: </b>R$ {(parseFloat(order.total) - parseFloat(order.paid_value)).toFixed(2)}</Text>
+                <Text><b>Total: </b>{DecimalFormatter.format(order.total)}</Text>
+                <Text><b>Valor pago: </b>{DecimalFormatter.format(order.paid_value)}</Text>
+                <Text><b>Valor remanescente: </b>{DecimalFormatter.format(parseFloat(order.total) - parseFloat(order.paid_value))}</Text>
               </Box>
             )
           })}

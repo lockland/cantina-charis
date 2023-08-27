@@ -25,7 +25,13 @@ function AddProductModal() {
         <Button onClick={open}>Adicionar produto</Button>
       </Group>
 
-      <ProductModal onSubmit={handleSubmit} product={product} opened={opened} closeModal={close} />
+      <ProductModal
+        modalTitle="Adicionar novo produto"
+        onSubmit={handleSubmit}
+        product={product}
+        opened={opened}
+        closeModal={close}
+      />
     </Box>
   )
 }

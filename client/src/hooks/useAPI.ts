@@ -1,8 +1,9 @@
 import { faker } from '@faker-js/faker';
 import ProductListItem from '../models/ProductListItem';
 import Event, { EventType } from '../models/Event';
+import DecimalFormatter from '../helpers/Decimal';
 
-const fetcher = (url: string, options: any = {}) => {
+const fetcher = async (url: string, options: any = {}) => {
   return fetch(url, options)
     .then((r) => r.json())
 }
@@ -98,7 +99,7 @@ export function getProductNames(): any {
 
   return {
     data: resp.map((el) => {
-      return { value: el.id, label: `${el.name} - R$ ${el.price}`, name: el.name, price: el.price }
+      return { value: el.id, label: `${el.name} - ${DecimalFormatter.format(el.price)}`, name: el.name, price: el.price }
     })
   }
 }

@@ -18,7 +18,13 @@ function EditProductModal({ product, opened, closeModal }: EditModalProps) {
 
 
   return (
-    <ProductModal onSubmit={handleSubmit} product={product} opened={opened} closeModal={closeModal} />
+    <ProductModal
+      modalTitle="Editar produto"
+      onSubmit={handleSubmit}
+      product={product}
+      opened={opened}
+      closeModal={closeModal}
+    />
   )
 }
 

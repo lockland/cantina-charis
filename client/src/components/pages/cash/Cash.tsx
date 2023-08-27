@@ -6,7 +6,7 @@ import AddOutgoingModal from "./AddOutgoingModal";
 function CashPage() {
   return (
     <Grid>
-      <Grid.Col mah={700} md={6} lg={6} orderMd={1} orderSm={1} order={2} style={{ overflow: "auto" }}>
+      <Grid.Col mah={750} md={6} lg={6} orderMd={1} orderSm={1} order={2} style={{ overflow: "auto" }}>
         <Title align="center" order={2} >Pedidos</Title>
         <OrdersCardList />
       </Grid.Col>

@@ -1,6 +1,7 @@
 import { Box, Table, Text } from "@mantine/core"
 import { useFormContext } from "../../../hooks/formContext";
 import { useSharedContext } from "../../../hooks/useSharedContext";
+import OrderItemRow from "../../../models/OrderItemRow";
 
 function ProductsTable() {
   const form = useFormContext()
@@ -8,12 +9,12 @@ function ProductsTable() {
 
   const error = form.getInputProps("products")["error"]
 
-  const rows = orderItemList.map((item, index) => (
+  const rows = orderItemList.map((item: OrderItemRow, index) => (
     <tr key={index}>
       <td>{item.name}</td>
       <td>{item.quantity}</td>
-      <td>{`R$ ${item.getFormattedPrice()}`}</td>
-      <td>{`R$ ${item.getFormattedTotal()}`}</td>
+      <td>{item.getFormattedPrice()}</td>
+      <td>{item.getFormattedTotal()}</td>
     </tr>
   ));
 

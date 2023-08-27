@@ -1,5 +1,8 @@
 import { faker } from '@faker-js/faker';
 import ProductListItem from '../models/ProductListItem';
+import DecimalFormatter from '../helpers/Decimal';
+import ReportEntries from '../models/ReportsEntries';
+import ReportEntry from '../models/ReportEntry';
 
 
 export function getOrders(total: number): any {
@@ -72,7 +75,7 @@ export function getProductNames(): any {
 
   return {
     data: resp.map((el) => {
-      return { value: el.id, label: `${el.name} - R$ ${el.price}`, name: el.name, price: el.price }
+      return { value: el.id, label: `${el.name} - ${DecimalFormatter.format(el.price)}`, name: el.name, price: el.price }
     })
   }
 }
@@ -159,14 +162,14 @@ export function getEventsSummary(total: number = 5) {
 
     return parseFloat(result.toFixed(2))
   }
-  const list = []
+  const list = new ReportEntries
 
   for (let i = 0; i < total; i++) {
     const event = {
-      event_id: i.toString(),
+      event_id: i,
       event_name: faker.helpers.arrayElement(['Culto', 'Culto de mulheres', 'Vigília', 'Dia dos pais']),
       open_amount: amount,
-      created_at: faker.date.recent().toLocaleDateString('pt-BR'),
+      created_at: faker.date.recent(),
       incoming: getFloatNumber(5000),
       outgoing: outgoing(),
       balance: "0.00",
@@ -176,7 +179,7 @@ export function getEventsSummary(total: number = 5) {
     event["balance"] = (event.incoming + event.open_amount - event.outgoing).toFixed(2)
     event["liquid_funds"] = (event.incoming - event.outgoing).toFixed(2)
 
-    list.push(event)
+    list.push(ReportEntry.buildFromData(event))
   }
 
   return {

@@ -1,3 +1,5 @@
+import DecimalFormatter from "../helpers/Decimal"
+
 interface OrderItemType {
   id: string,
   name: string,
@@ -10,28 +12,31 @@ interface OrderItemType {
 }
 
 class OrderItemRow implements OrderItemType {
+  private total: any
+
   constructor(
     public id: string,
     public name: string,
     public quantity: any,
-    public price: any
+    public price: any,
   ) {
     this.id = id
     this.name = name
     this.quantity = parseInt(quantity)
     this.price = parseFloat(price)
+    this.total = this.price * this.quantity
   }
 
   getFormattedPrice(): string {
-    return this.price.toFixed(2)
+    return DecimalFormatter.format(this.price)
   }
 
   getTotal(): number {
-    return this.price * this.quantity
+    return this.total
   }
 
   getFormattedTotal(): string {
-    return (this.price * this.quantity).toFixed(2)
+    return DecimalFormatter.format(this.total)
   }
 
 

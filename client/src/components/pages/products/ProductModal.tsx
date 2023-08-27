@@ -2,15 +2,17 @@ import { useMediaQuery } from "@mantine/hooks";
 import ProductListItem from "../../../models/ProductListItem";
 import { Button, Group, Modal, NumberInput, Space, TextInput } from "@mantine/core";
 import { useForm } from "@mantine/form";
+import { RealIcon } from "../cash/RealIcon";
 
 interface ModalProps {
   product: ProductListItem
+  modalTitle: string
   opened: boolean
   closeModal: any
   onSubmit: any
 }
 
-function ProductModal({ product, opened, closeModal, onSubmit }: ModalProps) {
+function ProductModal({ product, opened, closeModal, onSubmit, modalTitle }: ModalProps) {
   const isMobile = useMediaQuery("(max-width: 787px)");
 
   const form = useForm({
@@ -30,7 +32,7 @@ function ProductModal({ product, opened, closeModal, onSubmit }: ModalProps) {
     <Modal
       opened={opened}
       onClose={closeModal}
-      title="Editar produto"
+      title={modalTitle}
       fullScreen={isMobile}
       transitionProps={{ transition: 'fade', duration: 200 }}
 
@@ -53,8 +55,10 @@ function ProductModal({ product, opened, closeModal, onSubmit }: ModalProps) {
         <Space mt="md" />
 
         <NumberInput
-          label="Valor do produto R$"
+          label="Valor do produto"
+          icon={<RealIcon />}
           precision={2}
+          hideControls
           withAsterisk
           {...form.getInputProps('productPrice')}
           decimalSeparator=','

@@ -19,7 +19,7 @@ function ProductCard({ product }: { product: ProductListItem }) {
 
       <Box bg="var(--generic-blue)" p="sm" mih={100}>
         <Title order={2}>{product.name}</Title>
-        <Title order={3}>R$ {product.getFormattedPrice()}</Title>
+        <Title order={3}>{product.getFormattedPrice()}</Title>
       </Box>
       <Group mt="md" w="100%" style={{ display: "flex", justifyContent: "space-between" }}>
         <Switch
