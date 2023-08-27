@@ -21,7 +21,7 @@ function InitialPage({ setOpened }: any) {
     }
   });
 
-  const handleSubmit = async (values: any) => {
+  const handleSubmit = (values: any) => {
     const eventInfo = {
       "event_name": values.eventName,
       "open_amount": values.initialCashValue
@@ -29,9 +29,10 @@ function InitialPage({ setOpened }: any) {
 
     console.log(eventInfo)
 
-    const data = await createEvent(eventInfo)
-    setEventData(Event.buildFromData(data))
-    setOpened(true)
+    createEvent(eventInfo).then((data) => {
+      setEventData(Event.buildFromData(data))
+      setOpened("cashpage")
+    })
   }
 
   return (
