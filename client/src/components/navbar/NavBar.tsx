@@ -3,6 +3,7 @@ import "./NavBar.css"
 import { CloseBtn } from "./CloseBtn";
 import { Container } from "@mantine/core";
 import { useState } from "react";
+import { useCookiesHook } from "../../hooks/useCookiesHook";
 
 interface NavBarProps {
   maw: string
@@ -10,6 +11,7 @@ interface NavBarProps {
 
 function NavBar({ maw }: NavBarProps) {
   const [open, setOpen] = useState(false)
+  const { isEventCreated } = useCookiesHook()
 
   return (
     <div className="navbar">
@@ -34,10 +36,9 @@ function NavBar({ maw }: NavBarProps) {
             </li>
           </ul>
         </nav>
-        <CloseBtn />
+        {isEventCreated ? <CloseBtn /> : ""}
       </Container>
     </div>
-
   );
 }
 export default NavBar;
