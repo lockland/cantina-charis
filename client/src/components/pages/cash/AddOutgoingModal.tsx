@@ -46,6 +46,8 @@ function AddOutgoingModal() {
             mt="md"
             placeholder="0"
             {...form.getInputProps("amount")}
+            decimalSeparator=','
+            thousandsSeparator='.'
           />
           <Button size="lg" type="submit" fullWidth mt="md">Salvar</Button>
         </form>

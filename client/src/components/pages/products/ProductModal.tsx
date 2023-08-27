@@ -57,6 +57,8 @@ function ProductModal({ product, opened, closeModal, onSubmit }: ModalProps) {
           precision={2}
           withAsterisk
           {...form.getInputProps('productPrice')}
+          decimalSeparator=','
+          thousandsSeparator='.'
         />
         <Group mt="md">
           <Button fullWidth type="submit">Salvar</Button>

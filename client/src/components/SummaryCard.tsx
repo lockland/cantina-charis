@@ -45,6 +45,8 @@ function SummaryCard(
           hideControls
           precision={2}
           onKeyDown={handleKeyDown}
+          decimalSeparator=','
+          thousandsSeparator='.'
         />
       </Group>
     </Box>
