@@ -20,7 +20,7 @@ function OrderForm() {
   const handleOnSubmit = (values: OrderFormValues, event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     console.log(values, event)
-    refreshPage()
+    //refreshPage()
   }
 
 
@@ -30,12 +30,12 @@ function OrderForm() {
 
   const form = useForm({
     initialValues: {
-      customer_id: "",
+      customer_name: "",
       products: []
     },
 
     validate: {
-      customer_id: (value: string) => (parseInt(value) >= 0) ? null : 'Selecione um cliente por favor!',
+      customer_name: (value: string) => (value.length > 0) ? null : 'Selecione um cliente por favor!',
       products: (value: OrderItemRow[]) => (value.length > 0) ? null : 'Adicione algum produto para continuar',
     },
   });

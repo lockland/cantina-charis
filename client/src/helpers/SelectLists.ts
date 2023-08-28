@@ -7,7 +7,7 @@ export function buildCustomerNamesList(customers: CustomerType[]): CustomerNames
   customers.forEach(
     (customer: CustomerType) =>
       list.push({
-        value: customer.customer_id.toString(),
+        value: customer.customer_name,
         label: customer.customer_name
       })
   )

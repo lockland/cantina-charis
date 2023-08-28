@@ -59,7 +59,7 @@ function OrderItemInputs() {
       <Select
         size="md"
         onCreate={(query) => {
-          const item: CustomerNamesOptionType = { value: "0", label: query };
+          const item: CustomerNamesOptionType = { value: query, label: query };
           setCustomerNames((current: CustomerNamesOptionType[]) => [...current, item]);
           return item;
         }}
@@ -72,7 +72,7 @@ function OrderItemInputs() {
         label="Selecione o cliente"
         placeholder="Digite o nome do cliente"
         withAsterisk
-        {...form.getInputProps("customer_id")}
+        {...form.getInputProps("customer_name")}
       />
       <Space mt="md" />
 

@@ -2,7 +2,7 @@ import { createFormContext } from '@mantine/form';
 import OrderItemRow from '../models/OrderItemRow';
 
 export interface OrderFormValues {
-  customer_id: string,
+  customer_name: string,
   products: OrderItemRow[],
 }
 
