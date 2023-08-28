@@ -19,7 +19,7 @@ function OrderForm() {
     event.preventDefault();
     await createOrder(values)
     console.log("created")
-    refreshPage()
+    //refreshPage()
   }
 
 
@@ -30,6 +30,7 @@ function OrderForm() {
   const form = useForm({
     initialValues: {
       customer_name: "",
+      customer_paid_value: "0",
       products: []
     },
 

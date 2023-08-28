@@ -45,9 +45,12 @@ export function getEnabledProducts() {
   return fetcher("api/products/enabled")
 }
 
-export function createOrder(order: OrderFormValues) {
-  return new Promise((resolveInner) => {
-    console.log(order)
-    setTimeout(resolveInner, 1000);
+export function createOrder(values: OrderFormValues) {
+  return fetcher("api/orders", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(values),
   })
 }

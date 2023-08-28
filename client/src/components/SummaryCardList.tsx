@@ -2,15 +2,18 @@ import SummaryCard from "./SummaryCard"
 import { useState } from "react"
 import { useSharedContext } from "../hooks/useSharedContext"
 import CustomSimpleGrid from "./CustomSimpleGrid"
+import { useFormContext } from "../hooks/formContext"
 
 function SummaryCardList({ setButtonDisabled }: any) {
   const [changeOfMoney, setChangeOfMoney] = useState(0.00)
   const [paidAmount, setPaidAmount] = useState(0.00)
 
   const { orderAmount, setOrderAmount } = useSharedContext()
+  const form = useFormContext()
 
   const handleOnChange = (value: number): void => {
     setPaidAmount(value)
+    form.setFieldValue("customer_paid_value", value)
   }
 
   const handleOnBlur = (): void => {
