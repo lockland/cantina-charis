@@ -27,6 +27,6 @@ func (c *OutgoingController) CreateOutgoing(f *fiber.Ctx) error {
 
 	return f.JSON(fiber.Map{
 		"outgoing_id": outgoing.ID,
-		"event_id":    outgoing.Event.ID,
+		"event_id":    outgoing.EventID,
 	})
 }
