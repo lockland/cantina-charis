@@ -25,5 +25,6 @@ func Connect(url string) {
 		new(models.Event),
 		new(models.Outgoing),
 		new(models.Customer),
+		new(models.Product),
 	)
 }
