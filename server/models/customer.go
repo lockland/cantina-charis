@@ -1,9 +1,15 @@
 package models
 
-import "github.com/shopspring/decimal"
+import (
+	"time"
+
+	"github.com/shopspring/decimal"
+)
 
 type Customer struct {
-	Id         int             `json:"customer_id"`
-	Name       string          `json:"customer_name"`
-	DebitValue decimal.Decimal `json:"debit_value"`
+	ID         int             `json:"customer_id"`
+	Name       string          `json:"customer_name" gorm:"uniqueIndex"`
+	DebitValue decimal.Decimal `json:"debit_value" gorm:"default:0.00"`
+	CreatedAt  time.Time       `json:"created_at"`
+	UpdatedAt  time.Time       `json:"updated_at"`
 }

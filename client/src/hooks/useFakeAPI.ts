@@ -55,16 +55,6 @@ export function getOrders(total: number): any {
   }
 }
 
-export function getCustomerNames(): any {
-  // Value is the Customer ID on database
-  return {
-    data: [
-      { value: '1', label: 'Fulano' },
-      { value: '2', label: 'Beltrano' },
-    ]
-  }
-}
-
 export function getProductNames(): any {
   // Value is the Product ID on database
 

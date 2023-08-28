@@ -24,5 +24,6 @@ func Connect(url string) {
 	Conn.AutoMigrate(
 		new(models.Event),
 		new(models.Outgoing),
+		new(models.Customer),
 	)
 }

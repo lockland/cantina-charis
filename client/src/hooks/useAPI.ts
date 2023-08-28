@@ -1,6 +1,5 @@
 import Event, { EventType } from '../models/Event';
 import { OutgoingType } from '../models/Outgoing';
-import { useCookiesHook } from './useCookiesHook';
 
 const fetcher = async (url: string, options: any = {}) => {
   return fetch(url, options)
@@ -35,4 +34,8 @@ export function createOutgoing(values: OutgoingType) {
     },
     body: JSON.stringify(values),
   })
+}
+
+export function getCustomerNames() {
+  return fetcher("api/customers")
 }

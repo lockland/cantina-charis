@@ -1,16 +1,25 @@
 import { Box, Button, Grid, NumberInput, Select, Space } from "@mantine/core"
 import OrderItemRow from "../../../models/OrderItemRow"
-import { getCustomerNames, getProductNames } from "../../../hooks/useFakeAPI"
-import { useState } from "react"
+import { getProductNames } from "../../../hooks/useFakeAPI"
+import { useEffect, useState } from "react"
 import { useFormContext } from "../../../hooks/formContext"
 import { useSharedContext } from "../../../hooks/useSharedContext"
+import { buildCustomerNamesList } from "../../../helpers/SelectLists"
+import { getCustomerNames } from "../../../hooks/useAPI"
+import { customerType, CustomerNamesOptionType } from "../../../models/Customer"
 
 function OrderItemInputs() {
-  const customersResp = getCustomerNames()
   const productsResp = getProductNames()
 
-  const [customerNames, setCustomerNames] = useState(customersResp?.data);
+  const [customerNames, setCustomerNames] = useState<CustomerNamesOptionType[]>([]);
   const [productNames, _setProductNames] = useState(productsResp?.data);
+
+  useEffect(() => {
+    getCustomerNames().then((response: customerType[]) => {
+      const list = buildCustomerNamesList(response)
+      setCustomerNames(list)
+    })
+  }, [])
 
   const [quantity, setQuantity] = useState(1)
   const [productIndex, setProductIndex] = useState("0")
@@ -41,8 +50,8 @@ function OrderItemInputs() {
       <Select
         size="md"
         onCreate={(query) => {
-          const item = { value: "0", label: query };
-          setCustomerNames((current: any) => [...current, item]);
+          const item: CustomerNamesOptionType = { value: "0", label: query };
+          setCustomerNames((current: CustomerNamesOptionType[]) => [...current, item]);
           return item;
         }}
 
