@@ -2,27 +2,34 @@ import { Box, Button, Group, Modal, NumberInput, TextInput } from "@mantine/core
 import { useForm } from "@mantine/form"
 import { useDisclosure, useMediaQuery } from "@mantine/hooks"
 import { RealIcon } from "./RealIcon"
+import { createOutgoing } from "../../../hooks/useAPI";
+import { OutgoingType } from "../../../models/Outgoing";
+import { useCookiesHook } from "../../../hooks/useCookiesHook";
 
 function AddOutgoingModal() {
+  const { eventId } = useCookiesHook()
+
   const isMobile = useMediaQuery("(max-width: 787px)");
-  const [opened, { open, close }] = useDisclosure(false)
+  const [opened, { open, close: closeModal }] = useDisclosure(false)
 
   const form = useForm({
     initialValues: {
-      description: "",
-      amount: undefined
+      outgoing_description: "",
+      outgoing_amount: undefined,
+      event_id: eventId
     }
   })
 
-  const handleOnSubmit = (values: any): void => {
-    console.log(values)
-    close()
+  const handleOnSubmit = (outgoing: OutgoingType): void => {
+    console.log(outgoing)
+    createOutgoing(outgoing)
+    closeModal()
   }
 
   return (
     <Box>
       <Modal
-        onClose={close}
+        onClose={closeModal}
         opened={opened}
         title="Registar despesa"
         fullScreen={isMobile}
@@ -34,7 +41,7 @@ function AddOutgoingModal() {
             size="lg"
             label="Descrição da despesa"
             required
-            {...form.getInputProps("description")}
+            {...form.getInputProps("outgoing_description")}
           />
           <NumberInput
             size="lg"
@@ -45,7 +52,7 @@ function AddOutgoingModal() {
             required
             mt="md"
             placeholder="0"
-            {...form.getInputProps("amount")}
+            {...form.getInputProps("outgoing_amount")}
             decimalSeparator=','
             thousandsSeparator='.'
           />
