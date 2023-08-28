@@ -1,4 +1,5 @@
 import Event, { EventType } from '../models/Event';
+import { OrderFormValues } from '../models/Order';
 import { OutgoingType } from '../models/Outgoing';
 
 const fetcher = async (url: string, options: any = {}) => {
@@ -42,4 +43,11 @@ export function getCustomerNames() {
 
 export function getEnabledProducts() {
   return fetcher("api/products/enabled")
+}
+
+export function createOrder(order: OrderFormValues) {
+  return new Promise((resolveInner) => {
+    console.log(order)
+    setTimeout(resolveInner, 1000);
+  })
 }

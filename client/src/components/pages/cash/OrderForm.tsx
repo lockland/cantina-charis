@@ -3,24 +3,23 @@ import OrderItemInputs from "./OrderItemInputs"
 import ProductsTable from "./ProductsTable"
 import SummaryCardList from "../../SummaryCardList"
 import OrderItemRow from "../../../models/OrderItemRow"
-import { FormProvider, OrderFormValues, useForm } from "../../../hooks/formContext"
+import { FormProvider, useForm } from "../../../hooks/formContext"
 import { SharedContextProvider } from "../../../contexts/sharedContext"
-import { FormEvent, useEffect, useState } from "react"
+import { FormEvent, useState } from "react"
 import { useNavigate } from "react-router-dom"
+import { OrderFormValues } from "../../../models/Order"
+import { createOrder } from "../../../hooks/useAPI"
 
 function OrderForm() {
 
   const [buttonDisabled, setButtonDisabled] = useState(true)
   const navigate = useNavigate()
 
-  useEffect(() => {
-    console.log("Rendered")
-  })
-
-  const handleOnSubmit = (values: OrderFormValues, event: FormEvent<HTMLFormElement>) => {
+  const handleOnSubmit = async (values: OrderFormValues, event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    console.log(values, event)
-    //refreshPage()
+    await createOrder(values)
+    console.log("created")
+    refreshPage()
   }
 
 
