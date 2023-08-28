@@ -1,23 +1,23 @@
 import { useNavigate } from "react-router-dom";
 import ProductModal from "./ProductModal";
 import { Box, Button, Group } from "@mantine/core";
-import ProductListItem from "../../../models/ProductListItem";
+import Product, { ProductType } from "../../../models/Product";
 import { useDisclosure } from "@mantine/hooks";
 
 function AddProductModal() {
   const [opened, { open, close }] = useDisclosure(false);
   const navigate = useNavigate()
 
-  const handleSubmit = (values: any) => {
+  const handleSubmit = (values: ProductType) => {
     console.log(values)
-    refreshPage()
+    //refreshPage()
   }
 
   const refreshPage = () => {
     navigate(0)
   }
 
-  const product = new ProductListItem()
+  const product = new Product()
 
   return (
     <Box>

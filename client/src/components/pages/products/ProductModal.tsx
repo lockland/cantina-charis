@@ -1,5 +1,5 @@
 import { useMediaQuery } from "@mantine/hooks";
-import ProductListItem from "../../../models/ProductListItem";
+import ProductListItem from "../../../models/Product";
 import { Button, Group, Modal, NumberInput, Space, TextInput } from "@mantine/core";
 import { useForm } from "@mantine/form";
 import { RealIcon } from "../cash/RealIcon";
@@ -17,14 +17,14 @@ function ProductModal({ product, opened, closeModal, onSubmit, modalTitle }: Mod
 
   const form = useForm({
     initialValues: {
-      productId: product.id,
-      productName: product.name,
-      productPrice: product.price || undefined,
+      product_id: product.id,
+      product_name: product.name,
+      product_price: product.price,
     },
 
     validate: {
-      productName: (value) => (value.length < 3 ? "Preencha o nome do produto por favor!" : null),
-      productPrice: (value) => ((parseInt(value) || 0) <= 0 ? "Preencha o valor!" : null),
+      product_name: (value) => (value.length < 3 ? "Preencha o nome do produto por favor!" : null),
+      product_price: (value) => ((parseInt(value) || 0) <= 0 ? "Preencha o valor!" : null),
     }
   })
 
@@ -42,7 +42,7 @@ function ProductModal({ product, opened, closeModal, onSubmit, modalTitle }: Mod
       >
         <TextInput
           label="Identificador"
-          {...form.getInputProps('productId')}
+          {...form.getInputProps('product_id')}
           readOnly
         />
 
@@ -50,7 +50,7 @@ function ProductModal({ product, opened, closeModal, onSubmit, modalTitle }: Mod
         <TextInput
           label="Nome do produto"
           withAsterisk
-          {...form.getInputProps('productName')}
+          {...form.getInputProps('product_name')}
         />
         <Space mt="md" />
 
@@ -60,7 +60,7 @@ function ProductModal({ product, opened, closeModal, onSubmit, modalTitle }: Mod
           precision={2}
           hideControls
           withAsterisk
-          {...form.getInputProps('productPrice')}
+          {...form.getInputProps('product_price')}
           decimalSeparator=','
           thousandsSeparator='.'
         />

@@ -1,11 +1,11 @@
 import { ActionIcon, Box, Group, Switch, Title } from "@mantine/core"
-import ProductListItem from "../../../models/ProductListItem"
 import { ChangeEvent } from "react"
 import EditIcon from "./EditIcon"
 import EditProductModal from "./EditProductModal";
 import { useDisclosure } from "@mantine/hooks";
+import Product from "../../../models/Product";
 
-function ProductCard({ product }: { product: ProductListItem }) {
+function ProductCard({ product }: { product: Product }) {
   const [opened, { open, close }] = useDisclosure(false);
 
   const handleOnChange = (event: ChangeEvent<HTMLInputElement>, productId: string) => {

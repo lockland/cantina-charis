@@ -1,5 +1,5 @@
 import { faker } from '@faker-js/faker';
-import ProductListItem from '../models/ProductListItem';
+import ProductListItem from '../models/Product';
 import DecimalFormatter from '../helpers/Decimal';
 import ReportEntries from '../models/ReportsEntries';
 import ReportEntry from '../models/ReportEntry';

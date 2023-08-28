@@ -1,17 +1,17 @@
-import ProductListItem from "../../../models/ProductListItem";
+import Product, { ProductType } from "../../../models/Product";
 import ProductModal from "./ProductModal";
 
 interface EditModalProps {
-  product: ProductListItem
+  product: Product
   opened: boolean
   closeModal: any
 }
 
 function EditProductModal({ product, opened, closeModal }: EditModalProps) {
-  const handleSubmit = (values: any) => {
+  const handleSubmit = (values: ProductType) => {
     console.log(values)
-    product.name = values.productName
-    product.price = values.productPrice
+    product.name = values.product_name
+    product.price = values.product_price
 
     closeModal()
   }

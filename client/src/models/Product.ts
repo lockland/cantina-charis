@@ -1,17 +1,17 @@
 import DecimalFormatter from "../helpers/Decimal"
 
-interface ProductListItemType {
+export interface ProductType {
   product_id: string,
   product_name: string,
   product_price: number,
-  enabled: boolean,
+  enabled?: boolean,
 }
 
-class ProductListItem {
+class Product {
   constructor(
     public id: string = '0',
     public name: string = "",
-    public price?: any,
+    public price: any = "0.00",
     public enabled: boolean = false,
   ) {
     this.id = id
@@ -20,8 +20,15 @@ class ProductListItem {
     this.enabled = enabled
   }
 
-  static buildFromData({ product_id, product_name, product_price, enabled }: ProductListItemType): ProductListItem {
-    return new ProductListItem(product_id, product_name, product_price, enabled)
+  static buildFromData(
+    {
+      product_id,
+      product_name,
+      product_price,
+      enabled
+    }: ProductType
+  ): Product {
+    return new Product(product_id, product_name, product_price, enabled)
   }
 
   getFormattedPrice(): string {
@@ -29,4 +36,4 @@ class ProductListItem {
   }
 }
 
-export default ProductListItem
+export default Product
