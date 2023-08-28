@@ -44,14 +44,17 @@ func main() {
 
 	apiGroup := app.Group("api")
 
-	customerController := controllers.NewCustomerController()
-	apiGroup.Get("/customers", customerController.GetCustomers)
-
 	eventController := controllers.NewEventController()
 	apiGroup.Post("/events/", eventController.CreateEvent)
 	apiGroup.Get("/events/", eventController.GetEvents)
 	apiGroup.Get("/events/:id", eventController.GetEvent)
 	apiGroup.Put("/events/:id/close", eventController.CloseEvent)
+
+	outgoingController := controllers.NewOutgoingController()
+	apiGroup.Post("/outgoings", outgoingController.CreateOutgoing)
+
+	customerController := controllers.NewCustomerController()
+	apiGroup.Get("/customers", customerController.GetCustomers)
 
 	TodoController := controllers.NewTodoController()
 	apiGroup.Post("/todos", func(c *fiber.Ctx) error {
