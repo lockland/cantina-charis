@@ -3,7 +3,7 @@ export interface CustomerNamesOptionType {
   label: string
 }
 
-export interface customerType {
+export interface CustomerType {
   customer_id: number,
   customer_name: string,
   debit_value?: any

@@ -1,23 +1,27 @@
 import { Box, Button, Grid, NumberInput, Select, Space } from "@mantine/core"
 import OrderItemRow from "../../../models/OrderItemRow"
-import { getProductNames } from "../../../hooks/useFakeAPI"
 import { useEffect, useState } from "react"
 import { useFormContext } from "../../../hooks/formContext"
 import { useSharedContext } from "../../../hooks/useSharedContext"
-import { buildCustomerNamesList } from "../../../helpers/SelectLists"
-import { getCustomerNames } from "../../../hooks/useAPI"
-import { customerType, CustomerNamesOptionType } from "../../../models/Customer"
+import { buildCustomerNamesList, buildProductsList } from "../../../helpers/SelectLists"
+import { getCustomerNames, getEnabledProducts } from "../../../hooks/useAPI"
+import { CustomerType, CustomerNamesOptionType } from "../../../models/Customer"
+import { ProductOptionType, ProductType } from "../../../models/Product"
 
 function OrderItemInputs() {
-  const productsResp = getProductNames()
 
   const [customerNames, setCustomerNames] = useState<CustomerNamesOptionType[]>([]);
-  const [productNames, _setProductNames] = useState(productsResp?.data);
+  const [products, setProducts] = useState<ProductOptionType[]>([]);
 
   useEffect(() => {
-    getCustomerNames().then((response: customerType[]) => {
+    getCustomerNames().then((response: CustomerType[]) => {
       const list = buildCustomerNamesList(response)
       setCustomerNames(list)
+    })
+
+    getEnabledProducts().then((response: ProductType[]) => {
+      const list = buildProductsList(response)
+      setProducts(list)
     })
   }, [])
 
@@ -32,8 +36,13 @@ function OrderItemInputs() {
   }
 
   const handleOnClick = () => {
-    const product = productNames.filter((el: { value: string }) => el.value === productIndex)
-    const productRow = new OrderItemRow(productIndex, product[0]["name"], quantity, product[0]["price"])
+    const product: ProductOptionType[] = products.filter((el: { value: string }) => el.value === productIndex)
+    const productRow = new OrderItemRow(
+      productIndex,
+      product[0]["product_name"],
+      quantity,
+      product[0]["product_price"]
+    )
 
     addProductToTable(productRow)
     setOrderAmount((orderAmount + productRow.getTotal()))
@@ -72,7 +81,7 @@ function OrderItemInputs() {
         <Grid.Col md={6} lg={9}>
           <Select
             onChange={(value: string) => setProductIndex(value)}
-            data={productNames}
+            data={products}
             searchable
             label="Selecione o produto"
             placeholder="Digite o nome do produto"

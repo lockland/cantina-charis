@@ -7,6 +7,13 @@ export interface ProductType {
   enabled?: boolean,
 }
 
+export interface ProductOptionType {
+  value: string,
+  label: string,
+  product_name: string,
+  product_price: any
+}
+
 class Product {
   constructor(
     public id: string = '0',

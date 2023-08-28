@@ -39,3 +39,7 @@ export function createOutgoing(values: OutgoingType) {
 export function getCustomerNames() {
   return fetcher("api/customers")
 }
+
+export function getEnabledProducts() {
+  return fetcher("api/products/enabled")
+}
