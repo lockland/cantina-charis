@@ -50,6 +50,13 @@ func main() {
 	apiGroup.Get("/events/:id", eventController.GetEvent)
 	apiGroup.Put("/events/:id/close", eventController.CloseEvent)
 
+	productController := controllers.NewProductController()
+	apiGroup.Post("/products/", productController.CreateProduct)
+	apiGroup.Get("/products/", productController.GetProducts)
+	apiGroup.Get("/products/enabled", productController.GetEnabledProducts)
+	apiGroup.Get("/products/:id", productController.GetProduct)
+	apiGroup.Put("/products/:id/toggle", productController.ToggleProduct)
+
 	outgoingController := controllers.NewOutgoingController()
 	apiGroup.Post("/outgoings", outgoingController.CreateOutgoing)
 
