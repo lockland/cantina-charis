@@ -19,6 +19,8 @@ func Connect(url string) {
 		panic("failed to connect database")
 	}
 
+	Conn.Exec("PRAGMA foreign_keys = ON;")
+
 	Conn.AutoMigrate(
 		new(models.Event),
 		new(models.Outgoing),
