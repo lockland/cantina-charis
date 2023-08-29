@@ -19,7 +19,7 @@ function ProductModal({ product, opened, closeModal, onSubmit, modalTitle }: Mod
     initialValues: {
       product_id: product.id,
       product_name: product.name,
-      product_price: product.price,
+      product_price: (product.price) ? product.price : undefined,
     },
 
     validate: {

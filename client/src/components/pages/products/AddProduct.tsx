@@ -3,14 +3,14 @@ import ProductModal from "./ProductModal";
 import { Box, Button, Group } from "@mantine/core";
 import Product, { ProductType } from "../../../models/Product";
 import { useDisclosure } from "@mantine/hooks";
+import { createProduct } from "../../../hooks/useAPI";
 
 function AddProductModal() {
   const [opened, { open, close }] = useDisclosure(false);
   const navigate = useNavigate()
 
   const handleSubmit = (values: ProductType) => {
-    console.log(values)
-    //refreshPage()
+    createProduct(values).then(() => refreshPage())
   }
 
   const refreshPage = () => {

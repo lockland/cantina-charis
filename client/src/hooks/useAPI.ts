@@ -1,6 +1,7 @@
 import Event, { EventType } from '../models/Event';
 import { OrderFormValues } from '../models/Order';
 import { OutgoingType } from '../models/Outgoing';
+import { ProductType } from '../models/Product';
 
 const fetcher = async (url: string, options: any = {}) => {
   return fetch(url, options)
@@ -60,5 +61,15 @@ export function getOrders(eventId: number) {
 }
 
 export function getProducts() {
-  return fetcher("api/products/enabled")
+  return fetcher("api/products/")
+}
+
+export function createProduct(values: ProductType) {
+  return fetcher("api/products", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(values),
+  })
 }
