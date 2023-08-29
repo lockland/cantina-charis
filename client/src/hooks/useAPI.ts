@@ -73,3 +73,17 @@ export function createProduct(values: ProductType) {
     body: JSON.stringify(values),
   })
 }
+
+export function toggleProductStatus(productId: number) {
+  return fetcher(`api/products/${productId}/toggle`, { method: "PUT" })
+}
+
+export function updateProduct(values: ProductType) {
+  return fetcher("api/products", {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(values),
+  })
+}

@@ -1,7 +1,7 @@
 import DecimalFormatter from "../helpers/Decimal"
 
 export interface ProductType {
-  product_id: string,
+  product_id: number,
   product_name: string,
   product_price: number,
   enabled?: boolean,
@@ -16,12 +16,12 @@ export interface ProductOptionType {
 
 class Product {
   constructor(
-    public id: any = '0',
+    public id: number = 0,
     public name: string = "",
     public price: any = "0.00",
     public enabled: boolean = false,
   ) {
-    this.id = parseInt(id)
+    this.id = id
     this.name = name
     this.price = parseFloat(price)
     this.enabled = enabled

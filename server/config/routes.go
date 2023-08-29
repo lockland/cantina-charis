@@ -22,7 +22,8 @@ func SetupApiRoutes(app *fiber.App) {
 	apiGroup.Post("/products/", productController.CreateProduct)
 	apiGroup.Get("/products/", productController.GetProducts)
 	apiGroup.Get("/products/enabled", productController.GetEnabledProducts)
-	apiGroup.Get("/products/:id", productController.GetProduct)
+	// apiGroup.Get("/products/:id", productController.UpdateProduct)
+	apiGroup.Put("/products/:id", productController.GetProduct)
 	apiGroup.Put("/products/:id/toggle", productController.ToggleProduct)
 
 	outgoingController := controllers.NewOutgoingController()

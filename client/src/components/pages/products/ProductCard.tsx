@@ -1,15 +1,15 @@
 import { ActionIcon, Box, Group, Switch, Title } from "@mantine/core"
-import { ChangeEvent } from "react"
 import EditIcon from "./EditIcon"
 import EditProductModal from "./EditProductModal";
 import { useDisclosure } from "@mantine/hooks";
 import Product from "../../../models/Product";
+import { toggleProductStatus } from "../../../hooks/useAPI";
 
 function ProductCard({ product }: { product: Product }) {
   const [opened, { open, close }] = useDisclosure(false);
 
-  const handleOnChange = (event: ChangeEvent<HTMLInputElement>, productId: string) => {
-    console.log(event, productId)
+  const handleOnChange = () => {
+    toggleProductStatus(product.id)
   }
 
 
@@ -26,7 +26,7 @@ function ProductCard({ product }: { product: Product }) {
           size="xl"
           defaultChecked={product.enabled}
           onLabel="Remover do cardápio" offLabel="Adicionar ao cardápio"
-          onChange={(e) => handleOnChange(e, product.id)}
+          onChange={handleOnChange}
         />
 
         <ActionIcon
