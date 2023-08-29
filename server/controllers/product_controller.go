@@ -63,3 +63,18 @@ func (c *ProductController) CreateProduct(f *fiber.Ctx) error {
 
 	return f.JSON(product)
 }
+
+func (c *ProductController) UpdateProduct(f *fiber.Ctx) error {
+	product := new(models.Product)
+
+	if error := f.BodyParser(product); error != nil {
+		return error
+	}
+
+	result := database.Conn.Model(&product).Updates(product)
+	if result.Error != nil {
+		return f.Status(fiber.StatusBadRequest).SendString(result.Error.Error())
+	}
+
+	return f.JSON(product)
+}

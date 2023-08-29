@@ -12,7 +12,6 @@ function ProductCard({ product }: { product: Product }) {
     toggleProductStatus(product.id)
   }
 
-
   return (
     <Box bg="var(--secondary-background-color)" p="sm">
       <EditProductModal product={product} opened={opened} closeModal={close} />

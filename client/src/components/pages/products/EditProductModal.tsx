@@ -1,3 +1,4 @@
+import { updateProduct } from "../../../hooks/useAPI";
 import Product, { ProductType } from "../../../models/Product";
 import ProductModal from "./ProductModal";
 
@@ -13,6 +14,7 @@ function EditProductModal({ product, opened, closeModal }: EditModalProps) {
     product.name = values.product_name
     product.price = values.product_price
 
+    updateProduct(values)
     closeModal()
   }
 
