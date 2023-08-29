@@ -12,4 +12,5 @@ type Customer struct {
 	DebitValue decimal.Decimal `json:"debit_value" gorm:"default:0.00"`
 	CreatedAt  time.Time       `json:"created_at"`
 	UpdatedAt  time.Time       `json:"updated_at"`
+	Orders     []Order         `json:"orders"`
 }
