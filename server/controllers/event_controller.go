@@ -6,6 +6,7 @@ import (
 	"github.com/gofiber/fiber/v2"
 	"github.com/lockland/cantina-charis/server/database"
 	"github.com/lockland/cantina-charis/server/models"
+	"gorm.io/gorm/clause"
 )
 
 type EventController struct{}
@@ -54,4 +55,23 @@ func (c *EventController) CreateEvent(f *fiber.Ctx) error {
 
 	database.Conn.Create(&event)
 	return f.JSON(event)
+}
+
+func (c *EventController) GetOrders(f *fiber.Ctx) error {
+	id, err := f.ParamsInt("id")
+	event := models.Event{
+		ID: id,
+	}
+
+	if err != nil {
+		return f.Status(401).SendString("Invalid id")
+	}
+
+	database.Conn.
+		Preload("Orders.Products.OrderProduct").
+		Preload("Orders.OrderProduct").
+		Preload("Orders.Customer").
+		Preload(clause.Associations).
+		Find(&event)
+	return f.JSON(event.Orders)
 }
