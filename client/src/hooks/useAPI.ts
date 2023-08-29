@@ -58,3 +58,7 @@ export function createOrder(values: OrderFormValues) {
 export function getOrders(eventId: number) {
   return fetcher(`api/events/${eventId}/orders`)
 }
+
+export function getProducts() {
+  return fetcher("api/products/enabled")
+}

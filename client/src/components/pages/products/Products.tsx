@@ -1,14 +1,23 @@
 import CustomSimpleGrid from "../../CustomSimpleGrid";
-import { getProducts } from "../../../hooks/useFakeAPI";
+import { getProducts } from "../../../hooks/useAPI";
 import ProductCard from "./ProductCard";
-import Product from "../../../models/Product";
+import Product, { ProductType } from "../../../models/Product";
 import { Box } from "@mantine/core";
 import AddProduct from "./AddProduct";
+import { useEffect, useState } from "react";
 
 
 function Products() {
-  const { data } = getProducts(20)
-  const list = data.map((product: Product) => <ProductCard key={product.id} product={product} />)
+  const [list, setList] = useState<Product[]>([])
+
+  useEffect(() => {
+    getProducts().then((response: ProductType[]) => {
+      const data: Product[] = response.map((p: ProductType) => Product.buildFromData(p))
+      setList(data)
+    })
+
+  }, [])
+
 
 
   return (
@@ -16,7 +25,9 @@ function Products() {
       <AddProduct />
 
       <CustomSimpleGrid mt="md" cols={4}>
-        {list}
+        {list.map((product: Product) =>
+          <ProductCard key={product.id} product={product} />
+        )}
       </CustomSimpleGrid>
     </Box>
 
