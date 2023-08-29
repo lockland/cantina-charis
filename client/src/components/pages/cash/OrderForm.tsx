@@ -18,7 +18,7 @@ function OrderForm() {
   const handleOnSubmit = async (values: OrderFormValues, event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     await createOrder(values)
-    console.log("created")
+    console.info("sent values", values)
     //refreshPage()
   }
 
@@ -31,6 +31,7 @@ function OrderForm() {
     initialValues: {
       customer_name: "",
       customer_paid_value: "0",
+      order_amount: "0",
       products: []
     },
 

@@ -44,8 +44,11 @@ function OrderItemInputs() {
       product[0]["product_price"]
     )
 
+    const amount = orderAmount + productRow.getTotal()
+
     addProductToTable(productRow)
-    setOrderAmount((orderAmount + productRow.getTotal()))
+    setOrderAmount(amount)
+    form.setFieldValue("order_amount", amount)
     form.insertListItem("products", productRow)
     form.clearFieldError("products")
     setQuantity(1)
