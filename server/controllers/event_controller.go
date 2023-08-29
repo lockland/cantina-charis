@@ -68,6 +68,7 @@ func (c *EventController) GetOrders(f *fiber.Ctx) error {
 	}
 
 	database.Conn.
+		Preload("Orders", "deliveried = ?", false).
 		Preload("Orders.Products.OrderProduct").
 		Preload("Orders.OrderProduct").
 		Preload("Orders.Customer").
