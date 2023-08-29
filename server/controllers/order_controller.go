@@ -111,3 +111,11 @@ func (c *OrderController) CreateOrder(f *fiber.Ctx) error {
 	return f.JSON(order)
 
 }
+
+func (c *OrderController) GetOrders(f *fiber.Ctx) error {
+	orders := new([]models.Order)
+	database.Conn.
+		Preload("Products.OrderProduct").
+		Preload(clause.Associations).Find(&orders)
+	return f.JSON(orders)
+}
