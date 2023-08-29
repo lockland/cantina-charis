@@ -9,11 +9,13 @@ import { FormEvent, useState } from "react"
 import { useNavigate } from "react-router-dom"
 import { OrderFormValues } from "../../../models/Order"
 import { createOrder } from "../../../hooks/useAPI"
+import { useCookiesHook } from "../../../hooks/useCookiesHook"
 
 function OrderForm() {
 
   const [buttonDisabled, setButtonDisabled] = useState(true)
   const navigate = useNavigate()
+  const { eventId } = useCookiesHook()
 
   const handleOnSubmit = async (values: OrderFormValues, event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -29,6 +31,7 @@ function OrderForm() {
 
   const form = useForm({
     initialValues: {
+      event_id: eventId,
       customer_name: "",
       customer_paid_value: "0",
       order_amount: "0",
