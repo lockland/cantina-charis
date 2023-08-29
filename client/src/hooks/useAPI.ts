@@ -54,3 +54,7 @@ export function createOrder(values: OrderFormValues) {
     body: JSON.stringify(values),
   })
 }
+
+export function getOrders(eventId: number) {
+  return fetcher(`api/events/${eventId}/orders`)
+}

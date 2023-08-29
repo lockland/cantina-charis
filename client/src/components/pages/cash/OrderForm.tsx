@@ -21,7 +21,7 @@ function OrderForm() {
     event.preventDefault();
     await createOrder(values)
     console.info("sent values", values)
-    //refreshPage()
+    refreshPage()
   }
 
 
