@@ -15,12 +15,12 @@ class OrderItemRow implements OrderItemType {
   private total: any
 
   constructor(
-    public id: string,
+    public id: any,
     public name: string,
     public quantity: any,
     public price: any,
   ) {
-    this.id = id
+    this.id = parseInt(id)
     this.name = name
     this.quantity = parseInt(quantity)
     this.price = parseFloat(price)

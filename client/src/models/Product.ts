@@ -16,12 +16,12 @@ export interface ProductOptionType {
 
 class Product {
   constructor(
-    public id: string = '0',
+    public id: any = '0',
     public name: string = "",
     public price: any = "0.00",
     public enabled: boolean = false,
   ) {
-    this.id = id
+    this.id = parseInt(id)
     this.name = name
     this.price = parseFloat(price)
     this.enabled = enabled
