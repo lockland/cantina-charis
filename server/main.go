@@ -34,7 +34,13 @@ func main() {
 	})
 
 	app.Get("/heathcheck", func(c *fiber.Ctx) error {
-		return c.SendString("ok")
+		status := "ok"
+
+		if database.Conn == nil {
+			status = "fail"
+		}
+
+		return c.SendString(status)
 	})
 
 	config.SetupApiRoutes(app)
