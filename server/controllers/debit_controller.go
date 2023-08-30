@@ -53,5 +53,26 @@ func (c *DebitController) GetDebits(f *fiber.Ctx) error {
 }
 
 func (c *DebitController) PayDebits(f *fiber.Ctx) error {
-	return f.JSON([]models.Order{})
+	id, err := f.ParamsInt("customer_id")
+
+	customer := models.Customer{
+		ID: id,
+	}
+
+	if err != nil {
+		return f.Status(401).SendString("Invalid id")
+	}
+
+	transaction := database.Conn.Begin()
+	transaction.Preload("Orders").Find(&customer)
+	customer.DebitValue = decimal.NewFromInt(0)
+
+	for index, order := range customer.Orders {
+		customer.Orders[index].PaidValue = order.OrderAmount
+	}
+
+	transaction.Save(&customer)
+	transaction.Commit()
+
+	return f.JSON(fiber.Map{"customer_id": id})
 }

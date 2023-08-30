@@ -95,3 +95,7 @@ export function updateProduct(values: ProductType) {
 export function getDebits() {
   return fetcher("api/debits")
 }
+
+export function payDebits(customerId: number) {
+  return fetcher(`api/debits/${customerId}/pay`, { method: "PUT" })
+}

@@ -1,6 +1,5 @@
 import { Accordion, Box, Button, Divider, Flex, Group, Text } from "@mantine/core";
-import { getDebits } from "../../../hooks/useAPI";
-import DecimalFormatter from "../../../helpers/Decimal";
+import { getDebits, payDebits } from "../../../hooks/useAPI";
 import { useEffect, useState } from "react";
 import Debit, { DebitType } from "../../../models/Debit";
 import { DebitOrderType } from "../../../models/DebitOrder";
@@ -16,11 +15,13 @@ function Debits() {
     })
   }, [])
 
-  const handleOnClick = (id: any) => {
+  const handleOnClick = (id: number) => {
     const resp = confirm("Deseja mesmo definir esse debito como pago?")
 
     if (resp) {
-      console.log(id)
+      payDebits(id)
+      setDebits(debits.filter((debit) => debit.customer.id != id))
+      console.log(`all debits paid for customer_id: ${id}`)
     }
   }
 
