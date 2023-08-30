@@ -24,14 +24,24 @@ func main() {
 	// }))
 	app.Use(cors.New(cors.ConfigDefault))
 
-	app.Static("/", "./views", fiber.Static{
-		Compress:      true,
-		ByteRange:     true,
-		Browse:        true,
-		Index:         "index.html",
-		CacheDuration: 10 * time.Second,
-		MaxAge:        3600,
-	})
+	reactRoutes := []string{
+		"/",
+		"/orders",
+		"/products",
+		"/customers-debits",
+		"/reports",
+	}
+
+	for _, route := range reactRoutes {
+		app.Static(route, "./views", fiber.Static{
+			Compress:      true,
+			ByteRange:     true,
+			Browse:        true,
+			Index:         "index.html",
+			CacheDuration: 10 * time.Second,
+			MaxAge:        3600,
+		})
+	}
 
 	app.Get("/heathcheck", func(c *fiber.Ctx) error {
 		status := "ok"
