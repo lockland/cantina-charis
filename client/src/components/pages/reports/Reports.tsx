@@ -1,22 +1,22 @@
 import { Box, Flex, Table, Title } from "@mantine/core";
-import { getEventsSummary } from "../../../hooks/useFakeAPI";
+import { getEventsSummary } from "../../../hooks/useAPI";
 import ReportEntry from "../../../models/ReportEntry";
+import { useEffect, useState } from "react";
+import ReportEntries from "../../../models/ReportsEntries";
 
 function Reports() {
 
-  const { data } = getEventsSummary(10)
+  const [rows, setRows] = useState(new ReportEntries)
 
-  const rows = data.map((event: ReportEntry) => (
-    <tr key={event.event_id}>
-      <td>{event.event_name}</td>
-      <td>{event.getFormattedOpenAmount()}</td>
-      <td>{event.getFormattedCreatedAt()}</td>
-      <td>{event.getFormattedIncoming()}</td>
-      <td>{event.getFormattedOutgoing()}</td>
-      <td>{event.getFormattedBalance()}</td>
-      <td>{event.getFormattedLiquidFunds()}</td>
-    </tr>
-  ));
+  useEffect(() => {
+    getEventsSummary().then((response: ReportEntries) => {
+      const list = new ReportEntries
+      response.map((entryData) => {
+        return list.push(ReportEntry.buildFromData(entryData))
+      })
+      setRows(list)
+    })
+  }, [])
 
   return (
     <Box p={7}>
@@ -27,7 +27,7 @@ function Reports() {
       >
         <Title>Sumário dos eventos cadastrados</Title>
         <Title order={2}>
-          Valor apurado até o momento: {data.getFormattedLiquidFounds()}
+          Valor apurado até o momento: {rows.getFormattedLiquidFounds()}
         </Title>
       </Flex>
       <Table
@@ -47,7 +47,19 @@ function Reports() {
             <th>TOTAL LÍQUIDO</th>
           </tr>
         </thead>
-        <tbody>{rows}</tbody>
+        <tbody>
+          {rows.map((event: ReportEntry) => (
+            <tr key={event.event_id}>
+              <td>{event.event_name}</td>
+              <td>{event.getFormattedOpenAmount()}</td>
+              <td>{event.getFormattedCreatedAt()}</td>
+              <td>{event.getFormattedIncoming()}</td>
+              <td>{event.getFormattedOutgoing()}</td>
+              <td>{event.getFormattedBalance()}</td>
+              <td>{event.getFormattedLiquidFunds()}</td>
+            </tr>
+          ))}
+        </tbody>
       </Table>
     </Box>
   );

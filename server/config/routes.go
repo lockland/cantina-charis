@@ -15,6 +15,7 @@ func SetupApiRoutes(app *fiber.App) {
 	eventController := controllers.NewEventController()
 	apiGroup.Post("/events/", eventController.CreateEvent)
 	apiGroup.Get("/events/", eventController.GetEvents)
+	apiGroup.Get("/events/summaries", eventController.GetSummaries)
 	apiGroup.Get("/events/:id", eventController.GetEvent)
 	apiGroup.Put("/events/:id/close", eventController.CloseEvent)
 	apiGroup.Get("/events/:id/orders", eventController.GetOrders)

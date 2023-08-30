@@ -99,3 +99,7 @@ export function getDebits() {
 export function payDebits(customerId: number) {
   return fetcher(`api/debits/${customerId}/pay`, { method: "PUT" })
 }
+
+export function getEventsSummary() {
+  return fetcher("api/events/summaries")
+}
