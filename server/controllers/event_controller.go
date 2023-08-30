@@ -87,28 +87,30 @@ func (c *EventController) GetSummaries(f *fiber.Ctx) error {
 		open_amount,
 		incoming,
 		outgoing,
-		(open_amount + incoming - outgoing) as balance,
-		(incoming - outgoing) as liquid_funds
+		0 as balance,
+		0 as liquid_funds
 	from
 		events
-		join (
+		left join (
 			select
 				sum(orders.order_amount) as incoming,
 				event_id
 			from
 				orders
 			group by
-			event_id
+				event_id
 		) as incomings
-		join (
+				on incomings.event_id = events.id
+		left join (
 			select
 				sum(amount) as outgoing,
-				event_id from outgoings
+				event_id
+			from
+				outgoings
 			group by
-			 	event_id
+				event_id
 		) as outgoings
-			 on incomings.event_id = events.id
-			 	AND outgoings.event_id = events.id;
+			on outgoings.event_id = events.id;
 	`
 
 	result := []struct {
@@ -123,6 +125,12 @@ func (c *EventController) GetSummaries(f *fiber.Ctx) error {
 	}{}
 
 	database.Conn.Raw(rawQuery).Scan(&result)
+
+	for index, summary := range result {
+		summary.Balance = summary.OpenAmount.Add(summary.Incoming).Sub(summary.Outgoing)
+		summary.LiquidFunds = summary.Incoming.Sub(summary.Outgoing)
+		result[index] = summary
+	}
 
 	return f.JSON(result)
 }
