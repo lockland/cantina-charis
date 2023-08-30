@@ -119,3 +119,17 @@ func (c *OrderController) GetOrders(f *fiber.Ctx) error {
 		Preload(clause.Associations).Find(&orders)
 	return f.JSON(orders)
 }
+
+func (c *OrderController) DeliveryOrder(f *fiber.Ctx) error {
+	id, err := f.ParamsInt("id")
+	order := &models.Order{
+		ID: id,
+	}
+
+	if err != nil {
+		return f.Status(401).SendString("Invalid id")
+	}
+
+	database.Conn.Model(&order).Update("Deliveried", true)
+	return f.Status(fiber.StatusOK).JSON(fiber.Map{"order_id": id})
+}

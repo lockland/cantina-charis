@@ -60,6 +60,10 @@ export function getOrders(eventId: number) {
   return fetcher(`api/events/${eventId}/orders`)
 }
 
+export function deliveryOrder(orderId: number) {
+  return fetcher(`api/orders/${orderId}/done`, { method: "PUT" })
+}
+
 export function getProducts() {
   return fetcher("api/products/")
 }

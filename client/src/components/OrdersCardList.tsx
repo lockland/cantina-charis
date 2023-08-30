@@ -21,7 +21,7 @@ function OrdersCardList() {
 
 
   return (
-    <CustomSimpleGrid m={10} cols={4}>
+    <CustomSimpleGrid m={10} cols={3}>
       {orders.map((order: OrdersCardType, index: number) =>
         <OrdersCard
           key={index}

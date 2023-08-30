@@ -42,8 +42,7 @@ func (c *EventController) CloseEvent(f *fiber.Ctx) error {
 	}
 
 	database.Conn.Model(&event).Update("Open", false)
-	f.Status(fiber.StatusOK).JSON(fiber.Map{"event_id": id})
-	return nil
+	return f.Status(fiber.StatusOK).JSON(fiber.Map{"event_id": id})
 }
 
 func (c *EventController) CreateEvent(f *fiber.Ctx) error {

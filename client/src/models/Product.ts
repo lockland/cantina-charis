@@ -1,10 +1,19 @@
 import DecimalFormatter from "../helpers/Decimal"
 
+interface OrderDetails {
+  order_id: number,
+  customer_id: number,
+  product_id: number,
+  quantity: number,
+  sub_total: any
+}
+
 export interface ProductType {
   product_id: number,
   product_name: string,
   product_price: number,
   enabled?: boolean,
+  order_details?: OrderDetails
 }
 
 export interface ProductOptionType {

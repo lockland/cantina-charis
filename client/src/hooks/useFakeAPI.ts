@@ -75,7 +75,7 @@ export function getProducts(total: number) {
 
   for (let i = 0; i < total; i++) {
     const product = ProductListItem.buildFromData({
-      product_id: i.toString(),
+      product_id: i,
       product_name: faker.commerce.productName(),
       enabled: faker.helpers.arrayElement([true, false]),
       product_price: getFloatNumber(100),
