@@ -33,4 +33,7 @@ func SetupApiRoutes(app *fiber.App) {
 	customerController := controllers.NewCustomerController()
 	apiGroup.Get("/customers", customerController.GetCustomers)
 
+	debitController := controllers.NewDebitController()
+	apiGroup.Get("/debits", debitController.GetDebits)
+	apiGroup.Put("/debits/:customer_id/pay", debitController.PayDebits)
 }

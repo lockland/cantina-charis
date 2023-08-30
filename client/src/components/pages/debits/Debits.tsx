@@ -1,10 +1,20 @@
 import { Accordion, Box, Button, Divider, Flex, Group, Text } from "@mantine/core";
-import { getDebits } from "../../../hooks/useFakeAPI";
+import { getDebits } from "../../../hooks/useAPI";
 import DecimalFormatter from "../../../helpers/Decimal";
+import { useEffect, useState } from "react";
+import Debit, { DebitType } from "../../../models/Debit";
+import { DebitOrderType } from "../../../models/DebitOrder";
 
 function Debits() {
+  const [debits, setDebits] = useState<Debit[]>([])
 
-  const { data } = getDebits(10)
+  useEffect(() => {
+    getDebits().then((response: DebitType[]) => {
+      setDebits(response.map((debitData: DebitType) => {
+        return Debit.buildFromData(debitData)
+      }))
+    })
+  }, [])
 
   const handleOnClick = (id: any) => {
     const resp = confirm("Deseja mesmo definir esse debito como pago?")
@@ -14,9 +24,9 @@ function Debits() {
     }
   }
 
-  const items = data.map((debit: any, index: number) => {
+  const items = debits.map((debit: Debit, index: number) => {
     return (
-      <Accordion.Item key={index} value={debit.customer.id}>
+      <Accordion.Item key={index} value={debit.customer.id.toString()}>
         <Accordion.Control>
           <Flex
             justify="space-between"
@@ -26,22 +36,22 @@ function Debits() {
             <Text>
               {debit.customer.name}
             </Text>
-            <Text><b>TOTAL: </b>{DecimalFormatter.format(debit.total)}</Text>
+            <Text><b>TOTAL: </b>{debit.getFormattedTotal()}</Text>
           </Flex>
         </Accordion.Control>
         <Accordion.Panel>
           <Group position="right">
             <Button onClick={() => handleOnClick(debit.customer.id)}>Quitar débito</Button>
           </Group>
-          {debit.orders.map((order: any, index: number) => {
+          {debit.orders.map((order: DebitOrderType, index: number) => {
             return (
               <Box key={index}>
                 <Divider mb={20} mt={20} />
                 <Text><b>Evento: </b>{order.event_name}</Text>
-                <Text><b>Data: </b>{order.date}</Text>
-                <Text><b>Total: </b>{DecimalFormatter.format(order.total)}</Text>
-                <Text><b>Valor pago: </b>{DecimalFormatter.format(order.paid_value)}</Text>
-                <Text><b>Valor remanescente: </b>{DecimalFormatter.format(parseFloat(order.total) - parseFloat(order.paid_value))}</Text>
+                <Text><b>Data: </b>{order.getFormattedCreatedAt()}</Text>
+                <Text><b>Total: </b>{order.getFormattedOrderAmount()}</Text>
+                <Text><b>Valor pago: </b>{order.getFormattedPaidValue()}</Text>
+                <Text><b>Valor remanescente: </b>{order.getFormattedDebitValue()}</Text>
               </Box>
             )
           })}

@@ -91,3 +91,7 @@ export function updateProduct(values: ProductType) {
     body: JSON.stringify(values),
   })
 }
+
+export function getDebits() {
+  return fetcher("api/debits")
+}
