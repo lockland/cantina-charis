@@ -24,12 +24,9 @@ func (c *DebitController) GetDebits(f *fiber.Ctx) error {
 
 	response := []fiber.Map{}
 
-	for _, entry := range customers {
+	for _, customer := range customers {
 		orders := []fiber.Map{}
-		total := decimal.NewFromFloat(0.0)
-
-		for _, order := range entry.Orders {
-			total = total.Add(entry.DebitValue)
+		for _, order := range customer.Orders {
 			orders = append(orders, fiber.Map{
 				"order_id":     order.ID,
 				"event_name":   order.Event.Name,
@@ -41,10 +38,10 @@ func (c *DebitController) GetDebits(f *fiber.Ctx) error {
 
 		response = append(response, fiber.Map{
 			"customer": fiber.Map{
-				"id":   entry.ID,
-				"name": entry.Name,
+				"id":   customer.ID,
+				"name": customer.Name,
 			},
-			"total":  total,
+			"total":  customer.DebitValue,
 			"orders": orders,
 		})
 	}

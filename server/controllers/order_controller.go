@@ -60,8 +60,9 @@ func (c *OrderController) CreateOrder(f *fiber.Ctx) error {
 
 	result = database.Conn.
 		Where(models.Customer{Name: payload.CustomerName}).
-		Assign(models.Customer{DebitValue: debitValue}).
 		FirstOrCreate(&order.Customer)
+
+	order.Customer.DebitValue = order.Customer.DebitValue.Add(debitValue)
 
 	if result.Error != nil {
 		return f.Status(fiber.StatusBadRequest).SendString(result.Error.Error())
