@@ -23,13 +23,15 @@ func (c *DebitController) GetDebits(f *fiber.Ctx) error {
 		Find(&customers)
 
 	response := []fiber.Map{}
-	orders := []fiber.Map{}
-	total := decimal.NewFromFloat(0.0)
 
 	for _, entry := range customers {
+		orders := []fiber.Map{}
+		total := decimal.NewFromFloat(0.0)
+
 		for _, order := range entry.Orders {
 			total = total.Add(entry.DebitValue)
 			orders = append(orders, fiber.Map{
+				"order_id":     order.ID,
 				"event_name":   order.Event.Name,
 				"event_date":   order.Event.CreatedAt,
 				"order_amount": order.OrderAmount,
