@@ -5,23 +5,17 @@ import { useEffect, useState } from "react";
 import Order, { OrderListItem } from "../../../models/Order";
 import { useCookiesHook } from "../../../hooks/useCookiesHook";
 import { ProductType } from "../../../models/Product";
-import { useNavigate } from "react-router-dom";
 
 function Orders() {
 
   const [orders, setOrders] = useState<OrderListItem[]>([])
   const { eventId } = useCookiesHook()
-  const navigate = useNavigate()
 
   useEffect(() => {
     getOrders(eventId).then((response: OrderListItem[]) => {
       setOrders(response.map((orderData) => Order.buildFromData(orderData)))
     })
-
-    setTimeout(() => {
-      console.log("Reloading")
-      navigate(0)
-    }, 60 * 1000)
+    //@TODO implements a websocket to deal with page refresh
   }, [])
 
   const handleOnClick = (id: number) => {
