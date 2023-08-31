@@ -110,7 +110,8 @@ func (c *EventController) GetSummaries(f *fiber.Ctx) error {
 			group by
 				event_id
 		) as outgoings
-			on outgoings.event_id = events.id;
+			on outgoings.event_id = events.id
+		order by created_at desc;
 	`
 
 	result := []struct {
