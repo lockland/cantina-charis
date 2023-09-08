@@ -1,5 +1,6 @@
 server/views/
 server/server
 server/cantina.db
+server/server.exe
 .~*
 
