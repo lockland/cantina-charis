@@ -17,7 +17,7 @@ func (c *DebitController) GetDebits(f *fiber.Ctx) error {
 	var customers []models.Customer
 
 	database.Conn.
-		Preload("Orders").
+		Preload("Orders", "paid_value < order_amount").
 		Preload("Orders.Event").
 		Where("debit_value > 0").
 		Find(&customers)
