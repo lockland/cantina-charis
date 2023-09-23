@@ -24,6 +24,7 @@ function AddOutgoingModal() {
     console.log(outgoing)
     createOutgoing(outgoing)
     closeModal()
+    form.reset()
   }
 
   return (
@@ -35,7 +36,7 @@ function AddOutgoingModal() {
         fullScreen={isMobile}
         transitionProps={{ transition: 'fade', duration: 200 }}
       >
-        <form onSubmit={form.onSubmit(handleOnSubmit)}>
+        <form onSubmit={form.onSubmit(handleOnSubmit)} onReset={form.onReset}>
           <TextInput
             placeholder="Gastos mercado"
             size="lg"
