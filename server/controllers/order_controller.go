@@ -91,14 +91,12 @@ func (c *OrderController) CreateOrder(f *fiber.Ctx) error {
 	for _, el := range payload.Products {
 		if index := contains(orderItems, el.ID); index > -1 {
 			orderItems[index].ProductQuantity += el.Quantity
-			orderItems[index].SubTotal = orderItems[index].SubTotal.Add(el.Total)
 		} else {
 			orderItems = append(orderItems, models.OrderProduct{
 				OrderID:         order.ID,
 				CustomerID:      order.Customer.ID,
 				ProductID:       el.ID,
 				ProductQuantity: el.Quantity,
-				SubTotal:        el.Total,
 			})
 		}
 	}

@@ -30,6 +30,6 @@ func Connect(url string) {
 		new(models.OrderProduct),
 	)
 
-	Conn.SetupJoinTable(&models.Order{}, "Products", &models.OrderProduct{})
-	Conn.SetupJoinTable(&models.Product{}, "Orders", &models.OrderProduct{})
+	Conn.SetupJoinTable(new(models.Order), "Products", new(models.OrderProduct))
+	Conn.SetupJoinTable(new(models.Product), "Orders", new(models.OrderProduct))
 }
