@@ -6,6 +6,7 @@ interface ReportEntryType {
   open_amount: any,
   incoming: any,
   outgoing: any,
+  debits: any,
   balance: any,
   liquid_funds: any
   created_at?: Date,
@@ -18,6 +19,7 @@ export default class ReportEntry {
     public open_amount: any,
     public incoming: any,
     public outgoing: any,
+    public debits: any,
     public balance: any,
     public liquid_funds: any,
     public created_at?: Date
@@ -29,6 +31,7 @@ export default class ReportEntry {
     this.created_at = new Date(created_at || "")
     this.incoming = parseFloat(incoming)
     this.outgoing = parseFloat(outgoing)
+    this.debits = parseFloat(debits)
     this.balance = parseFloat(balance)
     this.liquid_funds = parseFloat(liquid_funds)
   }
@@ -40,6 +43,7 @@ export default class ReportEntry {
     created_at,
     incoming,
     outgoing,
+    debits,
     balance,
     liquid_funds
   }: ReportEntryType): ReportEntry {
@@ -49,6 +53,7 @@ export default class ReportEntry {
       open_amount,
       incoming,
       outgoing,
+      debits,
       balance,
       liquid_funds,
       created_at
@@ -65,6 +70,10 @@ export default class ReportEntry {
 
   getFormattedOutgoing(): string {
     return DecimalFormatter.format(this.outgoing)
+  }
+
+  getFormattedDebits(): string {
+    return DecimalFormatter.format(this.debits)
   }
 
   getFormattedBalance(): string {

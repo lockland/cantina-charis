@@ -38,11 +38,12 @@ function Reports() {
       >
         <thead>
           <tr>
-            <th>NOME DO EVENTO</th>
+            <th>EVENTO</th>
             <th>ABERTURA DO CAIXA</th>
             <th>DATA DO EVENTO</th>
-            <th>TOTAL DE ENTRADAS</th>
-            <th>TOTAL DE DESPESAS</th>
+            <th>ENTRADAS</th>
+            <th>DESPESAS</th>
+            <th>EM ABERTO</th>
             <th>TOTAL BRUTO</th>
             <th>TOTAL LÍQUIDO</th>
           </tr>
@@ -55,6 +56,7 @@ function Reports() {
               <td>{event.getFormattedCreatedAt()}</td>
               <td>{event.getFormattedIncoming()}</td>
               <td>{event.getFormattedOutgoing()}</td>
+              <td>{event.getFormattedDebits()}</td>
               <td>{event.getFormattedBalance()}</td>
               <td>{event.getFormattedLiquidFunds()}</td>
             </tr>

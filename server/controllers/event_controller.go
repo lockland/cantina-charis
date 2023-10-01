@@ -86,6 +86,7 @@ func (c *EventController) GetSummaries(f *fiber.Ctx) error {
 		open_amount,
 		incoming,
 		outgoing,
+		debits,
 		0 as balance,
 		0 as liquid_funds
 	from
@@ -110,6 +111,18 @@ func (c *EventController) GetSummaries(f *fiber.Ctx) error {
 				event_id
 		) as outgoings
 			on outgoings.event_id = events.id
+		left join (
+				select
+					sum(order_amount) as debits,
+					event_id
+				from
+					orders
+				where
+					paid_value < order_amount
+				group by
+					event_id
+			) as debits
+				on debits.event_id = events.id
 		order by created_at desc;
 	`
 
@@ -120,6 +133,7 @@ func (c *EventController) GetSummaries(f *fiber.Ctx) error {
 		OpenAmount  decimal.Decimal `json:"open_amount"`
 		Incoming    decimal.Decimal `json:"incoming"`
 		Outgoing    decimal.Decimal `json:"outgoing"`
+		Debits      decimal.Decimal `json:"debits"`
 		Balance     decimal.Decimal `json:"balance"`
 		LiquidFunds decimal.Decimal `json:"liquid_funds"`
 	}{}

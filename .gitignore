@@ -1,7 +1,7 @@
 dist/
 server/views/
 server/server
-server/cantina.db
+server/*.db
 server/cantina.log
 server/server.exe
 .~*
