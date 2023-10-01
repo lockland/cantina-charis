@@ -162,6 +162,7 @@ export function getEventsSummary(total: number = 5) {
       created_at: faker.date.recent(),
       incoming: getFloatNumber(5000),
       outgoing: outgoing(),
+      debits: "0.00",
       balance: "0.00",
       liquid_funds: "0.00" //
     }

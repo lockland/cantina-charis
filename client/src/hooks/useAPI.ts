@@ -1,7 +1,7 @@
 import Event, { EventType } from '../models/Event';
 import { OrderFormValues } from '../models/Order';
 import { OutgoingType } from '../models/Outgoing';
-import { ProductType } from '../models/Product';
+import { ProductDetails, ProductType } from '../models/Product';
 
 const fetcher = async (url: string, options: any = {}) => {
   return fetch(url, options)
@@ -82,7 +82,7 @@ export function toggleProductStatus(productId: number) {
   return fetcher(`api/products/${productId}/toggle`, { method: "PUT" })
 }
 
-export function updateProduct(values: ProductType) {
+export function updateProduct(values: ProductDetails) {
   return fetcher("api/products", {
     method: "PUT",
     headers: {

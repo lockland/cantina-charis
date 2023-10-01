@@ -1,5 +1,5 @@
 import { updateProduct } from "../../../hooks/useAPI";
-import Product, { ProductType } from "../../../models/Product";
+import Product, { ProductDetails } from "../../../models/Product";
 import ProductModal from "./ProductModal";
 
 interface EditModalProps {
@@ -9,7 +9,7 @@ interface EditModalProps {
 }
 
 function EditProductModal({ product, opened, closeModal }: EditModalProps) {
-  const handleSubmit = (values: ProductType) => {
+  const handleSubmit = (values: ProductDetails) => {
     console.log(values)
     product.name = values.product_name
     product.price = values.product_price

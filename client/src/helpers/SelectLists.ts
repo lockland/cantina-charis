@@ -1,5 +1,5 @@
 import { CustomerType, CustomerNamesOptionType } from "../models/Customer"
-import { ProductOptionType, ProductType } from "../models/Product"
+import { ProductDetails, ProductOptionType } from "../models/Product"
 import DecimalFormatter from "./Decimal"
 
 export function buildCustomerNamesList(customers: CustomerType[]): CustomerNamesOptionType[] {
@@ -14,10 +14,10 @@ export function buildCustomerNamesList(customers: CustomerType[]): CustomerNames
   return list
 }
 
-export function buildProductsList(products: ProductType[]): ProductOptionType[] {
+export function buildProductsList(products: ProductDetails[]): ProductOptionType[] {
   const list: ProductOptionType[] = []
   products.forEach(
-    (product: ProductType) =>
+    (product: ProductDetails) =>
       list.push({
         value: product.product_id.toString(),
         label: `${product.product_name} - ${DecimalFormatter.format(product.product_price)}`,

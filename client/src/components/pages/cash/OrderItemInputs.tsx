@@ -6,7 +6,7 @@ import { useSharedContext } from "../../../hooks/useSharedContext"
 import { buildCustomerNamesList, buildProductsList } from "../../../helpers/SelectLists"
 import { getCustomerNames, getEnabledProducts } from "../../../hooks/useAPI"
 import { CustomerType, CustomerNamesOptionType } from "../../../models/Customer"
-import { ProductOptionType, ProductType } from "../../../models/Product"
+import { ProductDetails, ProductOptionType } from "../../../models/Product"
 
 function OrderItemInputs() {
 
@@ -19,7 +19,7 @@ function OrderItemInputs() {
       setCustomerNames(list)
     })
 
-    getEnabledProducts().then((response: ProductType[]) => {
+    getEnabledProducts().then((response: ProductDetails[]) => {
       const list = buildProductsList(response)
       setProducts(list)
     })

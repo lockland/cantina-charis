@@ -1,6 +1,6 @@
 import DecimalFormatter from "../helpers/Decimal"
 
-interface ProductDetails {
+export interface ProductDetails {
   product_id: number,
   product_name: string,
   product_price: number,
