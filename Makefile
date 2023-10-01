@@ -10,5 +10,6 @@ run: server/main.go
 
 build-windows:
 	rm dist/views -rf
+	cp -a Start.cmd dist/
 	cd client && yarn build && cd -
 	cd server && GOOS=windows GOARCH=amd64 CGO_ENABLED=1 CXX=x86_64-w64-mingw32-g++ CC=x86_64-w64-mingw32-gcc go build -o ../dist/server.exe main.go
