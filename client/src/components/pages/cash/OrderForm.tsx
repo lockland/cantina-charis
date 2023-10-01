@@ -17,11 +17,12 @@ function OrderForm() {
   const navigate = useNavigate()
   const { eventId } = useCookiesHook()
 
-  const handleOnSubmit = async (values: OrderFormValues, event: FormEvent<HTMLFormElement>) => {
+  const handleOnSubmit = (values: OrderFormValues, event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    await createOrder(values)
-    console.info("sent values", values)
-    refreshPage()
+    createOrder(values).then(() => {
+      console.info("sent values", values)
+      refreshPage()
+    })
   }
 
 
