@@ -46,10 +46,10 @@ function Orders() {
                   </tr>
                 </thead>
                 <tbody>
-                  {order.products.map((product: ProductType) =>
-                    <tr key={product.product_id}>
-                      <td>{product.product_name}</td>
-                      <td>{product.order_details?.quantity}</td>
+                  {order.order_items.map((item: ProductType) =>
+                    <tr key={item.product.product_id}>
+                      <td>{item.product.product_name}</td>
+                      <td>{item.quantity}</td>
                     </tr>
                   )}
                 </tbody>

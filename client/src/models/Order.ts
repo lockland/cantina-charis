@@ -24,27 +24,26 @@ export interface OrderListItem {
   order_id: number,
   order_amount: any,
   customer: OrderCustomer,
-  products: ProductType[],
+  order_items: ProductType[],
 
   getFormattedAmount(): string
 }
-
 
 export default class Order implements OrderListItem {
   constructor(
     public order_id: number,
     public order_amount: any,
     public customer: OrderCustomer,
-    public products: ProductType[],
+    public order_items: ProductType[],
   ) {
     this.order_id = order_id
     this.order_amount = parseFloat(order_amount)
     this.customer = customer
-    this.products = products
+    this.order_items = order_items
   }
 
-  static buildFromData({ order_id, order_amount, customer, products }: OrderListItem): OrderListItem {
-    return new Order(order_id, order_amount, customer, products)
+  static buildFromData({ order_id, order_amount, customer, order_items }: OrderListItem): OrderListItem {
+    return new Order(order_id, order_amount, customer, order_items)
   }
 
   getFormattedAmount(): string {
