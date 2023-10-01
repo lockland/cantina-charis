@@ -6,6 +6,7 @@
 :root {
   color: var(--main-color);
   background-color: var(--primary-background-color);
+  font-size: 0.9rem;
 
   --navbar-selected-item: #162440;
   --primary-background-color: #213547;
