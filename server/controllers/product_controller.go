@@ -17,13 +17,13 @@ func NewProductController() ProductController {
 func (c *ProductController) GetProducts(f *fiber.Ctx) error {
 	products := new([]models.Product)
 
-	database.Conn.Find(&products)
+	database.Conn.Order("Name").Find(&products)
 	return f.JSON(products)
 }
 
 func (c *ProductController) GetEnabledProducts(f *fiber.Ctx) error {
 	products := new([]models.Product)
-	database.Conn.Where("enabled = ?", true).Find(&products)
+	database.Conn.Order("Name").Where("enabled = ?", true).Find(&products)
 	return f.JSON(products)
 }
 
