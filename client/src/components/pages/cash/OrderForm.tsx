@@ -25,7 +25,6 @@ function OrderForm() {
     })
   }
 
-
   const refreshPage = () => {
     navigate(0)
   }
@@ -44,9 +43,6 @@ function OrderForm() {
       products: (value: OrderItemRow[]) => (value.length > 0) ? null : 'Adicione algum produto para continuar',
     },
   });
-
-
-
 
   return (
     <Box>

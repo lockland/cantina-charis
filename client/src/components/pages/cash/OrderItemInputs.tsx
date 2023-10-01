@@ -52,6 +52,7 @@ function OrderItemInputs() {
     form.insertListItem("products", productRow)
     form.clearFieldError("products")
     setQuantity(1)
+    setProductIndex("0")
   }
 
   const handleOnChange = (value: number) => setQuantity(value)
@@ -89,7 +90,7 @@ function OrderItemInputs() {
             label="Selecione o produto"
             placeholder="Digite o nome do produto"
             size="md"
-            required
+            value={productIndex}
           />
         </Grid.Col>
         <Grid.Col md={6} lg={3}>
@@ -97,8 +98,7 @@ function OrderItemInputs() {
             min={1}
             size="md"
             label="Quantidade"
-            required
-            value={1}
+            value={quantity}
             onChange={handleOnChange}
           />
         </Grid.Col>
