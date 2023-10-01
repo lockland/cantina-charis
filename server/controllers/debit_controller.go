@@ -27,10 +27,16 @@ func (c *DebitController) GetDebits(f *fiber.Ctx) error {
 	for _, customer := range customers {
 		orders := []fiber.Map{}
 		for _, order := range customer.Orders {
+			orderDate := order.CreatedAt
+
+			if order.CreatedAt.Before(order.Event.CreatedAt) {
+				orderDate = order.Event.CreatedAt
+			}
+
 			orders = append(orders, fiber.Map{
 				"order_id":     order.ID,
 				"event_name":   order.Event.Name,
-				"event_date":   order.Event.CreatedAt,
+				"order_date":   orderDate,
 				"order_amount": order.OrderAmount,
 				"paid_value":   order.PaidValue,
 			})
