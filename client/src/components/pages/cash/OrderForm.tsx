@@ -4,7 +4,6 @@ import ProductsTable from "./ProductsTable"
 import SummaryCardList from "../../SummaryCardList"
 import OrderItemRow from "../../../models/OrderItemRow"
 import { FormProvider, useForm } from "../../../hooks/formContext"
-import { SharedContextProvider } from "../../../contexts/sharedContext"
 import { FormEvent, useState } from "react"
 import { useNavigate } from "react-router-dom"
 import { OrderFormValues } from "../../../models/Order"
@@ -47,16 +46,14 @@ function OrderForm() {
   return (
     <Box>
       <FormProvider form={form}>
-        <SharedContextProvider>
-          <form onSubmit={form.onSubmit(handleOnSubmit)} onReset={form.onReset}>
-            <OrderItemInputs />
-            <ProductsTable />
-            <SummaryCardList setButtonDisabled={setButtonDisabled} />
-            <Button type="submit" size="lg" mt="md" fullWidth disabled={buttonDisabled}>
-              Registrar Pedido
-            </Button>
-          </form>
-        </SharedContextProvider>
+        <form onSubmit={form.onSubmit(handleOnSubmit)} onReset={form.onReset}>
+          <OrderItemInputs />
+          <ProductsTable />
+          <SummaryCardList setButtonDisabled={setButtonDisabled} />
+          <Button type="submit" size="lg" mt="md" fullWidth disabled={buttonDisabled}>
+            Registrar Pedido
+          </Button>
+        </form>
       </FormProvider>
     </Box >
   )

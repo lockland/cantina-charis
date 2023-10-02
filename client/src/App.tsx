@@ -10,7 +10,28 @@ import { Container, Space } from '@mantine/core';
 
 export const COOKIE_NAME = 'app'
 
+import { useSharedContext } from "./hooks/useSharedContext"
+import { useEffect } from 'react';
+import { getOpenEvent } from './hooks/useAPI';
+import Event from './models/Event';
+import { useCookiesHook } from './hooks/useCookiesHook';
+
 function App() {
+  const { setEventData, removeAppCookie } = useCookiesHook()
+  const { homePage, setHomePage } = useSharedContext()
+
+  useEffect(() => {
+
+    getOpenEvent().then((event: Event) => {
+      if (event.event_id > 0) {
+        setEventData(event)
+        setHomePage("cashpage")
+      } else {
+        removeAppCookie()
+        setHomePage("initial")
+      }
+    })
+  }, [homePage])
 
   const maw = "80vw"
 

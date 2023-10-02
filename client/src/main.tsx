@@ -4,6 +4,7 @@ import App from './App.tsx'
 import './index.css'
 import { ButtonStylesParams, MantineProvider } from '@mantine/core'
 import { CookiesProvider } from 'react-cookie'
+import { SharedContextProvider } from './contexts/sharedContext.tsx'
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
@@ -91,9 +92,12 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
         }
       }}
     >
-      <CookiesProvider>
-        <App />
-      </CookiesProvider>
+
+      <SharedContextProvider>
+        <CookiesProvider>
+          <App />
+        </CookiesProvider>
+      </SharedContextProvider>
     </MantineProvider>
   </React.StrictMode>,
 )
