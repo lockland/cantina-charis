@@ -7,12 +7,10 @@ import { getOpenEvent } from "../../../hooks/useAPI";
 import Event from "../../../models/Event";
 
 function Home() {
-  const { isEventCreated, setEventData, removeAppCookie } = useCookiesHook()
+  const { setEventData, removeAppCookie } = useCookiesHook()
   const [opened, setOpened] = useState("")
 
   useEffect(() => {
-    if (isEventCreated) return setOpened("cashpage")
-
     getOpenEvent().then((event: Event) => {
       if (event.event_id > 0) {
         setEventData(event)
