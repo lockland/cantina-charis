@@ -11,6 +11,7 @@ export interface OrderFormValues {
 
 export interface OrdersCardType {
   order_amount: string,
+  paid_value: any,
   customer: {
     customer_name: string,
   }

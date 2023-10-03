@@ -25,8 +25,9 @@ function OrdersCardList() {
       {orders.map((order: OrdersCardType, index: number) =>
         <OrdersCard
           key={index}
-          cname={order.customer.customer_name}
-          price={order.order_amount}
+          customer_name={order.customer.customer_name}
+          order_amount={order.order_amount}
+          paid_value={order.paid_value}
         />
       )}
     </CustomSimpleGrid>
