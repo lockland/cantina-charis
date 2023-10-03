@@ -30,3 +30,9 @@ func (c *OutgoingController) CreateOutgoing(f *fiber.Ctx) error {
 		"event_id":    outgoing.EventID,
 	})
 }
+
+func (c *OutgoingController) GetOutgoings(f *fiber.Ctx) error {
+	outgoings := new([]models.Outgoing)
+	database.Conn.Find(&outgoings)
+	return f.JSON(outgoings)
+}

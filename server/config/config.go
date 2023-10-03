@@ -60,6 +60,7 @@ func setupApiRoutes(app *fiber.App) {
 
 	outgoingController := controllers.NewOutgoingController()
 	apiGroup.Post("/outgoings", outgoingController.CreateOutgoing)
+	apiGroup.Get("/outgoings", outgoingController.GetOutgoings)
 
 	customerController := controllers.NewCustomerController()
 	apiGroup.Get("/customers", customerController.GetCustomers)
