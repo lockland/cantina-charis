@@ -38,6 +38,10 @@ export function createOutgoing(values: OutgoingType) {
   })
 }
 
+export function getOutgoings() {
+  return fetcher("api/outgoings")
+}
+
 export function getCustomerNames() {
   return fetcher("api/customers")
 }

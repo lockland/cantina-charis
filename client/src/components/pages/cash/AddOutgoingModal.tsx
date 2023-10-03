@@ -1,12 +1,23 @@
-import { Box, Button, Group, Modal, NumberInput, TextInput } from "@mantine/core"
+import { Box, Button, Group, Modal, NumberInput, Select } from "@mantine/core"
 import { useForm } from "@mantine/form"
 import { useDisclosure, useMediaQuery } from "@mantine/hooks"
 import { RealIcon } from "./RealIcon"
-import { createOutgoing } from "../../../hooks/useAPI";
-import { OutgoingType } from "../../../models/Outgoing";
+import { createOutgoing, getOutgoings } from "../../../hooks/useAPI";
+import { OutgoingOptionType, OutgoingType } from "../../../models/Outgoing";
 import { useCookiesHook } from "../../../hooks/useCookiesHook";
+import { useEffect, useState } from "react";
+import { buildOutgoingDescriptionList } from "../../../helpers/SelectLists";
 
 function AddOutgoingModal() {
+  const [outgoingDescriptions, setOutgoingDescriptions] = useState<OutgoingOptionType[]>([]);
+
+  useEffect(() => {
+    getOutgoings().then((response: OutgoingType[]) => {
+      const list = buildOutgoingDescriptionList(response)
+      setOutgoingDescriptions(list)
+    })
+  }, [])
+
   const { eventId } = useCookiesHook()
 
   const isMobile = useMediaQuery("(max-width: 787px)");
@@ -37,13 +48,25 @@ function AddOutgoingModal() {
         transitionProps={{ transition: 'fade', duration: 200 }}
       >
         <form onSubmit={form.onSubmit(handleOnSubmit)} onReset={form.onReset}>
-          <TextInput
-            placeholder="Gastos mercado"
-            size="lg"
-            label="Descrição da despesa"
+          <Select
+            size="md"
+            onCreate={(query) => {
+              const item: OutgoingOptionType = { value: query, label: query };
+              setOutgoingDescriptions((current: OutgoingOptionType[]) => [...current, item]);
+              return item;
+            }}
+
+            getCreateLabel={(query) => `+ Adicionar ${query}`}
+
+            data={outgoingDescriptions}
+            creatable
+            searchable
+            label="Selecione o fornecedor"
+            placeholder="Digite o nome do fornecedor"
             required
             {...form.getInputProps("outgoing_description")}
           />
+
           <NumberInput
             size="lg"
             icon={<RealIcon />}

@@ -3,3 +3,8 @@ export interface OutgoingType {
   outgoing_description: string
   outgoing_amount: any
 }
+
+export interface OutgoingOptionType {
+  value: string,
+  label: string
+}
