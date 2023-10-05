@@ -88,6 +88,14 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
                 color: "var(--main-color)",
               }
             }),
+          },
+          Tabs: {
+            styles: () => ({
+              tab: {
+                backgroundColor: "var(--secondary-background-color)",
+                fontSize: "1.5rem"
+              }
+            }),
           }
         }
       }}

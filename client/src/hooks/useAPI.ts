@@ -107,3 +107,7 @@ export function payDebits(customerId: number) {
 export function getEventsSummary() {
   return fetcher("api/reports/summaries")
 }
+
+export function getBalance(days: number) {
+  return fetcher(`api/reports/balance/${days}`)
+}
