@@ -85,3 +85,52 @@ func (c *ReportController) GetSummaries(f *fiber.Ctx) error {
 
 	return f.JSON(result)
 }
+
+func (c *ReportController) GetBalance(f *fiber.Ctx) error {
+	rawQuery := `
+	select
+		incoming.date as date,
+		incoming,
+		outgoing
+	from (
+		select
+			date(created_at) as date,
+			sum(order_amount) as incoming
+		from
+			orders
+		group by date(created_at)
+	) as incoming
+	left join (
+		select
+			date(created_at) as date,
+			sum(amount) as outgoing
+		from
+			outgoings
+		group by
+			date(created_at)
+		) as outgoings
+			on incoming.date = outgoings.date
+	where
+		incoming.date >= ?
+	order by
+		incoming.date desc;
+
+	`
+	result := []struct {
+		Date     string          `json:"date"`
+		Incoming decimal.Decimal `json:"incoming"`
+		Outgoing decimal.Decimal `json:"outgoing"`
+	}{}
+
+	lastDays, err := f.ParamsInt("lastDays")
+
+	if err != nil {
+		lastDays = 7
+	}
+
+	currentTime := time.Now()
+	daysAgo := currentTime.Add(time.Hour * -1 * 24 * time.Duration(lastDays))
+	database.Conn.Raw(rawQuery, daysAgo.Format("2006-01-02")).Scan(&result)
+
+	return f.JSON(result)
+}
