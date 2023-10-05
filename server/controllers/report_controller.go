@@ -94,20 +94,20 @@ func (c *ReportController) GetBalance(f *fiber.Ctx) error {
 		outgoing
 	from (
 		select
-			date(created_at) as date,
+			date(created_at, "localtime") as date,
 			sum(order_amount) as incoming
 		from
 			orders
-		group by date(created_at)
+		group by date(created_at, "localtime")
 	) as incoming
 	left join (
 		select
-			date(created_at) as date,
+			date(created_at, "localtime") as date,
 			sum(amount) as outgoing
 		from
 			outgoings
 		group by
-			date(created_at)
+			date(created_at, "localtime")
 		) as outgoings
 			on incoming.date = outgoings.date
 	where
