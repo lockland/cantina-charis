@@ -5,6 +5,7 @@ import (
 	"github.com/lockland/cantina-charis/server/database"
 	"github.com/lockland/cantina-charis/server/models"
 	"github.com/shopspring/decimal"
+	"gorm.io/gorm"
 )
 
 type DebitController struct{}
@@ -17,7 +18,9 @@ func (c *DebitController) GetDebits(f *fiber.Ctx) error {
 	var customers []models.Customer
 
 	database.Conn.
-		Preload("Orders", "paid_value < order_amount").
+		Preload("Orders", func(db *gorm.DB) *gorm.DB {
+			return db.Order("created_at").Where("paid_value < order_amount")
+		}).
 		Preload("Orders.Event").
 		Where("debit_value > 0").
 		Find(&customers)
