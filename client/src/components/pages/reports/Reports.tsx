@@ -34,7 +34,7 @@ function Reports() {
       <Tabs defaultValue="first" variant="pills">
         <Tabs.List>
           <Tabs.Tab value="first">Sumário de eventos</Tabs.Tab>
-          <Tabs.Tab value="second">Entradas últimos 7 dias</Tabs.Tab>
+          <Tabs.Tab value="second">Balanço últimos 7 dias</Tabs.Tab>
         </Tabs.List>
 
         <Tabs.Panel value="first">
@@ -85,7 +85,7 @@ function Reports() {
         <Tabs.Panel value="second">
 
           <Center>
-            <Title>Entradas dos últimos 7 dias</Title>
+            <Title>Balanço dos últimos 7 dias</Title>
           </Center>
           <Table
             bg="var(--secondary-background-color)"
