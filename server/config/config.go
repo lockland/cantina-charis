@@ -45,7 +45,6 @@ func setupApiRoutes(app *fiber.App) {
 	eventController := controllers.NewEventController()
 	apiGroup.Post("/events/", eventController.CreateEvent)
 	apiGroup.Get("/events/", eventController.GetEvents)
-	apiGroup.Get("/events/summaries", eventController.GetSummaries)
 	apiGroup.Get("/events/:id", eventController.GetEvent)
 	apiGroup.Put("/events/:id/close", eventController.CloseEvent)
 	apiGroup.Get("/events/:id/orders", eventController.GetOrders)
@@ -68,6 +67,9 @@ func setupApiRoutes(app *fiber.App) {
 	debitController := controllers.NewDebitController()
 	apiGroup.Get("/debits", debitController.GetDebits)
 	apiGroup.Put("/debits/:customer_id/pay", debitController.PayDebits)
+
+	reportController := controllers.NewReportController()
+	apiGroup.Get("/reports/summaries", reportController.GetSummaries)
 }
 
 func setupStaticRoutes(app *fiber.App) {

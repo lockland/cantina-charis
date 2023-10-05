@@ -105,5 +105,5 @@ export function payDebits(customerId: number) {
 }
 
 export function getEventsSummary() {
-  return fetcher("api/events/summaries")
+  return fetcher("api/reports/summaries")
 }
