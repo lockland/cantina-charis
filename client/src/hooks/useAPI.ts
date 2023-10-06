@@ -100,8 +100,15 @@ export function getDebits() {
   return fetcher("api/debits")
 }
 
-export function payDebits(customerId: number) {
-  return fetcher(`api/debits/${customerId}/pay`, { method: "PUT" })
+export function payDebits(customerId: number, paidValue: number) {
+  return fetcher(`api/debits/${customerId}/pay`, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ paid_value: paidValue }),
+  }
+  )
 }
 
 export function getEventsSummary() {

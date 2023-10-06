@@ -15,14 +15,21 @@ function Debits() {
     })
   }, [])
 
-  const handleOnClick = (id: number) => {
-    const resp = confirm("Deseja mesmo definir esse debito como pago?")
+  const handleOnClick = async (id: number) => {
+    const resp = prompt("💰 Digite o valor que será abatido do débito")
+    const paidValue = parseFloat(resp || "0")
+    const customerDebit = debits.filter((debit) => debit.customer.id == id)
 
-    if (resp) {
-      payDebits(id)
+    if (!resp) return
+
+    const debitData: DebitType = await payDebits(id, paidValue)
+    if (paidValue < customerDebit[0].total) {
+      setDebits(debits.map(debit => (debit.customer.id != id) ? debit : Debit.buildFromData(debitData)))
+    } else {
       setDebits(debits.filter((debit) => debit.customer.id != id))
-      console.log(`all debits paid for customer_id: ${id}`)
     }
+
+    console.log(`paid value ${paidValue} in debits for customer_id: ${id}`)
   }
 
   const items = debits.map((debit: Debit, index: number) => {
