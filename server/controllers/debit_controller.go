@@ -22,7 +22,7 @@ func (c *DebitController) GetDebits(f *fiber.Ctx) error {
 			return db.Order("created_at").Where("paid_value <> order_amount")
 		}).
 		Preload("Orders.Event").
-		Where("debit_value > 0").
+		Where("debit_value <> 0").
 		Find(&customers)
 
 	response := []fiber.Map{}
