@@ -19,7 +19,7 @@ func (c *DebitController) GetDebits(f *fiber.Ctx) error {
 
 	database.Conn.
 		Preload("Orders", func(db *gorm.DB) *gorm.DB {
-			return db.Order("created_at").Where("paid_value < order_amount")
+			return db.Order("created_at").Where("paid_value <> order_amount")
 		}).
 		Preload("Orders.Event").
 		Where("debit_value > 0").
@@ -78,7 +78,7 @@ func (c *DebitController) PayDebits(f *fiber.Ctx) error {
 
 	transaction := database.Conn.Begin()
 	transaction.
-		Preload("Orders", "paid_value < order_amount").
+		Preload("Orders", "paid_value <> order_amount").
 		Preload("Orders.Event").
 		Find(&customer)
 

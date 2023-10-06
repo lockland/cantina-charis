@@ -16,7 +16,7 @@ function Debits() {
   }, [])
 
   const handleOnClick = async (id: number) => {
-    const resp = prompt("💰 Digite o valor que será abatido do débito")
+    const resp = prompt("💰 Digite o valor que será abatido do débito 💵")
     const paidValue = parseFloat(resp || "0")
     const customerDebit = debits.filter((debit) => debit.customer.id == id)
 
