@@ -85,7 +85,7 @@ func (c *DebitController) PayDebits(f *fiber.Ctx) error {
 	zero := decimal.NewFromInt(0)
 
 	if customer.DebitValue.Sub(payload.CustomerPaidValue).LessThanOrEqual(zero) {
-		customer.DebitValue = decimal.NewFromInt(0)
+		customer.DebitValue = zero
 	} else {
 		customer.DebitValue = customer.DebitValue.Sub(payload.CustomerPaidValue)
 	}
@@ -96,6 +96,7 @@ func (c *DebitController) PayDebits(f *fiber.Ctx) error {
 			payload.CustomerPaidValue = payload.CustomerPaidValue.Sub(order.OrderAmount)
 		} else {
 			customer.Orders[index].PaidValue = payload.CustomerPaidValue
+			payload.CustomerPaidValue = zero
 		}
 	}
 
