@@ -153,7 +153,9 @@ func (c *ReportController) GetPayments(f *fiber.Ctx) error {
 		join customers c on c.id = op.customer_id
 	where
 		o.paid_value = o.order_amount
-		and c.id = ?;
+		and c.id = ?
+	order by
+		o.updated_at desc
 
 	`
 
