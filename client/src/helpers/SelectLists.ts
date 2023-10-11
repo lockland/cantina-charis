@@ -15,6 +15,18 @@ export function buildCustomerNamesList(customers: CustomerType[]): CustomerNames
   return list
 }
 
+export function buildReportCustomerNamesList(customers: CustomerType[]): CustomerNamesOptionType[] {
+  const list: CustomerNamesOptionType[] = []
+  customers.forEach(
+    (customer: CustomerType) =>
+      list.push({
+        value: customer.customer_id.toString(),
+        label: customer.customer_name
+      })
+  )
+  return list
+}
+
 export function buildProductsList(products: ProductDetails[]): ProductOptionType[] {
   const list: ProductOptionType[] = []
   products.forEach(

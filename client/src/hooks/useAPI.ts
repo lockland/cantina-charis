@@ -118,3 +118,7 @@ export function getEventsSummary() {
 export function getBalance(days: number) {
   return fetcher(`api/reports/balance/${days}`)
 }
+
+export function getCustomerPayments(customerId: string) {
+  return fetcher(`api/reports/payments/${customerId}`)
+}

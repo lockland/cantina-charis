@@ -1,15 +1,20 @@
-import { Box, Center, Flex, Table, Title } from "@mantine/core";
-import { getBalance, getEventsSummary } from "../../../hooks/useAPI";
+import { Box, Center, Flex, Select, Space, Table, Title } from "@mantine/core";
+import { getBalance, getCustomerNames, getCustomerPayments, getEventsSummary } from "../../../hooks/useAPI";
 import ReportEntry from "../../../models/ReportEntry";
 import { useEffect, useState } from "react";
 import ReportEntries from "../../../models/ReportsEntries";
 import { Tabs } from '@mantine/core';
 import DailyBalanceEntry from "../../../models/DailyBalance";
+import { CustomerNamesOptionType, CustomerType } from "../../../models/Customer";
+import { buildReportCustomerNamesList } from "../../../helpers/SelectLists";
+import CustomerPayment from "../../../models/CustomerPayment";
 
 function Reports() {
 
   const [summaryRows, setSummaryRows] = useState(new ReportEntries)
   const [balance, setBalance] = useState<DailyBalanceEntry[]>([])
+  const [customerNames, setCustomerNames] = useState<CustomerNamesOptionType[]>([]);
+  const [paymentsByCustomer, setPaymentsByCustomer] = useState<CustomerPayment[]>([])
 
   useEffect(() => {
     getEventsSummary().then((response: ReportEntries) => {
@@ -27,7 +32,24 @@ function Reports() {
       })
       setBalance(list)
     })
+
+    getCustomerNames().then((response: CustomerType[]) => {
+      const list = buildReportCustomerNamesList(response)
+      setCustomerNames(list)
+    })
+
   }, [])
+
+  const handleOnChange = (customerId: string) => {
+    getCustomerPayments(customerId)
+      .then((response: CustomerPayment[]) => {
+        const list: CustomerPayment[] = []
+        response.map((entryData: CustomerPayment) => {
+          return list.push(CustomerPayment.buildFromData(entryData))
+        })
+        setPaymentsByCustomer(list)
+      })
+  }
 
   return (
     <Box p={7}>
@@ -35,6 +57,7 @@ function Reports() {
         <Tabs.List>
           <Tabs.Tab value="first">Sumário de eventos</Tabs.Tab>
           <Tabs.Tab value="second">Balanço últimos 7 dias</Tabs.Tab>
+          <Tabs.Tab value="third">Pedidos pagos por cliente</Tabs.Tab>
         </Tabs.List>
 
         <Tabs.Panel value="first">
@@ -111,9 +134,52 @@ function Reports() {
             </tbody>
           </Table>
         </Tabs.Panel>
+        <Tabs.Panel value="third">
+          <Center>
+            <Title>Pagamentos por cliente</Title>
+          </Center>
+          <Select
+            size="md"
+            data={customerNames}
+            creatable
+            searchable
+            label="Selecione o cliente"
+            placeholder="Digite o nome do cliente"
+            withAsterisk
+            onChange={handleOnChange}
+          />
+          <Space mt="xl" />
+          <Table
+            bg="var(--secondary-background-color)"
+            striped
+            withColumnBorders
+            withBorder
+          >
+            <thead>
+              <tr>
+                <th>PEDIDO(S)</th>
+                <th>PAGO EM</th>
+                <th>PRODUTO</th>
+                <th>PREÇO</th>
+                <th>QUANTIDADE</th>
+                <th>SUBTOTAL</th>
+              </tr>
+            </thead>
+            <tbody>
+              {paymentsByCustomer.map((payment: CustomerPayment, index: number) => (
+                <tr key={index}>
+                  <td>{payment.getFormattedOrderDate()}</td>
+                  <td>{payment.getFormattedPaymentDate()}</td>
+                  <td>{payment.product_name}</td>
+                  <td>{payment.getFormattedPrice()}</td>
+                  <td>{payment.product_quantity}</td>
+                  <td>{payment.getFormattedSubTotal()}</td>
+                </tr>
+              ))}
+            </tbody>
+          </Table>
+        </Tabs.Panel>
       </Tabs>
-
-
     </Box>
   );
 }

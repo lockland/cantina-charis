@@ -71,6 +71,7 @@ func setupApiRoutes(app *fiber.App) {
 	reportController := controllers.NewReportController()
 	apiGroup.Get("/reports/summaries", reportController.GetSummaries)
 	apiGroup.Get("/reports/balance/:lastDays", reportController.GetBalance)
+	apiGroup.Get("/reports/payments/:customer_id", reportController.GetPayments)
 }
 
 func setupStaticRoutes(app *fiber.App) {

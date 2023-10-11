@@ -134,3 +134,44 @@ func (c *ReportController) GetBalance(f *fiber.Ctx) error {
 
 	return f.JSON(result)
 }
+
+func (c *ReportController) GetPayments(f *fiber.Ctx) error {
+	rawQuery := `
+	select
+		c.name as customer_name,
+		date(o.created_at) as order_date,
+		date(o.updated_at) as payment_date,
+		p.name as product_name,
+		p.price as product_price,
+		op.product_quantity as product_quantity
+	from
+		orders o
+		join order_products op
+			on o.id = op.order_id
+		join products p
+			on p.id = op.product_id
+		join customers c on c.id = op.customer_id
+	where
+		o.paid_value = o.order_amount
+		and c.id = ?;
+
+	`
+
+	id, err := f.ParamsInt("customer_id")
+	if err != nil {
+		return f.Status(401).SendString("Invalid id")
+	}
+
+	result := []struct {
+		OrderDate       string          `json:"order_date"`
+		PaymentDate     string          `json:"payment_date"`
+		ProductName     string          `json:"product_name"`
+		ProductPrice    decimal.Decimal `json:"product_price"`
+		ProductQuantity int             `json:"product_quantity"`
+	}{}
+
+	database.Conn.Raw(rawQuery, id).Scan(&result)
+
+	return f.JSON(result)
+
+}
