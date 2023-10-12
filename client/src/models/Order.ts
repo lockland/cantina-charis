@@ -4,6 +4,7 @@ import { ProductType } from "./Product";
 export interface OrderFormValues {
   event_id: number,
   customer_name: string,
+  observation: string,
   customer_paid_value: any,
   order_amount: any,
   products: OrderItemRow[],
@@ -25,6 +26,7 @@ export interface OrderListItem {
   order_id: number,
   order_amount: any,
   customer: OrderCustomer,
+  observation: string,
   order_items: ProductType[],
 
   getFormattedAmount(): string
@@ -34,6 +36,7 @@ export default class Order implements OrderListItem {
   constructor(
     public order_id: number,
     public order_amount: any,
+    public observation: string,
     public customer: OrderCustomer,
     public order_items: ProductType[],
   ) {
@@ -43,8 +46,14 @@ export default class Order implements OrderListItem {
     this.order_items = order_items
   }
 
-  static buildFromData({ order_id, order_amount, customer, order_items }: OrderListItem): OrderListItem {
-    return new Order(order_id, order_amount, customer, order_items)
+  static buildFromData(data: OrderListItem): OrderListItem {
+    return new Order(
+      data.order_id,
+      data.order_amount,
+      data.observation,
+      data.customer,
+      data.order_items
+    )
   }
 
   getFormattedAmount(): string {

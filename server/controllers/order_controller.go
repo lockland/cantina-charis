@@ -25,6 +25,7 @@ func (c *OrderController) CreateOrder(f *fiber.Ctx) error {
 		EventID           int             `json:"event_id"`
 		CustomerName      string          `json:"customer_name"`
 		CustomerPaidValue decimal.Decimal `json:"customer_paid_value"`
+		Observation       string          `json:"observation"`
 		OrderAmount       decimal.Decimal `json:"order_amount"`
 		Products          []struct {
 			ID       int             `json:"id"`
@@ -48,6 +49,7 @@ func (c *OrderController) CreateOrder(f *fiber.Ctx) error {
 		EventID:     payload.EventID,
 		PaidValue:   paidValue,
 		OrderAmount: payload.OrderAmount,
+		Observation: payload.Observation,
 	}
 
 	debitValue := payload.OrderAmount.Sub(payload.CustomerPaidValue)
@@ -104,7 +106,7 @@ func (c *OrderController) CreateOrder(f *fiber.Ctx) error {
 	transaction.Save(&orderItems)
 
 	transaction.
-		Preload("Products.OrderProduct").
+		Preload("OrderProduct.Product").
 		Preload(clause.Associations).Find(&order)
 	transaction.Commit()
 	return f.JSON(order)

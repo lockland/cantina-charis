@@ -17,9 +17,10 @@ function OrderForm() {
   const { eventId } = useCookiesHook()
 
   const handleOnSubmit = (values: OrderFormValues, event: FormEvent<HTMLFormElement>) => {
-    const resp = confirm("Confirma registro do pedido?")
-    if (!resp) return
+    const resp = prompt("Alguma observação para o pedido?")
+    if (null === resp) return
 
+    values.observation = resp
     event.preventDefault();
     createOrder(values).then(() => {
       console.info("sent values", values)
@@ -35,6 +36,7 @@ function OrderForm() {
     initialValues: {
       event_id: eventId,
       customer_name: "",
+      observation: "",
       customer_paid_value: "0",
       order_amount: "0",
       products: []

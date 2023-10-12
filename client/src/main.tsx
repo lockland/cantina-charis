@@ -96,7 +96,14 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
                 fontSize: "1.5rem"
               }
             }),
-          }
+          },
+          Textarea: {
+            styles: () => ({
+              label: {
+                color: "var(--main-color)",
+              },
+            }),
+          },
         }
       }}
     >

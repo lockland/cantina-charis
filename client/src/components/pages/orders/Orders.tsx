@@ -1,4 +1,4 @@
-import { Box, Button, Group, Space, Table, Text, Title } from "@mantine/core";
+import { Box, Button, Group, Space, Table, Text, Textarea, Title } from "@mantine/core";
 import { deliveryOrder, getOrders } from "../../../hooks/useAPI";
 import CustomSimpleGrid from "../../CustomSimpleGrid";
 import { useEffect, useState } from "react";
@@ -37,6 +37,20 @@ function Orders() {
               <Group w="100%" position="right" mb="md">
                 <Button onClick={() => handleOnClick(order.order_id)} fullWidth>Pronto</Button>
               </Group>
+
+              {order.observation && (
+                <Box>
+                  <Textarea
+                    size="md"
+                    label="Observações"
+                    placeholder="Observações"
+                    defaultValue={order.observation}
+                    readOnly
+                  />
+
+                  <Space mt="xl" />
+                </Box>
+              )}
 
               <Table striped withColumnBorders bg="var(--secondary-background-color)">
                 <thead>
