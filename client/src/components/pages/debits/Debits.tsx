@@ -17,10 +17,10 @@ function Debits() {
 
   const handleOnClick = async (id: number) => {
     const resp = prompt("💰 Digite o valor que será abatido do débito 💵")
-    const paidValue = parseFloat(resp || "0")
-    const customerDebit = debits.filter((debit) => debit.customer.id == id)
-
     if (!resp) return
+
+    const paidValue = parseFloat(resp.replace(",", "."))
+    const customerDebit = debits.filter((debit) => debit.customer.id == id)
 
     const debitData: DebitType = await payDebits(id, paidValue)
     if (paidValue < customerDebit[0].total) {
