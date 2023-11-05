@@ -83,17 +83,21 @@ func (c *DebitController) PayDebits(f *fiber.Ctx) error {
 		Find(&customer)
 
 	zero := decimal.NewFromInt(0)
-
-	if customer.DebitValue.Sub(payload.CustomerPaidValue).LessThanOrEqual(zero) {
+	if customer.DebitValue.Sub(payload.CustomerPaidValue).LessThan(zero) {
 		customer.DebitValue = zero
 	} else {
 		customer.DebitValue = customer.DebitValue.Sub(payload.CustomerPaidValue)
 	}
 
 	for index, order := range customer.Orders {
-		if order.OrderAmount.LessThanOrEqual(payload.CustomerPaidValue) {
+		residual_value := order.OrderAmount.Sub(order.PaidValue)
+
+		if order.OrderAmount.LessThanOrEqual(payload.CustomerPaidValue) && order.PaidValue.Equal(zero) {
 			customer.Orders[index].PaidValue = order.OrderAmount
 			payload.CustomerPaidValue = payload.CustomerPaidValue.Sub(order.OrderAmount)
+		} else if residual_value.LessThanOrEqual(payload.CustomerPaidValue) && order.PaidValue.GreaterThan(zero) {
+			customer.Orders[index].PaidValue = order.OrderAmount
+			payload.CustomerPaidValue = payload.CustomerPaidValue.Sub(residual_value)
 		} else {
 			customer.Orders[index].PaidValue = payload.CustomerPaidValue
 			payload.CustomerPaidValue = zero
