@@ -1,33 +1,38 @@
 import { getOrders } from "../hooks/useAPI"
+import { useOrdersSocket } from "../hooks/useOrdersSocket"
 import OrdersCard from "./OrdersCard"
 import CustomSimpleGrid from "./CustomSimpleGrid"
-import { useEffect, useState } from "react"
+import { useCallback, useEffect, useState } from "react"
 import { useCookiesHook } from "../hooks/useCookiesHook"
 import { OrdersCardType } from "../models/Order"
 
-
-
 function OrdersCardList() {
-
   const [orders, setOrders] = useState<OrdersCardType[]>([])
   const { eventId } = useCookiesHook()
 
-  useEffect(() => {
+  const fetchOrders = useCallback(() => {
     getOrders(eventId).then((response: OrdersCardType[]) => {
       setOrders(response)
     })
+  }, [eventId])
 
-  }, [])
+  useEffect(() => {
+    fetchOrders()
+  }, [fetchOrders])
+
+  useOrdersSocket(eventId, fetchOrders)
 
 
   return (
     <CustomSimpleGrid m={10} cols={3}>
       {orders.map((order: OrdersCardType, index: number) =>
         <OrdersCard
-          key={index}
-          customer_name={order.customer.customer_name}
-          order_amount={order.order_amount}
-          paid_value={order.paid_value}
+          key={order.order_id ?? index}
+          customerId={order.customer_id ?? order.customer?.customer_id ?? 0}
+          customer_name={order.customer?.customer_name ?? ""}
+          order_amount={String(order.order_amount ?? 0)}
+          paid_value={String(order.paid_value ?? 0)}
+          onPaid={fetchOrders}
         />
       )}
     </CustomSimpleGrid>

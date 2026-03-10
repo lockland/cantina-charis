@@ -11,9 +11,12 @@ export interface OrderFormValues {
 }
 
 export interface OrdersCardType {
+  order_id?: number,
+  customer_id: number,
   order_amount: string,
   paid_value: any,
   customer: {
+    customer_id: number,
     customer_name: string,
   }
 }
