@@ -4,6 +4,7 @@ import { useEffect, useState } from "react"
 import { useFormContext } from "../../../hooks/formContext"
 import { useSharedContext } from "../../../hooks/useSharedContext"
 import { buildCustomerNamesList, buildProductsList } from "../../../helpers/SelectLists"
+import { normalizeForSearch } from "../../../helpers/normalizeText"
 import { getCustomerNames, getEnabledProducts } from "../../../hooks/useAPI"
 import { CustomerType, CustomerNamesOptionType } from "../../../models/Customer"
 import { ProductDetails, ProductOptionType } from "../../../models/Product"
@@ -87,6 +88,12 @@ function OrderItemInputs() {
             onChange={(value: string) => setProductIndex(value)}
             data={products}
             searchable
+            filter={(value, item) => {
+              const normalizedSearch = normalizeForSearch(value)
+              if (!normalizedSearch) return true
+              const label = item?.label != null ? String(item.label) : ""
+              return normalizeForSearch(label).includes(normalizedSearch)
+            }}
             label="Selecione o produto"
             placeholder="Digite o nome do produto"
             size="md"
