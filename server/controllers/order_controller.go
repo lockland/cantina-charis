@@ -1,9 +1,12 @@
 package controllers
 
 import (
+	"encoding/json"
+
 	"github.com/gofiber/fiber/v2"
 	"github.com/lockland/cantina-charis/server/database"
 	"github.com/lockland/cantina-charis/server/models"
+	"github.com/lockland/cantina-charis/server/ws"
 	"github.com/shopspring/decimal"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
@@ -109,6 +112,12 @@ func (c *OrderController) CreateOrder(f *fiber.Ctx) error {
 		Preload("OrderProduct.Product").
 		Preload(clause.Associations).Find(&order)
 	transaction.Commit()
+
+	if ws.DefaultHub != nil {
+		msg, _ := json.Marshal(map[string]interface{}{"type": "new_order", "event_id": payload.EventID})
+		ws.DefaultHub.Broadcast(msg)
+	}
+
 	return f.JSON(order)
 
 }
