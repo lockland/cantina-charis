@@ -1,4 +1,5 @@
 dist/
+client/.env
 server/views/
 server/server
 server/*.db
