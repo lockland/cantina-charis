@@ -8,15 +8,21 @@ export function useCookiesHook() {
 
   const [cookies, setCookie, removeCookie] = useCookies([cookieName]);
 
-  const isEventCreated = (function (cookieName: string): boolean {
-    const cookieValues = cookies[cookieName]
-    return cookieValues?.event_id > 0
+  const parsedCookie = (function (cookieName: string): EventType | null {
+    const raw = cookies[cookieName]
+    if (raw == null) return null
+    if (typeof raw === "string") {
+      try {
+        return JSON.parse(raw) as EventType
+      } catch {
+        return null
+      }
+    }
+    return raw as EventType
   }(cookieName))
 
-  const eventId = (function (cookieName: string): number {
-    const cookieValues = cookies[cookieName]
-    return cookieValues?.event_id
-  }(cookieName))
+  const isEventCreated = (parsedCookie?.event_id ?? 0) > 0
+  const eventId = parsedCookie?.event_id ?? 0
 
   const setCookieWithExpire = (value: string, expireTimestamp: number): void => {
     setCookie(cookieName, value, { expires: new Date(expireTimestamp) })
