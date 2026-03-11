@@ -1,5 +1,4 @@
 import { getOrders } from "../hooks/useAPI"
-import { useOrdersSocket } from "../hooks/useOrdersSocket"
 import OrdersCard from "./OrdersCard"
 import CustomSimpleGrid from "./CustomSimpleGrid"
 import { useCallback, useEffect, useState } from "react"
@@ -19,8 +18,6 @@ function OrdersCardList() {
   useEffect(() => {
     fetchOrders()
   }, [fetchOrders])
-
-  useOrdersSocket(eventId, fetchOrders)
 
 
   return (

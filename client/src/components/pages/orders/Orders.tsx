@@ -1,22 +1,27 @@
 import { Box, Button, Group, Space, Table, Text, Textarea, Title } from "@mantine/core";
 import { deliveryOrder, getOrders } from "../../../hooks/useAPI";
+import { useOrdersSocket } from "../../../hooks/useOrdersSocket";
 import CustomSimpleGrid from "../../CustomSimpleGrid";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import Order, { OrderListItem } from "../../../models/Order";
 import { useCookiesHook } from "../../../hooks/useCookiesHook";
 import { ProductType } from "../../../models/Product";
 
 function Orders() {
-
   const [orders, setOrders] = useState<OrderListItem[]>([])
   const { eventId } = useCookiesHook()
 
-  useEffect(() => {
+  const fetchOrders = useCallback(() => {
     getOrders(eventId).then((response: OrderListItem[]) => {
       setOrders(response.map((orderData) => Order.buildFromData(orderData)))
     })
-    //@TODO implements a websocket to deal with page refresh
-  }, [])
+  }, [eventId])
+
+  useEffect(() => {
+    fetchOrders()
+  }, [fetchOrders])
+
+  useOrdersSocket(eventId, fetchOrders)
 
   const handleOnClick = (id: number) => {
     deliveryOrder(id).then(() => {
