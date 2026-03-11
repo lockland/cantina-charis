@@ -28,7 +28,7 @@ function OrdersCardList() {
       {orders.map((order: OrdersCardType, index: number) =>
         <OrdersCard
           key={order.order_id ?? index}
-          customerId={order.customer_id ?? order.customer?.customer_id ?? 0}
+          orderId={order.order_id ?? 0}
           customer_name={order.customer?.customer_name ?? ""}
           order_amount={String(order.order_amount ?? 0)}
           paid_value={String(order.paid_value ?? 0)}

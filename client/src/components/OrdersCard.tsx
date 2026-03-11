@@ -2,17 +2,17 @@ import { Box, Button, Divider, Text } from "@mantine/core"
 import { CreditCardIcon, CalendarIcon } from "@primer/octicons-react"
 import { useState } from "react"
 import DecimalFormatter from "../helpers/Decimal"
-import { payDebits } from "../hooks/useAPI"
+import { payOrder } from "../hooks/useAPI"
 
 interface OrdersCardProps {
-  customerId: number
+  orderId: number
   customer_name: string
   order_amount: string
   paid_value: string
   onPaid?: () => void
 }
 
-function OrdersCard({ customerId, customer_name, order_amount, paid_value, onPaid }: OrdersCardProps) {
+function OrdersCard({ orderId, customer_name, order_amount, paid_value, onPaid }: OrdersCardProps) {
   const [loading, setLoading] = useState(false)
   const amount = parseFloat(String(order_amount ?? 0)) || 0
   const paid = parseFloat(String(paid_value ?? 0)) || 0
@@ -20,7 +20,7 @@ function OrdersCard({ customerId, customer_name, order_amount, paid_value, onPai
 
   const handlePay = () => {
     setLoading(true)
-    payDebits(customerId, amount)
+    payOrder(orderId)
       .then(() => onPaid?.())
       .finally(() => setLoading(false))
   }

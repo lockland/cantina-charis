@@ -130,6 +130,42 @@ func (c *OrderController) GetOrders(f *fiber.Ctx) error {
 	return f.JSON(orders)
 }
 
+func (c *OrderController) PayOrder(f *fiber.Ctx) error {
+	id, err := f.ParamsInt("id")
+	if err != nil {
+		return f.Status(fiber.StatusBadRequest).SendString("Invalid order id")
+	}
+
+	order := &models.Order{ID: id}
+	if err := database.Conn.Preload("Customer").First(order).Error; err != nil {
+		return f.Status(fiber.StatusNotFound).SendString("Order not found")
+	}
+
+	zero := decimal.NewFromInt(0)
+	if order.PaidValue.GreaterThanOrEqual(order.OrderAmount) {
+		return f.Status(fiber.StatusBadRequest).SendString("Order already paid")
+	}
+
+	residual := order.OrderAmount.Sub(order.PaidValue)
+	order.PaidValue = order.OrderAmount
+
+	customer := &order.Customer
+	customer.DebitValue = customer.DebitValue.Sub(residual)
+	if customer.DebitValue.LessThan(zero) {
+		customer.DebitValue = zero
+	}
+
+	database.Conn.Save(order)
+	database.Conn.Model(customer).Update("DebitValue", customer.DebitValue)
+
+	if ws.DefaultHub != nil {
+		msg, _ := json.Marshal(map[string]interface{}{"type": "order_paid", "event_id": order.EventID})
+		ws.DefaultHub.Broadcast(msg)
+	}
+
+	return f.Status(fiber.StatusOK).JSON(fiber.Map{"order_id": id, "paid_value": order.PaidValue})
+}
+
 func (c *OrderController) DeliveryOrder(f *fiber.Ctx) error {
 	id, err := f.ParamsInt("id")
 	order := &models.Order{

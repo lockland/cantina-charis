@@ -1,14 +1,11 @@
 package config
 
 import (
-	"io"
-	"os"
 	"time"
 
 	"github.com/gofiber/contrib/websocket"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/cors"
-	"github.com/gofiber/fiber/v2/middleware/logger"
 	"github.com/lockland/cantina-charis/server/controllers"
 	"github.com/lockland/cantina-charis/server/database"
 	"github.com/lockland/cantina-charis/server/ws"
@@ -17,26 +14,33 @@ import (
 func Configure(app *fiber.App) {
 	ws.DefaultHub = ws.NewHub()
 	useCors(app)
-	useFileLogger(app)
-	setupApiRoutes(app)
 	setupWebSocket(app)
+	setupApiRoutes(app)
 	setupStaticRoutes(app)
 	setupHealthCheckRoute(app)
 }
 
-func useFileLogger(app *fiber.App) {
-	file, _ := os.OpenFile("./cantina.log", os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
-
-	defer file.Close()
-	iw := io.MultiWriter(os.Stdout, file)
-
-	app.Use(logger.New(logger.Config{
-		Output: iw,
-	}))
-}
-
 func useCors(app *fiber.App) {
 	app.Use(cors.New(cors.ConfigDefault))
+}
+
+func setupWebSocket(app *fiber.App) {
+	app.Use("/api/ws", func(c *fiber.Ctx) error {
+		if websocket.IsWebSocketUpgrade(c) {
+			c.Locals("allowed", true)
+			return c.Next()
+		}
+		return fiber.ErrUpgradeRequired
+	})
+	app.Get("/api/ws", websocket.New(func(c *websocket.Conn) {
+		ws.DefaultHub.Register(c)
+		defer ws.DefaultHub.Unregister(c)
+		for {
+			if _, _, err := c.ReadMessage(); err != nil {
+				break
+			}
+		}
+	}))
 }
 
 func setupApiRoutes(app *fiber.App) {
@@ -44,6 +48,7 @@ func setupApiRoutes(app *fiber.App) {
 	orderController := controllers.NewOrderController()
 	apiGroup.Post("/orders", orderController.CreateOrder)
 	apiGroup.Get("/orders/", orderController.GetOrders)
+	apiGroup.Put("/orders/:id/pay", orderController.PayOrder)
 	apiGroup.Put("/orders/:id/done", orderController.DeliveryOrder)
 
 	eventController := controllers.NewEventController()
@@ -76,25 +81,6 @@ func setupApiRoutes(app *fiber.App) {
 	apiGroup.Get("/reports/summaries", reportController.GetSummaries)
 	apiGroup.Get("/reports/balance/:lastDays", reportController.GetBalance)
 	apiGroup.Get("/reports/payments/:customer_id", reportController.GetPayments)
-}
-
-func setupWebSocket(app *fiber.App) {
-	app.Use("/ws", func(c *fiber.Ctx) error {
-		if websocket.IsWebSocketUpgrade(c) {
-			c.Locals("allowed", true)
-			return c.Next()
-		}
-		return fiber.ErrUpgradeRequired
-	})
-	app.Get("/ws", websocket.New(func(c *websocket.Conn) {
-		ws.DefaultHub.Register(c)
-		defer ws.DefaultHub.Unregister(c)
-		for {
-			if _, _, err := c.ReadMessage(); err != nil {
-				break
-			}
-		}
-	}))
 }
 
 func setupStaticRoutes(app *fiber.App) {

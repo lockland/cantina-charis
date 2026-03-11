@@ -107,8 +107,13 @@ export function payDebits(customerId: number, paidValue: number) {
       "Content-Type": "application/json",
     },
     body: JSON.stringify({ paid_value: paidValue }),
-  }
-  )
+  })
+}
+
+export function payOrder(orderId: number) {
+  return fetcher(`api/orders/${orderId}/pay`, {
+    method: "PUT",
+  })
 }
 
 export function getEventsSummary() {
