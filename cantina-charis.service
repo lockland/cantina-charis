@@ -1,0 +1,19 @@
+# Copie esse arquivo para o path do systemd do usuário
+# após a cópia execute os seguintes comandos:
+# $ systemctl --user daemon-reload
+# $ systemctl --user restart cantina-charis
+# $ systemctl --user enable cantina-charis
+
+[Unit]
+Description=Software de gestão de vendas
+After=network.target
+
+[Service]
+Type=simple
+WorkingDirectory=/home/thaise/cantina-charis
+ExecStart=/home/thaise/cantina-charis/cantina-charis
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=default.target

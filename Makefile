@@ -3,7 +3,6 @@
 build:
 	rm dist/views -rf
 	mkdir -p dist
-	cp -a Start.sh dist/
 	cd client && yarn build && cd -
 	cd server && go build -o ../dist/cantina-charis main.go
 
