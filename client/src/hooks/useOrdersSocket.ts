@@ -2,26 +2,37 @@ import { useEffect, useRef } from "react"
 
 type NewOrderMessage = { type: string; event_id: number }
 
+const WS_OPEN = 1
+
 /**
  * Conecta ao WebSocket e chama onNewOrder quando um novo pedido for cadastrado
- * para o evento atual (eventId).
+ * ou uma ordem for paga no evento atual (eventId).
  */
 export function useOrdersSocket(eventId: number, onNewOrder: () => void) {
   const onNewOrderRef = useRef(onNewOrder)
   onNewOrderRef.current = onNewOrder
+  const cancelledRef = useRef(false)
 
   useEffect(() => {
     if (!eventId) return
 
+    cancelledRef.current = false
     const protocol = window.location.protocol === "https:" ? "wss:" : "ws:"
-    const wsUrl = `${protocol}//${window.location.host}/ws`
+    const wsUrl = `${protocol}//${window.location.host}/api/ws`
     const socket = new WebSocket(wsUrl)
 
+    socket.onopen = () => {
+      if (cancelledRef.current) {
+        socket.close()
+      }
+    }
+
     socket.onmessage = (event) => {
+      if (cancelledRef.current) return
       try {
         const data: NewOrderMessage = JSON.parse(event.data)
         const sameEvent = Number(data.event_id) === Number(eventId)
-        if (data.type === "new_order" && sameEvent) {
+        if (sameEvent && (data.type === "new_order" || data.type === "order_paid")) {
           onNewOrderRef.current()
         }
       } catch {
@@ -30,7 +41,12 @@ export function useOrdersSocket(eventId: number, onNewOrder: () => void) {
     }
 
     return () => {
-      socket.close()
+      cancelledRef.current = true
+      if (socket.readyState === WS_OPEN) {
+        socket.close()
+      }
+      // Se ainda CONNECTING, não chama close() aqui (evita erro no console).
+      // Ao abrir, onopen verá cancelledRef e fechará o socket.
     }
   }, [eventId])
 }
