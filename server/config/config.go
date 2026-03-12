@@ -8,6 +8,7 @@ import (
 	"github.com/gofiber/fiber/v2/middleware/cors"
 	"github.com/lockland/cantina-charis/server/controllers"
 	"github.com/lockland/cantina-charis/server/database"
+	"github.com/lockland/cantina-charis/server/middleware"
 	"github.com/lockland/cantina-charis/server/ws"
 )
 
@@ -16,7 +17,7 @@ func Configure(app *fiber.App) {
 	useCors(app)
 	setupWebSocket(app)
 	setupApiRoutes(app)
-	setupStaticRoutes(app)
+	setupStaticRoutesWithAuth(app)
 	setupHealthCheckRoute(app)
 }
 
@@ -25,7 +26,7 @@ func useCors(app *fiber.App) {
 }
 
 func setupWebSocket(app *fiber.App) {
-	app.Use("/api/ws", func(c *fiber.Ctx) error {
+	app.Use("/api/ws", middleware.Auth(), middleware.Authorize(), func(c *fiber.Ctx) error {
 		if websocket.IsWebSocketUpgrade(c) {
 			c.Locals("allowed", true)
 			return c.Next()
@@ -44,7 +45,14 @@ func setupWebSocket(app *fiber.App) {
 }
 
 func setupApiRoutes(app *fiber.App) {
-	apiGroup := app.Group("api")
+	apiGroup := app.Group("api", middleware.Auth(), middleware.Authorize())
+
+	apiGroup.Get("/auth/me", func(c *fiber.Ctx) error {
+		role, _ := c.Locals("role").(string)
+		username, _ := c.Locals("username").(string)
+		return c.JSON(fiber.Map{"role": role, "username": username})
+	})
+
 	orderController := controllers.NewOrderController()
 	apiGroup.Post("/orders", orderController.CreateOrder)
 	apiGroup.Get("/orders/", orderController.GetOrders)
@@ -84,7 +92,7 @@ func setupApiRoutes(app *fiber.App) {
 	apiGroup.Get("/reports/payments/:customer_id", reportController.GetPayments)
 }
 
-func setupStaticRoutes(app *fiber.App) {
+func setupStaticRoutesWithAuth(app *fiber.App) {
 	reactRoutes := []string{
 		"/",
 		"/orders",
@@ -93,6 +101,9 @@ func setupStaticRoutes(app *fiber.App) {
 		"/reports",
 	}
 
+	for _, route := range reactRoutes {
+		app.Use(route, middleware.Auth(), middleware.Authorize())
+	}
 	for _, route := range reactRoutes {
 		app.Static(route, "./views", fiber.Static{
 			Compress:      true,
