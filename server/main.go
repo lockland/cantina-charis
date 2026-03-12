@@ -1,6 +1,7 @@
 package main
 
 import (
+	"flag"
 	"log"
 
 	"github.com/gofiber/fiber/v2"
@@ -9,7 +10,10 @@ import (
 )
 
 func main() {
-	database.Connect("./cantina.db")
+	dbPath := flag.String("db", "./cantina.db", "caminho do arquivo do banco SQLite")
+	flag.Parse()
+
+	database.Connect(*dbPath)
 
 	app := fiber.New()
 
