@@ -32,7 +32,7 @@ export function useOrdersSocket(eventId: number, onNewOrder: () => void) {
       try {
         const data: NewOrderMessage = JSON.parse(event.data)
         const sameEvent = Number(data.event_id) === Number(eventId)
-        if (sameEvent && (data.type === "new_order" || data.type === "order_paid")) {
+        if (sameEvent && (data.type === "new_order" || data.type === "order_paid" || data.type === "order_deleted")) {
           onNewOrderRef.current()
         }
       } catch {

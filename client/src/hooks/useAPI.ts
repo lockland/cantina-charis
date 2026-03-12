@@ -116,6 +116,12 @@ export function payOrder(orderId: number) {
   })
 }
 
+export function deleteOrder(orderId: number) {
+  return fetcher(`api/orders/${orderId}`, {
+    method: "DELETE",
+  })
+}
+
 export function getEventsSummary() {
   return fetcher("api/reports/summaries")
 }

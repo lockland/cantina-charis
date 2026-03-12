@@ -30,6 +30,7 @@ function OrdersCardList() {
           order_amount={String(order.order_amount ?? 0)}
           paid_value={String(order.paid_value ?? 0)}
           onPaid={fetchOrders}
+          onDeleted={fetchOrders}
         />
       )}
     </CustomSimpleGrid>
