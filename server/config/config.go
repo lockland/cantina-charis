@@ -49,6 +49,7 @@ func setupApiRoutes(app *fiber.App) {
 	apiGroup.Post("/orders", orderController.CreateOrder)
 	apiGroup.Get("/orders/", orderController.GetOrders)
 	apiGroup.Put("/orders/:id/pay", orderController.PayOrder)
+	apiGroup.Delete("/orders/:id", orderController.DeleteOrder)
 	apiGroup.Put("/orders/:id/done", orderController.DeliveryOrder)
 
 	eventController := controllers.NewEventController()

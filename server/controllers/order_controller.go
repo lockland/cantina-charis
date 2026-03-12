@@ -166,6 +166,44 @@ func (c *OrderController) PayOrder(f *fiber.Ctx) error {
 	return f.Status(fiber.StatusOK).JSON(fiber.Map{"order_id": id, "paid_value": order.PaidValue})
 }
 
+func (c *OrderController) DeleteOrder(f *fiber.Ctx) error {
+	id, err := f.ParamsInt("id")
+	if err != nil {
+		return f.Status(fiber.StatusBadRequest).SendString("Invalid order id")
+	}
+
+	order := &models.Order{ID: id}
+	if err := database.Conn.Preload("Customer").First(order).Error; err != nil {
+		return f.Status(fiber.StatusNotFound).SendString("Order not found")
+	}
+
+	eventID := order.EventID
+	zero := decimal.NewFromInt(0)
+	residual := order.OrderAmount.Sub(order.PaidValue)
+	if residual.LessThan(zero) {
+		residual = zero
+	}
+
+	tx := database.Conn.Begin()
+	tx.Where("order_id = ?", id).Delete(&models.OrderProduct{})
+	tx.Delete(order)
+	customer := &order.Customer
+	customer.DebitValue = customer.DebitValue.Add(residual)
+	tx.Model(customer).Update("DebitValue", customer.DebitValue)
+	tx.Commit()
+
+	if ws.DefaultHub != nil {
+		msg, _ := json.Marshal(map[string]interface{}{
+			"type":     "order_deleted",
+			"event_id": eventID,
+			"order_id": id,
+		})
+		ws.DefaultHub.Broadcast(msg)
+	}
+
+	return f.Status(fiber.StatusOK).JSON(fiber.Map{"order_id": id})
+}
+
 func (c *OrderController) DeliveryOrder(f *fiber.Ctx) error {
 	id, err := f.ParamsInt("id")
 	order := &models.Order{
