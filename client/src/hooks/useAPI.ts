@@ -4,8 +4,16 @@ import { OutgoingType } from '../models/Outgoing';
 import { ProductDetails, ProductType } from '../models/Product';
 
 const fetcher = async (url: string, options: any = {}) => {
-  return fetch(url, options)
-    .then((r) => r.json())
+  const res = await fetch(url, { ...options, credentials: 'include' as RequestCredentials })
+  if (res.status === 401) {
+    window.location.reload()
+    throw new Error('Unauthorized')
+  }
+  return res.json()
+}
+
+export function getAuthMe(): Promise<{ role: string; username: string }> {
+  return fetcher('api/auth/me')
 }
 
 export function getOpenEvent() {

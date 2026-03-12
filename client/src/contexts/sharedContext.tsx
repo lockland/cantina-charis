@@ -5,10 +5,12 @@ interface ContextProps {
   orderAmount: number,
   orderItemList: OrderItemRow[],
   homePage: string,
+  role: string,
 
   setOrderAmount(value: number): void
   setOrderItemList(value: any): void
   setHomePage(value: string): void
+  setRole(value: string): void
 }
 
 
@@ -16,15 +18,18 @@ export const SharedContext = createContext<ContextProps>({
   orderAmount: 0.00,
   orderItemList: [],
   homePage: "",
+  role: "",
   setOrderAmount: () => { },
   setOrderItemList: () => { },
-  setHomePage: () => { }
+  setHomePage: () => { },
+  setRole: () => { }
 })
 
 export function SharedContextProvider({ children }: { children: ReactNode }) {
   const [orderAmount, setOrderAmount] = useState(0.00)
   const [orderItemList, setOrderItemList] = useState<OrderItemRow[]>([])
   const [homePage, setHomePage] = useState("")
+  const [role, setRole] = useState("")
 
   return (
     <SharedContext.Provider
@@ -34,10 +39,12 @@ export function SharedContextProvider({ children }: { children: ReactNode }) {
         orderItemList,
         setOrderItemList,
         homePage,
-        setHomePage
+        setHomePage,
+        role,
+        setRole
       }}
     >
       {children}
-    </ SharedContext.Provider>
+    </SharedContext.Provider>
   )
 }

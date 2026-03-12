@@ -19,6 +19,7 @@ export function useOrdersSocket(eventId: number, onNewOrder: () => void) {
     cancelledRef.current = false
     const protocol = window.location.protocol === "https:" ? "wss:" : "ws:"
     const wsUrl = `${protocol}//${window.location.host}/api/ws`
+    // Auth via cookie only; no credentials in URL
     const socket = new WebSocket(wsUrl)
 
     socket.onopen = () => {

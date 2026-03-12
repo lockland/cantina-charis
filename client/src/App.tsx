@@ -1,4 +1,4 @@
-import { BrowserRouter, Route, Routes } from 'react-router-dom'
+import { BrowserRouter, Route, Routes, useLocation, useNavigate } from 'react-router-dom'
 
 import NavBar from "./components/navbar/NavBar";
 import Products from "./components/pages/products/Products";
@@ -12,13 +12,34 @@ export const COOKIE_NAME = 'app'
 
 import { useSharedContext } from "./hooks/useSharedContext"
 import { useEffect } from 'react';
-import { getOpenEvent } from './hooks/useAPI';
+import { getAuthMe, getOpenEvent } from './hooks/useAPI';
 import Event from './models/Event';
 import { useCookiesHook } from './hooks/useCookiesHook';
 
+function ViewerRouteGuard({ children }: { children: React.ReactNode }) {
+  const { role } = useSharedContext()
+  const location = useLocation()
+  const navigate = useNavigate()
+  useEffect(() => {
+    if (role === 'viewer' && location.pathname !== '/orders') {
+      navigate('/orders', { replace: true })
+    }
+  }, [role, location.pathname, navigate])
+  if (role === 'viewer' && location.pathname !== '/orders') {
+    return null
+  }
+  return <>{children}</>
+}
+
 function App() {
   const { setEventData, removeAppCookie } = useCookiesHook()
-  const { homePage, setHomePage } = useSharedContext()
+  const { homePage, setHomePage, setRole } = useSharedContext()
+
+  useEffect(() => {
+    getAuthMe()
+      .then((data) => setRole(data.role))
+      .catch(() => {})
+  }, [setRole])
 
   useEffect(() => {
 
@@ -45,13 +66,15 @@ function App() {
       </Container>
       <Space h="md" />
       <Container maw={maw}>
-        <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/products" element={<Products />} />
-          <Route path="/orders" element={<Orders />} />
-          <Route path="/reports" element={<Reports />} />
-          <Route path="/customers-debits" element={<Debits />} />
-        </Routes>
+        <ViewerRouteGuard>
+          <Routes>
+            <Route path="/" element={<Home />} />
+            <Route path="/products" element={<Products />} />
+            <Route path="/orders" element={<Orders />} />
+            <Route path="/reports" element={<Reports />} />
+            <Route path="/customers-debits" element={<Debits />} />
+          </Routes>
+        </ViewerRouteGuard>
       </Container>
     </BrowserRouter>
   )
