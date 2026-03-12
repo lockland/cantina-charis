@@ -188,7 +188,10 @@ func (c *OrderController) DeleteOrder(f *fiber.Ctx) error {
 	tx.Where("order_id = ?", id).Delete(&models.OrderProduct{})
 	tx.Delete(order)
 	customer := &order.Customer
-	customer.DebitValue = customer.DebitValue.Add(residual)
+	customer.DebitValue = customer.DebitValue.Sub(residual)
+	if customer.DebitValue.LessThan(zero) {
+		customer.DebitValue = zero
+	}
 	tx.Model(customer).Update("DebitValue", customer.DebitValue)
 	tx.Commit()
 
