@@ -1,7 +1,7 @@
 .ONESHELL: # Applies to every targets in the file!
 
 build:
-	rm dist/views -rf
+	rm dist/views dist/cantina-charis -rf
 	mkdir -p dist
 	cd client && yarn build && cd -
 	cd server && go build -o ../dist/cantina-charis main.go
