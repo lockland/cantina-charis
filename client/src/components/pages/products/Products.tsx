@@ -4,19 +4,22 @@ import ProductCard from "./ProductCard";
 import Product, { ProductDetails } from "../../../models/Product";
 import { Box } from "@mantine/core";
 import AddProduct from "./AddProduct";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 
 function Products() {
   const [list, setList] = useState<Product[]>([])
 
-  useEffect(() => {
+  const fetchProducts = useCallback(() => {
     getProducts().then((response: ProductDetails[]) => {
       const data: Product[] = response.map((p: ProductDetails) => Product.buildFromData(p))
       setList(data)
     })
-
   }, [])
+
+  useEffect(() => {
+    fetchProducts()
+  }, [fetchProducts])
 
 
 
@@ -26,7 +29,7 @@ function Products() {
 
       <CustomSimpleGrid mt="md" cols={4}>
         {list.map((product: Product) =>
-          <ProductCard key={product.id} product={product} />
+          <ProductCard key={product.id} product={product} onDeleted={fetchProducts} />
         )}
       </CustomSimpleGrid>
     </Box>

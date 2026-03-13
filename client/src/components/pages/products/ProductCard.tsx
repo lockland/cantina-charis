@@ -1,19 +1,34 @@
-import { ActionIcon, Box, Group, Switch, Title } from "@mantine/core"
+import { ActionIcon, Box, CloseButton, Group, Switch, Title, Tooltip } from "@mantine/core"
 import EditIcon from "./EditIcon"
 import EditProductModal from "./EditProductModal";
 import { useDisclosure } from "@mantine/hooks";
 import Product from "../../../models/Product";
-import { toggleProductStatus } from "../../../hooks/useAPI";
+import { toggleProductStatus, deleteProduct } from "../../../hooks/useAPI";
 
-function ProductCard({ product }: { product: Product }) {
+function ProductCard({ product, onDeleted }: { product: Product; onDeleted?: () => void }) {
   const [opened, { open, close }] = useDisclosure(false);
 
   const handleOnChange = () => {
     toggleProductStatus(product.id)
   }
 
+  const handleDelete = () => {
+    const value = window.prompt("Digite DELETE para excluir o produto.")
+    if (value?.trim() === "DELETE") {
+      deleteProduct(product.id).then(() => onDeleted?.())
+    }
+  }
+
   return (
-    <Box bg="var(--secondary-background-color)" p="sm">
+    <Box bg="var(--secondary-background-color)" p="sm" style={{ position: "relative" }}>
+      <Tooltip label="Excluir produto">
+        <CloseButton
+          style={{ position: "absolute", top: 8, right: 8 }}
+          size="sm"
+          onClick={handleDelete}
+          aria-label="Excluir produto"
+        />
+      </Tooltip>
       <EditProductModal product={product} opened={opened} closeModal={close} />
 
       <Box bg="var(--generic-blue)" p="sm" mih={100}>

@@ -98,6 +98,19 @@ export function createProduct(values: ProductType) {
   })
 }
 
+export function deleteProduct(productId: number) {
+  return fetch(`api/products/${productId}`, { method: "DELETE", credentials: "include" }).then(
+    (res) => {
+      if (res.status === 401) {
+        window.location.reload()
+        throw new Error("Unauthorized")
+      }
+      if (res.status === 204 || res.ok) return
+      return res.json().then(() => {}, () => {})
+    }
+  )
+}
+
 export function toggleProductStatus(productId: number) {
   return fetcher(`api/products/${productId}/toggle`, { method: "PUT" })
 }
