@@ -50,7 +50,7 @@ function OrdersCard({ orderId, customer_name, order_amount, paid_value, deliveri
       w="100%"
       bg={isPaid ? "var(--orders-card-paid-background-color)" : "var(--orders-card-background-color)"}
       py={15}
-      style={{ position: "relative" }}
+      style={{ position: "relative", minWidth: 260 }}
     >
       <Box style={{ position: "absolute", top: 8, right: 8 }}>
         <Tooltip label="Cancelar pedido">
@@ -67,7 +67,7 @@ function OrdersCard({ orderId, customer_name, order_amount, paid_value, deliveri
       <Text align="center" weight={600} style={{ color: "#1a1a1a" }}>{customer_name}</Text>
       <Text align="center" weight={600} size="lg" style={{ color: "#1a1a1a" }}>{DecimalFormatter.format(amount)}</Text>
       <Divider my={10} style={{ borderColor: "rgba(0,0,0,0.12)" }} />
-      <Box mt="sm" style={{ display: "flex", flexDirection: "row", flexWrap: "wrap", alignItems: "center", justifyContent: "center", gap: 8 }}>
+      <Box mt="sm" style={{ display: "flex", flexDirection: "row", flexWrap: "nowrap", alignItems: "center", justifyContent: "center", gap: 8 }}>
         {isPaid ? (
           <Tooltip label="Pedido já pago">
             <Button
