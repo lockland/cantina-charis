@@ -72,6 +72,14 @@ export function getOrders(eventId: number) {
   return fetcher(`api/events/${eventId}/orders`)
 }
 
+export function getPendingOrders(eventId: number) {
+  return fetcher(`api/events/${eventId}/orders/pending`)
+}
+
+export function getActiveOrders(eventId: number) {
+  return fetcher(`api/events/${eventId}/orders/active`)
+}
+
 export function deliveryOrder(orderId: number) {
   return fetcher(`api/orders/${orderId}/done`, { method: "PUT" })
 }
