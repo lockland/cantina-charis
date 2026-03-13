@@ -1,5 +1,5 @@
 import { Box, Button, Group, Space, Table, Text, Textarea, Title } from "@mantine/core";
-import { deliveryOrder, getOrders } from "../../../hooks/useAPI";
+import { deliveryOrder, getPendingOrders } from "../../../hooks/useAPI";
 import { useOrdersSocket } from "../../../hooks/useOrdersSocket";
 import CustomSimpleGrid from "../../CustomSimpleGrid";
 import { useCallback, useEffect, useState } from "react";
@@ -12,7 +12,7 @@ function Orders() {
   const { eventId } = useCookiesHook()
 
   const fetchOrders = useCallback(() => {
-    getOrders(eventId).then((response: OrderListItem[]) => {
+    getPendingOrders(eventId).then((response: OrderListItem[]) => {
       setOrders(response.map((orderData) => Order.buildFromData(orderData)))
     })
   }, [eventId])

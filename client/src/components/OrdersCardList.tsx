@@ -1,4 +1,4 @@
-import { getOrders } from "../hooks/useAPI"
+import { getActiveOrders } from "../hooks/useAPI"
 import OrdersCard from "./OrdersCard"
 import CustomSimpleGrid from "./CustomSimpleGrid"
 import { useCallback, useEffect, useState } from "react"
@@ -10,7 +10,7 @@ function OrdersCardList() {
   const { eventId } = useCookiesHook()
 
   const fetchOrders = useCallback(() => {
-    getOrders(eventId).then((response: OrdersCardType[]) => {
+    getActiveOrders(eventId).then((response: OrdersCardType[]) => {
       setOrders(response)
     })
   }, [eventId])
@@ -29,8 +29,10 @@ function OrdersCardList() {
           customer_name={order.customer?.customer_name ?? ""}
           order_amount={String(order.order_amount ?? 0)}
           paid_value={String(order.paid_value ?? 0)}
+          deliveried={order.deliveried}
           onPaid={fetchOrders}
           onDeleted={fetchOrders}
+          onDelivered={fetchOrders}
         />
       )}
     </CustomSimpleGrid>

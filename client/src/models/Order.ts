@@ -15,6 +15,7 @@ export interface OrdersCardType {
   customer_id: number,
   order_amount: string,
   paid_value: any,
+  deliveried?: boolean,
   customer: {
     customer_id: number,
     customer_name: string,
@@ -31,6 +32,7 @@ export interface OrderListItem {
   customer: OrderCustomer,
   observation: string,
   order_items: ProductType[],
+  deliveried?: boolean,
 
   getFormattedAmount(): string
 }
