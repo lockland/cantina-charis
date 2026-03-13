@@ -58,16 +58,42 @@ func (c *EventController) CreateEvent(f *fiber.Ctx) error {
 
 func (c *EventController) GetOrders(f *fiber.Ctx) error {
 	id, err := f.ParamsInt("id")
-	event := models.Event{
-		ID: id,
-	}
-
 	if err != nil {
 		return f.Status(401).SendString("Invalid id")
 	}
+	event := models.Event{ID: id}
+	database.Conn.
+		Preload("Orders").
+		Preload("Orders.OrderProduct.Product").
+		Preload("Orders.Customer").
+		Preload(clause.Associations).
+		Find(&event)
+	return f.JSON(event.Orders)
+}
 
+func (c *EventController) GetPendingOrders(f *fiber.Ctx) error {
+	id, err := f.ParamsInt("id")
+	if err != nil {
+		return f.Status(401).SendString("Invalid id")
+	}
+	event := models.Event{ID: id}
 	database.Conn.
 		Preload("Orders", "deliveried = ?", false).
+		Preload("Orders.OrderProduct.Product").
+		Preload("Orders.Customer").
+		Preload(clause.Associations).
+		Find(&event)
+	return f.JSON(event.Orders)
+}
+
+func (c *EventController) GetActiveOrders(f *fiber.Ctx) error {
+	id, err := f.ParamsInt("id")
+	if err != nil {
+		return f.Status(401).SendString("Invalid id")
+	}
+	event := models.Event{ID: id}
+	database.Conn.
+		Preload("Orders", "deliveried = ? OR CAST(paid_value AS REAL) < CAST(order_amount AS REAL)", false).
 		Preload("Orders.OrderProduct.Product").
 		Preload("Orders.Customer").
 		Preload(clause.Associations).
