@@ -78,3 +78,19 @@ func (c *ProductController) UpdateProduct(f *fiber.Ctx) error {
 
 	return f.JSON(product)
 }
+
+func (c *ProductController) DeleteProduct(f *fiber.Ctx) error {
+	id, err := f.ParamsInt("id")
+	if err != nil {
+		return f.Status(fiber.StatusBadRequest).SendString("Invalid id")
+	}
+	database.Conn.Where("product_id = ?", id).Delete(&models.OrderProduct{})
+	result := database.Conn.Delete(&models.Product{}, id)
+	if result.Error != nil {
+		return f.Status(fiber.StatusBadRequest).SendString(result.Error.Error())
+	}
+	if result.RowsAffected == 0 {
+		return f.Status(fiber.StatusNotFound).SendString("Product not found")
+	}
+	return f.SendStatus(fiber.StatusNoContent)
+}
