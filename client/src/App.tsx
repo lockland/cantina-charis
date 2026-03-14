@@ -54,12 +54,12 @@ function App() {
     })
   }, [homePage])
 
-  const maw = "80vw"
+  const maw = "100vw"
 
   return (
 
     <BrowserRouter>
-      <Container maw="100vw" bg="var(--generic-blue)" style={{
+      <Container maw="110vw" bg="var(--generic-blue)" style={{
         boxShadow: "0 2px 4px 0 rgba(0, 0, 0, .3)",
       }} >
         <NavBar maw={maw} />
