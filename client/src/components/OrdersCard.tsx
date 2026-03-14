@@ -50,7 +50,7 @@ function OrdersCard({ orderId, customer_name, order_amount, paid_value, deliveri
       w="100%"
       bg={isPaid ? "var(--orders-card-paid-background-color)" : "var(--orders-card-background-color)"}
       py={15}
-      style={{ position: "relative", minWidth: 260 }}
+      style={{ position: "relative", minWidth: 200}}
     >
       <Box style={{ position: "absolute", top: 8, right: 8 }}>
         <Tooltip label="Cancelar pedido">
@@ -72,11 +72,10 @@ function OrdersCard({ orderId, customer_name, order_amount, paid_value, deliveri
           <Tooltip label="Pedido já pago">
             <Button
               disabled
-              variant="light"
-              color="gray"
-              sx={{ color: "#495057", backgroundColor: "#e9ecef" }}
+              aria-label="Sinalizar que o pedido já está pago"
+              rightIcon={<CalendarIcon size={18} />}
             >
-              Já Pago <span style={{ marginLeft: 6, display: "inline-flex", verticalAlign: "middle" }}><CalendarIcon size={18} /></span>
+            Pago
             </Button>
           </Tooltip>
         ) : (
@@ -84,29 +83,26 @@ function OrdersCard({ orderId, customer_name, order_amount, paid_value, deliveri
             <Button
               loading={loading}
               onClick={handlePay}
-              sx={{
-                backgroundColor: "#c92a2a",
-                color: "#fff",
-                "&:hover": {
-                  backgroundColor: "#a61e1e",
-                },
-              }}
+              aria-label="Registrar pagamento do pedido"
+              bg="red"
+              color="red"
+              rightIcon={<CreditCardIcon size={18} />}
             >
-              Pagar <span style={{ marginLeft: 6, display: "inline-flex", verticalAlign: "middle" }}><CreditCardIcon size={18} /></span>
+              Pagar
             </Button>
           </Tooltip>
         )}
         {!deliveried && (
           <Tooltip label="Marcar pedido como pronto para entrega">
             <Button
-              variant="light"
-              color="gray"
+              variant="filled"
+              color="blue"
               disabled={loading}
               onClick={handleDelivered}
               aria-label="Marcar pedido como pronto para entrega"
-              sx={{ color: "#495057", backgroundColor: "#e9ecef", "&:hover": { backgroundColor: "#dee2e6" } }}
+              leftIcon={<CheckIcon size={18} />}
             >
-              Pronto <span style={{ marginLeft: 6, display: "inline-flex", verticalAlign: "middle" }}><CheckIcon size={18} /></span>
+            Pronto
             </Button>
           </Tooltip>
         )}
