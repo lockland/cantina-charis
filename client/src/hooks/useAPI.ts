@@ -22,6 +22,11 @@ export function getOpenEvent() {
     .catch(() => new Event)
 }
 
+/** All events (open and closed) for comboboxes/reports. */
+export function getAllEvents() {
+  return fetcher("api/events")
+}
+
 export function createEvent(values: EventType) {
   return fetcher("api/events", {
     method: "POST",
