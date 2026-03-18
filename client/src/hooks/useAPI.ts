@@ -81,11 +81,6 @@ export function getOutgoingsByEvent(eventId: number) {
   return fetcher(`/api/events/${eventId}/outgoings`)
 }
 
-/** Despesas por período (datas inclusivas). from/to em YYYY-MM-DD. */
-export function getOutgoingsByDateRange(from: string, to: string) {
-  return fetcher(`/api/reports/outgoings?from=${encodeURIComponent(from)}&to=${encodeURIComponent(to)}`)
-}
-
 export function getPendingOrders(eventId: number) {
   return fetcher(`/api/events/${eventId}/orders/pending`)
 }

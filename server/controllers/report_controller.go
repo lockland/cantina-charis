@@ -5,7 +5,6 @@ import (
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/lockland/cantina-charis/server/database"
-	"github.com/lockland/cantina-charis/server/models"
 	"github.com/shopspring/decimal"
 )
 
@@ -176,34 +175,4 @@ func (c *ReportController) GetPayments(f *fiber.Ctx) error {
 	database.Conn.Raw(rawQuery, id).Scan(&result)
 
 	return f.JSON(result)
-}
-
-const dateLayout = "2006-01-02"
-
-func (c *ReportController) GetOutgoingsByDateRange(f *fiber.Ctx) error {
-	fromStr, toStr := f.Query("from"), f.Query("to")
-	if fromStr == "" || toStr == "" {
-		return f.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "query params 'from' and 'to' (YYYY-MM-DD) are required"})
-	}
-	from, errFrom := time.Parse(dateLayout, fromStr)
-	to, errTo := time.Parse(dateLayout, toStr)
-	if errFrom != nil || errTo != nil {
-		return f.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "datas inválidas; use YYYY-MM-DD"})
-	}
-	if to.Before(from) {
-		return f.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "'to' deve ser >= 'from'"})
-	}
-	toEnd := to.Add(24 * time.Hour) // fim do dia "to" (exclusivo)
-
-	var outgoings []models.Outgoing
-	database.Conn.Where("created_at >= ? AND created_at < ?", from, toEnd).
-		Preload("Event").
-		Order("created_at").
-		Find(&outgoings)
-
-	rows := make([]models.OutgoingReportRow, 0, len(outgoings))
-	for i := range outgoings {
-		rows = append(rows, outgoings[i].ReportRow())
-	}
-	return f.JSON(rows)
 }

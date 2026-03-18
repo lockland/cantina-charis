@@ -1,54 +1,35 @@
-import { Box, Flex, Space, Table, Title, useMantineTheme } from "@mantine/core"
-import { DatePickerInput } from "@mantine/dates"
+import { Flex, Select, Space, Table, Title, useMantineTheme } from "@mantine/core"
 import DecimalFormatter from "../../../helpers/Decimal"
 import { OutgoingRow } from "./outgoingsReport"
 
 interface ReportOutgoingsTabProps {
-  dateRange: [Date | null, Date | null]
-  onDateRangeChange: (value: [Date | null, Date | null]) => void
+  eventOptions: { value: string; label: string }[]
   outgoingsRows: OutgoingRow[]
   outgoingsTotal: string
+  onEventSelect: (eventId: string | null) => void
 }
 
 export default function ReportOutgoingsTab({
-  dateRange,
-  onDateRangeChange,
+  eventOptions,
   outgoingsRows,
   outgoingsTotal,
+  onEventSelect,
 }: ReportOutgoingsTabProps) {
   const theme = useMantineTheme()
   return (
     <>
       <Flex direction="column" align="center" mb="md">
-        <Title>Despesas</Title>
-        <Title order={2}>Total no período: {outgoingsTotal}</Title>
+        <Title>Despesas do evento</Title>
+        <Title order={2}>Total de despesas: {outgoingsTotal}</Title>
       </Flex>
-      <Box maw={320} mb="md">
-        <DatePickerInput
-          type="range"
-          label="Datas"
-          placeholder="Data inicial – Data final"
-          value={dateRange}
-          onChange={onDateRangeChange}
-          valueFormat="DD MMM YYYY"
-          labelSeparator=" – "
-          size="md"
-          clearable
-          dropdownType="modal"
-          numberOfColumns={2}
-          modalProps={{ size: "auto", withCloseButton: false }}
-          styles={{
-            calendar: {
-              "& [data-selected]": {
-                backgroundColor: "var(--button-color)",
-              },
-              "& [data-in-range]": {
-                backgroundColor: "var(--secondary-background-color)",
-              },
-            },
-          }}
-        />
-      </Box>
+      <Select
+        size="md"
+        data={eventOptions}
+        searchable
+        label="Evento"
+        placeholder="Selecione ou digite o nome do evento"
+        onChange={onEventSelect}
+      />
       <Space mt="xl" />
       <Table
         bg={theme.other?.secondaryBackground as string}
