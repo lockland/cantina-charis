@@ -16,11 +16,14 @@ func NewEventController() EventController {
 }
 
 // https://pkg.go.dev/github.com/shopspring/decimal#section-readme
+// GetEvents returns all events when "open" is omitted; with open=true/false filters by Open.
 func (c *EventController) GetEvents(f *fiber.Ctx) error {
-	status, _ := strconv.ParseBool(f.Query("open"))
 	events := new([]models.Event)
-
-	database.Conn.Where("Open = ?", status).Last(&events)
+	q := database.Conn.Order("created_at desc")
+	if open, err := strconv.ParseBool(f.Query("open")); err == nil {
+		q = q.Where("Open = ?", open)
+	}
+	q.Find(events)
 	return f.JSON(events)
 }
 

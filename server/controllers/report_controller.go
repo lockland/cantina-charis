@@ -175,5 +175,4 @@ func (c *ReportController) GetPayments(f *fiber.Ctx) error {
 	database.Conn.Raw(rawQuery, id).Scan(&result)
 
 	return f.JSON(result)
-
 }
