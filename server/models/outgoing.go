@@ -15,3 +15,20 @@ type Outgoing struct {
 	EventID     int             `json:"event_id" validate:"required"`
 	Event       Event           `json:"-"` // não serializar na API
 }
+
+// OutgoingReportRow é o formato de item retornado pelo relatório de despesas por período.
+type OutgoingReportRow struct {
+	EventName   string          `json:"event_name"`
+	CreatedAt   time.Time       `json:"created_at"`
+	Description string          `json:"description"`
+	Amount      decimal.Decimal `json:"amount"`
+}
+
+func (o *Outgoing) ReportRow() OutgoingReportRow {
+	return OutgoingReportRow{
+		EventName:   o.Event.Name,
+		CreatedAt:   o.CreatedAt,
+		Description: o.Description,
+		Amount:      o.Amount,
+	}
+}
