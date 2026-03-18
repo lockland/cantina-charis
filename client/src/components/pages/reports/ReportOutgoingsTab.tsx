@@ -1,35 +1,54 @@
-import { Flex, Select, Space, Table, Title, useMantineTheme } from "@mantine/core"
+import { Box, Flex, Space, Table, Title, useMantineTheme } from "@mantine/core"
+import { DatePickerInput } from "@mantine/dates"
 import DecimalFormatter from "../../../helpers/Decimal"
 import { OutgoingRow } from "./outgoingsReport"
 
 interface ReportOutgoingsTabProps {
-  eventOptions: { value: string; label: string }[]
+  dateRange: [Date | null, Date | null]
+  onDateRangeChange: (value: [Date | null, Date | null]) => void
   outgoingsRows: OutgoingRow[]
   outgoingsTotal: string
-  onEventSelect: (eventId: string | null) => void
 }
 
 export default function ReportOutgoingsTab({
-  eventOptions,
+  dateRange,
+  onDateRangeChange,
   outgoingsRows,
   outgoingsTotal,
-  onEventSelect,
 }: ReportOutgoingsTabProps) {
   const theme = useMantineTheme()
   return (
     <>
       <Flex direction="column" align="center" mb="md">
-        <Title>Despesas do evento</Title>
-        <Title order={2}>Total de despesas: {outgoingsTotal}</Title>
+        <Title>Despesas</Title>
+        <Title order={2}>Total no período: {outgoingsTotal}</Title>
       </Flex>
-      <Select
-        size="md"
-        data={eventOptions}
-        searchable
-        label="Evento"
-        placeholder="Selecione ou digite o nome do evento"
-        onChange={onEventSelect}
-      />
+      <Box maw={320} mb="md">
+        <DatePickerInput
+          type="range"
+          label="Datas"
+          placeholder="Data inicial – Data final"
+          value={dateRange}
+          onChange={onDateRangeChange}
+          valueFormat="DD MMM YYYY"
+          labelSeparator=" – "
+          size="md"
+          clearable
+          dropdownType="modal"
+          numberOfColumns={2}
+          modalProps={{ size: "auto", withCloseButton: false }}
+          styles={{
+            calendar: {
+              "& [data-selected]": {
+                backgroundColor: "var(--button-color)",
+              },
+              "& [data-in-range]": {
+                backgroundColor: "var(--secondary-background-color)",
+              },
+            },
+          }}
+        />
+      </Box>
       <Space mt="xl" />
       <Table
         bg={theme.other?.secondaryBackground as string}
