@@ -13,5 +13,5 @@ type Outgoing struct {
 	CreatedAt   time.Time       `json:"created_at"`
 	UpdatedAt   time.Time       `json:"updated_at"`
 	EventID     int             `json:"event_id" validate:"required"`
-	Event       Event
+	Event       Event           `json:"-"` // não serializar na API
 }
