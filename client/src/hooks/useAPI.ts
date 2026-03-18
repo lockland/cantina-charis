@@ -77,6 +77,10 @@ export function getOrders(eventId: number) {
   return fetcher(`api/events/${eventId}/orders`)
 }
 
+export function getOutgoingsByEvent(eventId: number) {
+  return fetcher(`api/events/${eventId}/outgoings`)
+}
+
 export function getPendingOrders(eventId: number) {
   return fetcher(`api/events/${eventId}/orders/pending`)
 }

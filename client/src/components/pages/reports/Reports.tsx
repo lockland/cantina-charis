@@ -1,5 +1,5 @@
 import { Box, Tabs } from "@mantine/core"
-import { getBalance, getCustomerNames, getCustomerPayments, getEventsSummary, getAllEvents, getOrders } from "../../../hooks/useAPI"
+import { getBalance, getCustomerNames, getCustomerPayments, getEventsSummary, getAllEvents, getOrders, getOutgoingsByEvent } from "../../../hooks/useAPI"
 import ReportEntry from "../../../models/ReportEntry"
 import { useCallback, useEffect, useState } from "react"
 import ReportEntries from "../../../models/ReportsEntries"
@@ -9,10 +9,12 @@ import { buildReportCustomerNamesList } from "../../../helpers/SelectLists"
 import CustomerPayment from "../../../models/CustomerPayment"
 import DecimalFormatter from "../../../helpers/Decimal"
 import { SoldProductRow, buildSoldProductRows } from "./soldProductsReport"
+import { OutgoingRow, buildOutgoingsRows } from "./outgoingsReport"
 import ReportSummariesTab from "./ReportSummariesTab"
 import ReportBalanceTab from "./ReportBalanceTab"
 import ReportPaymentsByCustomerTab from "./ReportPaymentsByCustomerTab"
 import ReportSoldProductsTab from "./ReportSoldProductsTab"
+import ReportOutgoingsTab from "./ReportOutgoingsTab"
 
 function Reports() {
   const [summaryRows, setSummaryRows] = useState(new ReportEntries())
@@ -22,6 +24,8 @@ function Reports() {
   const [eventOptions, setEventOptions] = useState<{ value: string; label: string }[]>([])
   const [soldProductsRows, setSoldProductsRows] = useState<SoldProductRow[]>([])
   const [soldProductsTotal, setSoldProductsTotal] = useState<string>("R$ 0,00")
+  const [outgoingsRows, setOutgoingsRows] = useState<OutgoingRow[]>([])
+  const [outgoingsTotal, setOutgoingsTotal] = useState<string>("R$ 0,00")
 
   useEffect(() => {
     getEventsSummary().then((response: ReportEntries) => {
@@ -59,6 +63,18 @@ function Reports() {
     [eventOptions]
   )
 
+  const handleOutgoingsEventSelect = useCallback(
+    async (eventId: string | null) => {
+      if (!eventId) return
+      const eventName = eventOptions.find((o) => o.value === eventId)?.label ?? ""
+      const outgoings = await getOutgoingsByEvent(Number(eventId))
+      const { rows, total } = buildOutgoingsRows(outgoings, eventName)
+      setOutgoingsRows(rows)
+      setOutgoingsTotal(DecimalFormatter.format(total))
+    },
+    [eventOptions]
+  )
+
   return (
     <Box p={7}>
       <Tabs defaultValue="first" variant="pills">
@@ -67,6 +83,7 @@ function Reports() {
           <Tabs.Tab value="second">Balanço últimos 7 dias</Tabs.Tab>
           <Tabs.Tab value="third">Pedidos pagos por cliente</Tabs.Tab>
           <Tabs.Tab value="fourth">Produtos vendidos</Tabs.Tab>
+          <Tabs.Tab value="fifth">Despesas do evento</Tabs.Tab>
         </Tabs.List>
         <Tabs.Panel value="first">
           <ReportSummariesTab summaryRows={summaryRows} />
@@ -87,6 +104,14 @@ function Reports() {
             soldProductsRows={soldProductsRows}
             soldProductsTotal={soldProductsTotal}
             onEventSelect={handleEventSelect}
+          />
+        </Tabs.Panel>
+        <Tabs.Panel value="fifth">
+          <ReportOutgoingsTab
+            eventOptions={eventOptions}
+            outgoingsRows={outgoingsRows}
+            outgoingsTotal={outgoingsTotal}
+            onEventSelect={handleOutgoingsEventSelect}
           />
         </Tabs.Panel>
       </Tabs>
