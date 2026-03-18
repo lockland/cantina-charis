@@ -3,6 +3,8 @@ import ReactDOM from 'react-dom/client'
 import App from './App.tsx'
 import './index.css'
 import { ButtonStylesParams, MantineProvider } from '@mantine/core'
+import { DatesProvider } from '@mantine/dates'
+import 'dayjs/locale/pt-br'
 import { CookiesProvider } from 'react-cookie'
 import { SharedContextProvider } from './contexts/sharedContext.tsx'
 
@@ -108,15 +110,23 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
               },
             }),
           },
+          DatePickerInput: {
+            styles: () => ({
+              label: {
+                color: "var(--main-color)",
+              }
+            }),
+          },
         }
       }}
     >
-
-      <SharedContextProvider>
-        <CookiesProvider>
-          <App />
-        </CookiesProvider>
-      </SharedContextProvider>
+      <DatesProvider settings={{ locale: 'pt-br', firstDayOfWeek: 0 }}>
+        <SharedContextProvider>
+          <CookiesProvider>
+            <App />
+          </CookiesProvider>
+        </SharedContextProvider>
+      </DatesProvider>
     </MantineProvider>
   </React.StrictMode>,
 )
