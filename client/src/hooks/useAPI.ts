@@ -13,22 +13,22 @@ const fetcher = async (url: string, options: any = {}) => {
 }
 
 export function getAuthMe(): Promise<{ role: string; username: string }> {
-  return fetcher('api/auth/me')
+  return fetcher('/api/auth/me')
 }
 
 export function getOpenEvent() {
-  return fetcher("api/events?open=true")
+  return fetcher("/api/events?open=true")
     .then((events) => Event.buildFromData(events[0]))
     .catch(() => new Event)
 }
 
 /** All events (open and closed) for comboboxes/reports. */
 export function getAllEvents() {
-  return fetcher("api/events")
+  return fetcher("/api/events")
 }
 
 export function createEvent(values: EventType) {
-  return fetcher("api/events", {
+  return fetcher("/api/events", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -38,11 +38,11 @@ export function createEvent(values: EventType) {
 }
 
 export function closeEvent(eventId: number) {
-  return fetcher(`api/events/${eventId}/close  `, { method: "PUT" })
+  return fetcher(`/api/events/${eventId}/close  `, { method: "PUT" })
 }
 
 export function createOutgoing(values: OutgoingType) {
-  return fetcher("api/outgoings", {
+  return fetcher("/api/outgoings", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -52,19 +52,19 @@ export function createOutgoing(values: OutgoingType) {
 }
 
 export function getOutgoings() {
-  return fetcher("api/outgoings")
+  return fetcher("/api/outgoings")
 }
 
 export function getCustomerNames() {
-  return fetcher("api/customers")
+  return fetcher("/api/customers")
 }
 
 export function getEnabledProducts() {
-  return fetcher("api/products/enabled")
+  return fetcher("/api/products/enabled")
 }
 
 export function createOrder(values: OrderFormValues) {
-  return fetcher("api/orders", {
+  return fetcher("/api/orders", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -74,31 +74,31 @@ export function createOrder(values: OrderFormValues) {
 }
 
 export function getOrders(eventId: number) {
-  return fetcher(`api/events/${eventId}/orders`)
+  return fetcher(`/api/events/${eventId}/orders`)
 }
 
 export function getOutgoingsByEvent(eventId: number) {
-  return fetcher(`api/events/${eventId}/outgoings`)
+  return fetcher(`/api/events/${eventId}/outgoings`)
 }
 
 export function getPendingOrders(eventId: number) {
-  return fetcher(`api/events/${eventId}/orders/pending`)
+  return fetcher(`/api/events/${eventId}/orders/pending`)
 }
 
 export function getActiveOrders(eventId: number) {
-  return fetcher(`api/events/${eventId}/orders/active`)
+  return fetcher(`/api/events/${eventId}/orders/active`)
 }
 
 export function deliveryOrder(orderId: number) {
-  return fetcher(`api/orders/${orderId}/done`, { method: "PUT" })
+  return fetcher(`/api/orders/${orderId}/done`, { method: "PUT" })
 }
 
 export function getProducts() {
-  return fetcher("api/products/")
+  return fetcher("/api/products/")
 }
 
 export function createProduct(values: ProductType) {
-  return fetcher("api/products", {
+  return fetcher("/api/products", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -108,7 +108,7 @@ export function createProduct(values: ProductType) {
 }
 
 export function deleteProduct(productId: number) {
-  return fetch(`api/products/${productId}`, { method: "DELETE", credentials: "include" }).then(
+  return fetch(`/api/products/${productId}`, { method: "DELETE", credentials: "include" }).then(
     (res) => {
       if (res.status === 401) {
         window.location.reload()
@@ -121,11 +121,11 @@ export function deleteProduct(productId: number) {
 }
 
 export function toggleProductStatus(productId: number) {
-  return fetcher(`api/products/${productId}/toggle`, { method: "PUT" })
+  return fetcher(`/api/products/${productId}/toggle`, { method: "PUT" })
 }
 
 export function updateProduct(values: ProductDetails) {
-  return fetcher("api/products", {
+  return fetcher("/api/products", {
     method: "PUT",
     headers: {
       "Content-Type": "application/json",
@@ -135,11 +135,11 @@ export function updateProduct(values: ProductDetails) {
 }
 
 export function getDebits() {
-  return fetcher("api/debits")
+  return fetcher("/api/debits")
 }
 
 export function payDebits(customerId: number, paidValue: number) {
-  return fetcher(`api/debits/${customerId}/pay`, {
+  return fetcher(`/api/debits/${customerId}/pay`, {
     method: "PUT",
     headers: {
       "Content-Type": "application/json",
@@ -149,25 +149,25 @@ export function payDebits(customerId: number, paidValue: number) {
 }
 
 export function payOrder(orderId: number) {
-  return fetcher(`api/orders/${orderId}/pay`, {
+  return fetcher(`/api/orders/${orderId}/pay`, {
     method: "PUT",
   })
 }
 
 export function deleteOrder(orderId: number) {
-  return fetcher(`api/orders/${orderId}`, {
+  return fetcher(`/api/orders/${orderId}`, {
     method: "DELETE",
   })
 }
 
 export function getEventsSummary() {
-  return fetcher("api/reports/summaries")
+  return fetcher("/api/reports/summaries")
 }
 
 export function getBalance(days: number) {
-  return fetcher(`api/reports/balance/${days}`)
+  return fetcher(`/api/reports/balance/${days}`)
 }
 
 export function getCustomerPayments(customerId: string) {
-  return fetcher(`api/reports/payments/${customerId}`)
+  return fetcher(`/api/reports/payments/${customerId}`)
 }

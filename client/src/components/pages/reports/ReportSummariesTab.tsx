@@ -1,4 +1,4 @@
-import { Flex, Table, Title } from "@mantine/core"
+import { Flex, Table, Title, useMantineTheme } from "@mantine/core"
 import ReportEntry from "../../../models/ReportEntry"
 import ReportEntries from "../../../models/ReportsEntries"
 
@@ -7,14 +7,15 @@ interface ReportSummariesTabProps {
 }
 
 export default function ReportSummariesTab({ summaryRows }: ReportSummariesTabProps) {
+  const theme = useMantineTheme()
   return (
     <>
-      <Flex direction="column" align="center" mb={10}>
+      <Flex direction="column" align="center" mb="md">
         <Title>Sumário dos eventos cadastrados</Title>
         <Title order={2}>Valor apurado até o momento: {summaryRows.getFormattedLiquidFounds()}</Title>
       </Flex>
       <Table
-        bg="var(--secondary-background-color)"
+        bg={theme.other?.secondaryBackground as string}
         striped
         withColumnBorders
         withBorder

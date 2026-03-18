@@ -27,7 +27,7 @@ function Products() {
     <Box>
       <AddProduct />
 
-      <CustomSimpleGrid mt="md" cols={4}>
+      <CustomSimpleGrid mt="md" cols={5}>
         {list.map((product: Product) =>
           <ProductCard key={product.id} product={product} onDeleted={fetchProducts} />
         )}

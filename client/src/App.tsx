@@ -3,7 +3,13 @@ import { BrowserRouter, Route, Routes, useLocation, useNavigate } from 'react-ro
 import NavBar from "./components/navbar/NavBar";
 import Products from "./components/pages/products/Products";
 import Orders from './components/pages/orders/Orders';
-import Reports from './components/pages/reports/Reports';
+import ReportsLayout from './components/pages/reports/ReportsLayout';
+import ReportsIndex from './components/pages/reports/ReportsIndex';
+import ReportSummaryPage from './components/pages/reports/ReportSummaryPage';
+import ReportBalancePage from './components/pages/reports/ReportBalancePage';
+import ReportPaymentsByCustomerPage from './components/pages/reports/ReportPaymentsByCustomerPage';
+import ReportSoldProductsPage from './components/pages/reports/ReportSoldProductsPage';
+import ReportOutgoingsPage from './components/pages/reports/ReportOutgoingsPage';
 import Debits from './components/pages/debits/Debits';
 import Home from './components/pages/home/Home';
 import { Container, Space } from '@mantine/core';
@@ -71,7 +77,14 @@ function App() {
             <Route path="/" element={<Home />} />
             <Route path="/products" element={<Products />} />
             <Route path="/orders" element={<Orders />} />
-            <Route path="/reports" element={<Reports />} />
+            <Route path="/reports" element={<ReportsLayout />}>
+              <Route index element={<ReportsIndex />} />
+              <Route path="summary" element={<ReportSummaryPage />} />
+              <Route path="balance" element={<ReportBalancePage />} />
+              <Route path="payments-by-customer" element={<ReportPaymentsByCustomerPage />} />
+              <Route path="sold-products" element={<ReportSoldProductsPage />} />
+              <Route path="outgoings" element={<ReportOutgoingsPage />} />
+            </Route>
             <Route path="/customers-debits" element={<Debits />} />
           </Routes>
         </ViewerRouteGuard>

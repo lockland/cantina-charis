@@ -11,6 +11,10 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
     <MantineProvider withNormalizeCSS withCSSVariables
       inherit
       theme={{
+        other: {
+          ordersCardBackground: 'var(--orders-card-background-color)',
+          secondaryBackground: 'var(--secondary-background-color)',
+        },
         components: {
           Accordion: {
             styles: {

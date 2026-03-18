@@ -30,7 +30,7 @@ function Orders() {
   }
 
   return (
-    <CustomSimpleGrid cols={3}>
+    <CustomSimpleGrid cols={5}>
       {orders.map((order: OrderListItem, index: number) => {
         return (
           <Box key={index}>

@@ -1,4 +1,4 @@
-import { Center, Select, Space, Table, Title } from "@mantine/core"
+import { Center, Select, Space, Table, Title, useMantineTheme } from "@mantine/core"
 import CustomerPayment from "../../../models/CustomerPayment"
 import { CustomerNamesOptionType } from "../../../models/Customer"
 
@@ -13,6 +13,7 @@ export default function ReportPaymentsByCustomerTab({
   paymentsByCustomer,
   onCustomerChange,
 }: ReportPaymentsByCustomerTabProps) {
+  const theme = useMantineTheme()
   return (
     <>
       <Center>
@@ -30,7 +31,7 @@ export default function ReportPaymentsByCustomerTab({
       />
       <Space mt="xl" />
       <Table
-        bg="var(--secondary-background-color)"
+        bg={theme.other?.secondaryBackground as string}
         striped
         withColumnBorders
         withBorder

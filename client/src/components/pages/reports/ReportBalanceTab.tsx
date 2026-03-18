@@ -1,4 +1,4 @@
-import { Center, Table, Title } from "@mantine/core"
+import { Center, Table, Title, useMantineTheme } from "@mantine/core"
 import DailyBalanceEntry from "../../../models/DailyBalance"
 
 interface ReportBalanceTabProps {
@@ -6,13 +6,14 @@ interface ReportBalanceTabProps {
 }
 
 export default function ReportBalanceTab({ balance }: ReportBalanceTabProps) {
+  const theme = useMantineTheme()
   return (
     <>
       <Center>
         <Title>Balanço dos últimos 7 dias</Title>
       </Center>
       <Table
-        bg="var(--secondary-background-color)"
+        bg={theme.other?.secondaryBackground as string}
         striped
         withColumnBorders
         withBorder

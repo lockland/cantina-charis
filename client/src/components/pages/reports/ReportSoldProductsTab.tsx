@@ -1,4 +1,4 @@
-import { Flex, Select, Space, Table, Title } from "@mantine/core"
+import { Flex, Select, Space, Table, Title, useMantineTheme } from "@mantine/core"
 import DecimalFormatter from "../../../helpers/Decimal"
 import { SoldProductRow } from "./soldProductsReport"
 
@@ -15,9 +15,10 @@ export default function ReportSoldProductsTab({
   soldProductsTotal,
   onEventSelect,
 }: ReportSoldProductsTabProps) {
+  const theme = useMantineTheme()
   return (
     <>
-      <Flex direction="column" align="center" mb={10}>
+      <Flex direction="column" align="center" mb="md">
         <Title>Produtos vendidos</Title>
         <Title order={2}>Valor arrecadado no evento: {soldProductsTotal}</Title>
       </Flex>
@@ -31,7 +32,7 @@ export default function ReportSoldProductsTab({
       />
       <Space mt="xl" />
       <Table
-        bg="var(--secondary-background-color)"
+        bg={theme.other?.secondaryBackground as string}
         striped
         withColumnBorders
         withBorder
