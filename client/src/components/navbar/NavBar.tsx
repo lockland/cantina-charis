@@ -45,7 +45,7 @@ function NavBar({ maw }: NavBarProps) {
             )}
           </ul>
         </nav>
-        {isEventCreated ? <CloseBtn /> : ""}
+        {isEventCreated && !isViewer ? <CloseBtn /> : ""}
       </Container>
     </div>
   );

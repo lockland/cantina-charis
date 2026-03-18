@@ -9,6 +9,8 @@ Description=Software de gestão de vendas
 After=network.target
 
 [Service]
+Environment="ADMIN_PASSWORD="
+Environment="VIEWER_PASSWORD="
 Type=simple
 WorkingDirectory=/home/thaise/cantina-charis
 ExecStart=/home/thaise/cantina-charis/cantina-charis
