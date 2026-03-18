@@ -74,6 +74,16 @@ func (c *EventController) GetOrders(f *fiber.Ctx) error {
 	return f.JSON(event.Orders)
 }
 
+func (c *EventController) GetEventOutgoings(f *fiber.Ctx) error {
+	id, err := f.ParamsInt("id")
+	if err != nil {
+		return f.Status(fiber.StatusBadRequest).SendString("Invalid event id")
+	}
+	var outgoings []models.Outgoing
+	database.Conn.Where("event_id = ?", id).Order("created_at").Find(&outgoings)
+	return f.JSON(outgoings)
+}
+
 func (c *EventController) GetPendingOrders(f *fiber.Ctx) error {
 	id, err := f.ParamsInt("id")
 	if err != nil {
