@@ -1,55 +1,63 @@
-import { Box, Center, Flex, Select, Space, Table, Title } from "@mantine/core";
-import { getBalance, getCustomerNames, getCustomerPayments, getEventsSummary } from "../../../hooks/useAPI";
-import ReportEntry from "../../../models/ReportEntry";
-import { useEffect, useState } from "react";
-import ReportEntries from "../../../models/ReportsEntries";
-import { Tabs } from '@mantine/core';
-import DailyBalanceEntry from "../../../models/DailyBalance";
-import { CustomerNamesOptionType, CustomerType } from "../../../models/Customer";
-import { buildReportCustomerNamesList } from "../../../helpers/SelectLists";
-import CustomerPayment from "../../../models/CustomerPayment";
+import { Box, Tabs } from "@mantine/core"
+import { getBalance, getCustomerNames, getCustomerPayments, getEventsSummary, getAllEvents, getOrders } from "../../../hooks/useAPI"
+import ReportEntry from "../../../models/ReportEntry"
+import { useCallback, useEffect, useState } from "react"
+import ReportEntries from "../../../models/ReportsEntries"
+import DailyBalanceEntry from "../../../models/DailyBalance"
+import { CustomerNamesOptionType, CustomerType } from "../../../models/Customer"
+import { buildReportCustomerNamesList } from "../../../helpers/SelectLists"
+import CustomerPayment from "../../../models/CustomerPayment"
+import DecimalFormatter from "../../../helpers/Decimal"
+import { SoldProductRow, buildSoldProductRows } from "./soldProductsReport"
+import ReportSummariesTab from "./ReportSummariesTab"
+import ReportBalanceTab from "./ReportBalanceTab"
+import ReportPaymentsByCustomerTab from "./ReportPaymentsByCustomerTab"
+import ReportSoldProductsTab from "./ReportSoldProductsTab"
 
 function Reports() {
-
-  const [summaryRows, setSummaryRows] = useState(new ReportEntries)
+  const [summaryRows, setSummaryRows] = useState(new ReportEntries())
   const [balance, setBalance] = useState<DailyBalanceEntry[]>([])
-  const [customerNames, setCustomerNames] = useState<CustomerNamesOptionType[]>([]);
+  const [customerNames, setCustomerNames] = useState<CustomerNamesOptionType[]>([])
   const [paymentsByCustomer, setPaymentsByCustomer] = useState<CustomerPayment[]>([])
+  const [eventOptions, setEventOptions] = useState<{ value: string; label: string }[]>([])
+  const [soldProductsRows, setSoldProductsRows] = useState<SoldProductRow[]>([])
+  const [soldProductsTotal, setSoldProductsTotal] = useState<string>("R$ 0,00")
 
   useEffect(() => {
     getEventsSummary().then((response: ReportEntries) => {
-      const list = new ReportEntries
-      response.map((entryData) => {
-        return list.push(ReportEntry.buildFromData(entryData))
-      })
+      const list = new ReportEntries()
+      response.map((entryData) => list.push(ReportEntry.buildFromData(entryData)))
       setSummaryRows(list)
     })
-
     getBalance(7).then((response: DailyBalanceEntry[]) => {
-      const list: DailyBalanceEntry[] = []
-      response.map((entryData: DailyBalanceEntry) => {
-        return list.push(DailyBalanceEntry.buildFromData(entryData))
-      })
+      const list = response.map((entryData) => DailyBalanceEntry.buildFromData(entryData))
       setBalance(list)
     })
-
     getCustomerNames().then((response: CustomerType[]) => {
-      const list = buildReportCustomerNamesList(response)
-      setCustomerNames(list)
+      setCustomerNames(buildReportCustomerNamesList(response))
     })
-
+    getAllEvents().then((response: { event_id: number; event_name: string }[]) => {
+      setEventOptions(response.map((e) => ({ value: String(e.event_id), label: e.event_name })))
+    })
   }, [])
 
-  const handleOnChange = (customerId: string) => {
-    getCustomerPayments(customerId)
-      .then((response: CustomerPayment[]) => {
-        const list: CustomerPayment[] = []
-        response.map((entryData: CustomerPayment) => {
-          return list.push(CustomerPayment.buildFromData(entryData))
-        })
-        setPaymentsByCustomer(list)
-      })
+  const handleCustomerChange = (customerId: string) => {
+    getCustomerPayments(customerId).then((response: CustomerPayment[]) => {
+      setPaymentsByCustomer(response.map((entryData) => CustomerPayment.buildFromData(entryData)))
+    })
   }
+
+  const handleEventSelect = useCallback(
+    async (eventId: string | null) => {
+      if (!eventId) return
+      const eventName = eventOptions.find((o) => o.value === eventId)?.label ?? ""
+      const orders = await getOrders(Number(eventId))
+      const { rows, total } = buildSoldProductRows(orders, eventName)
+      setSoldProductsRows(rows)
+      setSoldProductsTotal(DecimalFormatter.format(total))
+    },
+    [eventOptions]
+  )
 
   return (
     <Box p={7}>
@@ -58,130 +66,32 @@ function Reports() {
           <Tabs.Tab value="first">Sumário de eventos</Tabs.Tab>
           <Tabs.Tab value="second">Balanço últimos 7 dias</Tabs.Tab>
           <Tabs.Tab value="third">Pedidos pagos por cliente</Tabs.Tab>
+          <Tabs.Tab value="fourth">Produtos vendidos</Tabs.Tab>
         </Tabs.List>
-
         <Tabs.Panel value="first">
-          <Flex
-            direction="column"
-            align="center"
-            mb={10}
-          >
-            <Title>Sumário dos eventos cadastrados</Title>
-            <Title order={2}>
-              Valor apurado até o momento: {summaryRows.getFormattedLiquidFounds()}
-            </Title>
-          </Flex>
-          <Table
-            bg="var(--secondary-background-color)"
-            striped
-            withColumnBorders
-            withBorder
-          >
-            <thead>
-              <tr>
-                <th>EVENTO</th>
-                <th>ABERTURA DO CAIXA</th>
-                <th>DATA DO EVENTO</th>
-                <th>ENTRADAS</th>
-                <th>DESPESAS</th>
-                <th>EM ABERTO</th>
-                <th>TOTAL BRUTO</th>
-                <th>TOTAL LÍQUIDO</th>
-              </tr>
-            </thead>
-            <tbody>
-              {summaryRows.map((event: ReportEntry) => (
-                <tr key={event.event_id}>
-                  <td>{event.event_name}</td>
-                  <td>{event.getFormattedOpenAmount()}</td>
-                  <td>{event.getFormattedCreatedAt()}</td>
-                  <td>{event.getFormattedIncoming()}</td>
-                  <td>{event.getFormattedOutgoing()}</td>
-                  <td>{event.getFormattedDebits()}</td>
-                  <td>{event.getFormattedBalance()}</td>
-                  <td>{event.getFormattedLiquidFunds()}</td>
-                </tr>
-              ))}
-            </tbody>
-          </Table>
+          <ReportSummariesTab summaryRows={summaryRows} />
         </Tabs.Panel>
         <Tabs.Panel value="second">
-
-          <Center>
-            <Title>Balanço dos últimos 7 dias</Title>
-          </Center>
-          <Table
-            bg="var(--secondary-background-color)"
-            striped
-            withColumnBorders
-            withBorder
-          >
-            <thead>
-              <tr>
-                <th>DATA</th>
-                <th>ENTRADAS</th>
-                <th>DESPESAS</th>
-              </tr>
-            </thead>
-            <tbody>
-              {balance.map((event: DailyBalanceEntry, index: number) => (
-                <tr key={index}>
-                  <td>{event.getFormattedDate()}</td>
-                  <td>{event.getFormattedIncoming()}</td>
-                  <td>{event.getFormattedOutgoing()}</td>
-                </tr>
-              ))}
-            </tbody>
-          </Table>
+          <ReportBalanceTab balance={balance} />
         </Tabs.Panel>
         <Tabs.Panel value="third">
-          <Center>
-            <Title>Pagamentos por cliente</Title>
-          </Center>
-          <Select
-            size="md"
-            data={customerNames}
-            creatable
-            searchable
-            label="Selecione o cliente"
-            placeholder="Digite o nome do cliente"
-            withAsterisk
-            onChange={handleOnChange}
+          <ReportPaymentsByCustomerTab
+            customerNames={customerNames}
+            paymentsByCustomer={paymentsByCustomer}
+            onCustomerChange={handleCustomerChange}
           />
-          <Space mt="xl" />
-          <Table
-            bg="var(--secondary-background-color)"
-            striped
-            withColumnBorders
-            withBorder
-          >
-            <thead>
-              <tr>
-                <th>PEDIDO(S)</th>
-                <th>PAGO EM</th>
-                <th>PRODUTO</th>
-                <th>PREÇO</th>
-                <th>QUANTIDADE</th>
-                <th>SUBTOTAL</th>
-              </tr>
-            </thead>
-            <tbody>
-              {paymentsByCustomer.map((payment: CustomerPayment, index: number) => (
-                <tr key={index}>
-                  <td>{payment.getFormattedOrderDate()}</td>
-                  <td>{payment.getFormattedPaymentDate()}</td>
-                  <td>{payment.product_name}</td>
-                  <td>{payment.getFormattedPrice()}</td>
-                  <td>{payment.product_quantity}</td>
-                  <td>{payment.getFormattedSubTotal()}</td>
-                </tr>
-              ))}
-            </tbody>
-          </Table>
+        </Tabs.Panel>
+        <Tabs.Panel value="fourth">
+          <ReportSoldProductsTab
+            eventOptions={eventOptions}
+            soldProductsRows={soldProductsRows}
+            soldProductsTotal={soldProductsTotal}
+            onEventSelect={handleEventSelect}
+          />
         </Tabs.Panel>
       </Tabs>
     </Box>
-  );
+  )
 }
 
 export default Reports

@@ -1,0 +1,63 @@
+import { Center, Select, Space, Table, Title } from "@mantine/core"
+import CustomerPayment from "../../../models/CustomerPayment"
+import { CustomerNamesOptionType } from "../../../models/Customer"
+
+interface ReportPaymentsByCustomerTabProps {
+  customerNames: CustomerNamesOptionType[]
+  paymentsByCustomer: CustomerPayment[]
+  onCustomerChange: (customerId: string) => void
+}
+
+export default function ReportPaymentsByCustomerTab({
+  customerNames,
+  paymentsByCustomer,
+  onCustomerChange,
+}: ReportPaymentsByCustomerTabProps) {
+  return (
+    <>
+      <Center>
+        <Title>Pagamentos por cliente</Title>
+      </Center>
+      <Select
+        size="md"
+        data={customerNames}
+        creatable
+        searchable
+        label="Selecione o cliente"
+        placeholder="Digite o nome do cliente"
+        withAsterisk
+        onChange={onCustomerChange}
+      />
+      <Space mt="xl" />
+      <Table
+        bg="var(--secondary-background-color)"
+        striped
+        withColumnBorders
+        withBorder
+      >
+        <thead>
+          <tr>
+            <th>PEDIDO(S)</th>
+            <th>PAGO EM</th>
+            <th>PRODUTO</th>
+            <th>PREÇO</th>
+            <th>QUANTIDADE</th>
+            <th>SUBTOTAL</th>
+          </tr>
+        </thead>
+        <tbody>
+          {paymentsByCustomer.map((payment: CustomerPayment, index: number) => (
+            <tr key={index}>
+              <td>{payment.getFormattedOrderDate()}</td>
+              <td>{payment.getFormattedPaymentDate()}</td>
+              <td>{payment.product_name}</td>
+              <td>{payment.getFormattedPrice()}</td>
+              <td>{payment.product_quantity}</td>
+              <td>{payment.getFormattedSubTotal()}</td>
+            </tr>
+          ))}
+        </tbody>
+      </Table>
+    </>
+  )
+}
