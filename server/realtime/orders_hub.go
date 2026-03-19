@@ -56,13 +56,12 @@ func Unregister(eventID int, cc *clientConn) {
 	}
 }
 
-// NotifyOrdersChanged envia um aviso leve para todos os clientes inscritos no evento.
-func NotifyOrdersChanged(eventID int) {
+func broadcast(eventID int, typ string) {
 	if eventID <= 0 {
 		return
 	}
 	payload, err := json.Marshal(map[string]any{
-		"type":     "orders_changed",
+		"type":     typ,
 		"event_id": eventID,
 	})
 	if err != nil {
@@ -80,4 +79,14 @@ func NotifyOrdersChanged(eventID int) {
 	for _, cc := range list {
 		_ = cc.writeText(payload)
 	}
+}
+
+// NotifyOrderCreated avisa que um pedido novo foi registrado (ex.: notificação na cozinha).
+func NotifyOrderCreated(eventID int) {
+	broadcast(eventID, "order_created")
+}
+
+// NotifyOrdersChanged avisa outras alterações (entrega, exclusão, pagamento, etc.).
+func NotifyOrdersChanged(eventID int) {
+	broadcast(eventID, "orders_changed")
 }

@@ -111,7 +111,7 @@ func (c *OrderController) CreateOrder(f *fiber.Ctx) error {
 		Preload(clause.Associations).Find(&order)
 	transaction.Commit()
 
-	realtime.NotifyOrdersChanged(payload.EventID)
+	realtime.NotifyOrderCreated(payload.EventID)
 
 	return f.JSON(order)
 
