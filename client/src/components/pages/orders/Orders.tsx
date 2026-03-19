@@ -24,9 +24,7 @@ function Orders() {
   useOrdersSocket(eventId, fetchOrders)
 
   const handleOnClick = (id: number) => {
-    deliveryOrder(id).then(() => {
-      setOrders(orders.filter((order) => order.order_id != id))
-    })
+    deliveryOrder(id).then(() => fetchOrders())
   }
 
   return (

@@ -20,9 +20,9 @@ func Authorize() fiber.Handler {
 		allowed := false
 		if method == "GET" {
 			switch {
-			case path == "/api/ws":
-				allowed = true
 			case path == "/api/auth/me":
+				allowed = true
+			case strings.HasPrefix(path, "/api/ws/orders"):
 				allowed = true
 			case path == "/api/events" || strings.HasPrefix(path, "/api/events/"):
 				allowed = true

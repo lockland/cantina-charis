@@ -1,53 +1,54 @@
 import { useEffect, useRef } from "react"
 
-type NewOrderMessage = { type: string; event_id: number }
-
-const WS_OPEN = 1
-
-/**
- * Conecta ao WebSocket e chama onNewOrder quando um novo pedido for cadastrado
- * ou uma ordem for paga no evento atual (eventId).
- */
-export function useOrdersSocket(eventId: number, onNewOrder: () => void) {
-  const onNewOrderRef = useRef(onNewOrder)
-  onNewOrderRef.current = onNewOrder
-  const cancelledRef = useRef(false)
+export function useOrdersSocket(eventId: number, onRefresh: () => void) {
+  const onRefreshRef = useRef(onRefresh)
+  onRefreshRef.current = onRefresh
 
   useEffect(() => {
     if (!eventId) return
 
-    cancelledRef.current = false
-    const protocol = window.location.protocol === "https:" ? "wss:" : "ws:"
-    const wsUrl = `${protocol}//${window.location.host}/api/ws`
-    // Auth via cookie only; no credentials in URL
-    const socket = new WebSocket(wsUrl)
+    let ws: WebSocket | null = null
+    let retry = 0
+    let cancelled = false
+    let reconnectTimer: number | undefined
 
-    socket.onopen = () => {
-      if (cancelledRef.current) {
-        socket.close()
+    const connect = () => {
+      const proto = window.location.protocol === "https:" ? "wss:" : "ws:"
+      const url = `${proto}//${window.location.host}/api/ws/orders?event_id=${eventId}`
+      ws = new WebSocket(url)
+
+      ws.onopen = () => {
+        retry = 0
       }
-    }
 
-    socket.onmessage = (event) => {
-      if (cancelledRef.current) return
-      try {
-        const data: NewOrderMessage = JSON.parse(event.data)
-        const sameEvent = Number(data.event_id) === Number(eventId)
-        if (sameEvent && (data.type === "new_order" || data.type === "order_paid" || data.type === "order_deleted")) {
-          onNewOrderRef.current()
+      ws.onmessage = (ev) => {
+        try {
+          const msg = JSON.parse(ev.data as string) as { type?: string; event_id?: number }
+          if (msg?.type === "orders_changed" && Number(msg.event_id) === eventId) {
+            onRefreshRef.current()
+          }
+        } catch {
+          /* ignore malformed */
         }
-      } catch {
-        // ignora mensagens inválidas
+      }
+
+      ws.onclose = () => {
+        if (cancelled) return
+        const delay = Math.min(30_000, 1000 * 2 ** Math.min(retry, 5))
+        retry += 1
+        reconnectTimer = window.setTimeout(connect, delay)
+      }
+
+      ws.onerror = () => {
+        ws?.close()
       }
     }
 
+    connect()
     return () => {
-      cancelledRef.current = true
-      if (socket.readyState === WS_OPEN) {
-        socket.close()
-      }
-      // Se ainda CONNECTING, não chama close() aqui (evita erro no console).
-      // Ao abrir, onopen verá cancelledRef e fechará o socket.
+      cancelled = true
+      if (reconnectTimer !== undefined) window.clearTimeout(reconnectTimer)
+      ws?.close()
     }
   }, [eventId])
 }
