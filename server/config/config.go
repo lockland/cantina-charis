@@ -3,6 +3,7 @@ package config
 import (
 	"errors"
 	"path/filepath"
+	"strconv"
 	"strings"
 	"time"
 
@@ -11,6 +12,7 @@ import (
 	"github.com/gofiber/fiber/v2/middleware/cors"
 	"github.com/lockland/cantina-charis/server/controllers"
 	"github.com/lockland/cantina-charis/server/middleware"
+	"github.com/lockland/cantina-charis/server/realtime"
 )
 
 const viewsIndex = "./views/index.html"
@@ -55,7 +57,6 @@ func FiberConfig() fiber.Config {
 func Configure(app *fiber.App) {
 	useCors(app)
 	useAuthAndAuthorize(app)
-	setupWebSocket(app)
 	setupApiRoutes(app)
 	setupSPAAndStatic(app)
 }
@@ -68,25 +69,6 @@ func useCors(app *fiber.App) {
 	app.Use(cors.New(cors.ConfigDefault))
 }
 
-func setupWebSocket(app *fiber.App) {
-	app.Use("/api/ws", func(c *fiber.Ctx) error {
-		if websocket.IsWebSocketUpgrade(c) {
-			c.Locals("allowed", true)
-			return c.Next()
-		}
-		return fiber.ErrUpgradeRequired
-	})
-	app.Get("/api/ws", websocket.New(func(c *websocket.Conn) {
-		ws.DefaultHub.Register(c)
-		defer ws.DefaultHub.Unregister(c)
-		for {
-			if _, _, err := c.ReadMessage(); err != nil {
-				break
-			}
-		}
-	}))
-}
-
 // setupApiRoutes registra rotas sob /api com Auth+Authorize.
 // Ordem: rotas fixas antes de rotas com parâmetros (recomendado em https://docs.gofiber.io/v2.x/guide/routing).
 func setupApiRoutes(app *fiber.App) {
@@ -97,6 +79,30 @@ func setupApiRoutes(app *fiber.App) {
 		username, _ := c.Locals("username").(string)
 		return c.JSON(fiber.Map{"role": role, "username": username})
 	})
+
+	api.Get("/ws/orders", func(c *fiber.Ctx) error {
+		if websocket.IsWebSocketUpgrade(c) {
+			return c.Next()
+		}
+		return fiber.ErrUpgradeRequired
+	}, websocket.New(func(c *websocket.Conn) {
+		eventID, err := strconv.Atoi(c.Query("event_id"))
+		if err != nil || eventID <= 0 {
+			_ = c.Close()
+			return
+		}
+		cc := realtime.Register(eventID, c)
+		if cc == nil {
+			_ = c.Close()
+			return
+		}
+		defer realtime.Unregister(eventID, cc)
+		for {
+			if _, _, err := c.ReadMessage(); err != nil {
+				break
+			}
+		}
+	}))
 
 	orderController := controllers.NewOrderController()
 	api.Post("/orders", orderController.CreateOrder)

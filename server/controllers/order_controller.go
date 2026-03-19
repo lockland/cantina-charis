@@ -4,6 +4,7 @@ import (
 	"github.com/gofiber/fiber/v2"
 	"github.com/lockland/cantina-charis/server/database"
 	"github.com/lockland/cantina-charis/server/models"
+	"github.com/lockland/cantina-charis/server/realtime"
 	"github.com/shopspring/decimal"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
@@ -110,6 +111,8 @@ func (c *OrderController) CreateOrder(f *fiber.Ctx) error {
 		Preload(clause.Associations).Find(&order)
 	transaction.Commit()
 
+	realtime.NotifyOrdersChanged(payload.EventID)
+
 	return f.JSON(order)
 
 }
@@ -181,19 +184,24 @@ func (c *OrderController) DeleteOrder(f *fiber.Ctx) error {
 	tx.Model(customer).Update("DebitValue", customer.DebitValue)
 	tx.Commit()
 
+	eventID := order.EventID
+	realtime.NotifyOrdersChanged(eventID)
+
 	return f.Status(fiber.StatusOK).JSON(fiber.Map{"order_id": id})
 }
 
 func (c *OrderController) DeliveryOrder(f *fiber.Ctx) error {
 	id, err := f.ParamsInt("id")
-	order := &models.Order{
-		ID: id,
-	}
-
 	if err != nil {
-		return f.Status(401).SendString("Invalid id")
+		return f.Status(fiber.StatusBadRequest).SendString("Invalid id")
 	}
 
-	database.Conn.Model(&order).Update("Deliveried", true)
+	var existing models.Order
+	if err := database.Conn.Select("id", "event_id").First(&existing, id).Error; err != nil {
+		return f.Status(fiber.StatusNotFound).SendString("Order not found")
+	}
+
+	database.Conn.Model(&models.Order{ID: id}).Update("Deliveried", true)
+	realtime.NotifyOrdersChanged(existing.EventID)
 	return f.Status(fiber.StatusOK).JSON(fiber.Map{"order_id": id})
 }
