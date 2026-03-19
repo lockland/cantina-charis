@@ -3,19 +3,15 @@ package config
 import (
 	"time"
 
-	"github.com/gofiber/contrib/websocket"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/cors"
 	"github.com/lockland/cantina-charis/server/controllers"
 	"github.com/lockland/cantina-charis/server/database"
 	"github.com/lockland/cantina-charis/server/middleware"
-	"github.com/lockland/cantina-charis/server/ws"
 )
 
 func Configure(app *fiber.App) {
-	ws.DefaultHub = ws.NewHub()
 	useCors(app)
-	setupWebSocket(app)
 	setupApiRoutes(app)
 	setupStaticRoutesWithAuth(app)
 	setupHealthCheckRoute(app)
@@ -23,25 +19,6 @@ func Configure(app *fiber.App) {
 
 func useCors(app *fiber.App) {
 	app.Use(cors.New(cors.ConfigDefault))
-}
-
-func setupWebSocket(app *fiber.App) {
-	app.Use("/api/ws", middleware.Auth(), middleware.Authorize(), func(c *fiber.Ctx) error {
-		if websocket.IsWebSocketUpgrade(c) {
-			c.Locals("allowed", true)
-			return c.Next()
-		}
-		return fiber.ErrUpgradeRequired
-	})
-	app.Get("/api/ws", websocket.New(func(c *websocket.Conn) {
-		ws.DefaultHub.Register(c)
-		defer ws.DefaultHub.Unregister(c)
-		for {
-			if _, _, err := c.ReadMessage(); err != nil {
-				break
-			}
-		}
-	}))
 }
 
 func setupApiRoutes(app *fiber.App) {

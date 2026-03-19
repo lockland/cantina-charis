@@ -1,12 +1,9 @@
 package controllers
 
 import (
-	"encoding/json"
-
 	"github.com/gofiber/fiber/v2"
 	"github.com/lockland/cantina-charis/server/database"
 	"github.com/lockland/cantina-charis/server/models"
-	"github.com/lockland/cantina-charis/server/ws"
 	"github.com/shopspring/decimal"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
@@ -113,11 +110,6 @@ func (c *OrderController) CreateOrder(f *fiber.Ctx) error {
 		Preload(clause.Associations).Find(&order)
 	transaction.Commit()
 
-	if ws.DefaultHub != nil {
-		msg, _ := json.Marshal(map[string]interface{}{"type": "new_order", "event_id": payload.EventID})
-		ws.DefaultHub.Broadcast(msg)
-	}
-
 	return f.JSON(order)
 
 }
@@ -158,11 +150,6 @@ func (c *OrderController) PayOrder(f *fiber.Ctx) error {
 	database.Conn.Save(order)
 	database.Conn.Model(customer).Update("DebitValue", customer.DebitValue)
 
-	if ws.DefaultHub != nil {
-		msg, _ := json.Marshal(map[string]interface{}{"type": "order_paid", "event_id": order.EventID})
-		ws.DefaultHub.Broadcast(msg)
-	}
-
 	return f.Status(fiber.StatusOK).JSON(fiber.Map{"order_id": id, "paid_value": order.PaidValue})
 }
 
@@ -177,7 +164,6 @@ func (c *OrderController) DeleteOrder(f *fiber.Ctx) error {
 		return f.Status(fiber.StatusNotFound).SendString("Order not found")
 	}
 
-	eventID := order.EventID
 	zero := decimal.NewFromInt(0)
 	residual := order.OrderAmount.Sub(order.PaidValue)
 	if residual.LessThan(zero) {
@@ -194,15 +180,6 @@ func (c *OrderController) DeleteOrder(f *fiber.Ctx) error {
 	}
 	tx.Model(customer).Update("DebitValue", customer.DebitValue)
 	tx.Commit()
-
-	if ws.DefaultHub != nil {
-		msg, _ := json.Marshal(map[string]interface{}{
-			"type":     "order_deleted",
-			"event_id": eventID,
-			"order_id": id,
-		})
-		ws.DefaultHub.Broadcast(msg)
-	}
 
 	return f.Status(fiber.StatusOK).JSON(fiber.Map{"order_id": id})
 }

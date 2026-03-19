@@ -4,7 +4,7 @@ Ref: https://www.youtube.com/watch?v=QevhhM_QfbM&ab_channel=TomDoesTech
 
 ## Autenticação (Basic Auth + cookie)
 
-O servidor usa Basic Auth com dois usuários fixos: `admin` e `viewer`. A senha de cada um é definida por variáveis de ambiente. O viewer só pode acessar a tela de pedidos (`/orders`) e as APIs necessárias (GET events, GET events/:id/orders, WebSocket). O login é o diálogo nativo do navegador; credenciais não são enviadas na URL (WebSocket usa cookie de sessão).
+O servidor usa Basic Auth com dois usuários fixos: `admin` e `viewer`. A senha de cada um é definida por variáveis de ambiente. O viewer só pode acessar a tela de pedidos (`/orders`) e as APIs necessárias (GET events, GET events/:id/orders, etc.). O login é o diálogo nativo do navegador; credenciais não são enviadas na URL (sessão via cookie).
 
 Variáveis de ambiente:
 
