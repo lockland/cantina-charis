@@ -10,7 +10,6 @@ import (
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/cors"
 	"github.com/lockland/cantina-charis/server/controllers"
-	"github.com/lockland/cantina-charis/server/database"
 	"github.com/lockland/cantina-charis/server/middleware"
 	"github.com/lockland/cantina-charis/server/ws"
 )
@@ -57,10 +56,14 @@ func FiberConfig() fiber.Config {
 func Configure(app *fiber.App) {
 	ws.DefaultHub = ws.NewHub()
 	useCors(app)
+	useAuthAndAuthorize(app)
 	setupWebSocket(app)
 	setupApiRoutes(app)
-	setupHealthCheckRoute(app)
 	setupSPAAndStatic(app)
+}
+
+func useAuthAndAuthorize(app *fiber.App) {
+	app.Use(middleware.Auth(), middleware.Authorize())
 }
 
 func useCors(app *fiber.App) {
@@ -68,7 +71,7 @@ func useCors(app *fiber.App) {
 }
 
 func setupWebSocket(app *fiber.App) {
-	app.Use("/api/ws", middleware.Auth(), middleware.Authorize(), func(c *fiber.Ctx) error {
+	app.Use("/api/ws", func(c *fiber.Ctx) error {
 		if websocket.IsWebSocketUpgrade(c) {
 			c.Locals("allowed", true)
 			return c.Next()
@@ -89,7 +92,7 @@ func setupWebSocket(app *fiber.App) {
 // setupApiRoutes registra rotas sob /api com Auth+Authorize.
 // Ordem: rotas fixas antes de rotas com parâmetros (recomendado em https://docs.gofiber.io/v2.x/guide/routing).
 func setupApiRoutes(app *fiber.App) {
-	api := app.Group("/api", middleware.Auth(), middleware.Authorize())
+	api := app.Group("/api")
 
 	api.Get("/auth/me", func(c *fiber.Ctx) error {
 		role, _ := c.Locals("role").(string)
@@ -152,19 +155,7 @@ func setupSPAAndStatic(app *fiber.App) {
 		CacheDuration: 10 * time.Second,
 		MaxAge:        3600,
 	})
+
 	app.Get("/", serveSPAOrStatic)
 	app.Get("/*", serveSPAOrStatic)
-}
-
-func setupHealthCheckRoute(app *fiber.App) {
-
-	app.Get("/heathcheck", func(c *fiber.Ctx) error {
-		status := "ok"
-
-		if database.Conn == nil {
-			status = "fail"
-		}
-
-		return c.SendString(status)
-	})
 }
