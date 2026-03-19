@@ -15,7 +15,7 @@ func main() {
 
 	database.Connect(*dbPath)
 
-	app := fiber.New()
+	app := fiber.New(config.FiberConfig())
 
 	config.Configure(app)
 
