@@ -34,6 +34,10 @@ func Authorize() fiber.Handler {
 			}
 		}
 
+		if method == "PUT" && strings.Contains(path, "/done") {
+			allowed = true
+		}
+
 		if !allowed {
 			return c.Status(http.StatusForbidden).SendString("Forbidden")
 		}
