@@ -1,6 +1,10 @@
 import { Box, Button, Group, Space, Table, Text, Textarea, Title } from "@mantine/core";
 import { deliveryOrder, getPendingOrders } from "../../../hooks/useAPI";
 import { useOrdersSocket } from "../../../hooks/useOrdersSocket";
+import {
+  notifyNewOrderFromCashRegister,
+  primeKitchenAudioFromUserGesture,
+} from "../../../helpers/newOrderKitchenSignal";
 import CustomSimpleGrid from "../../CustomSimpleGrid";
 import { useCallback, useEffect, useState } from "react";
 import Order, { OrderListItem } from "../../../models/Order";
@@ -21,14 +25,26 @@ function Orders() {
     fetchOrders()
   }, [fetchOrders])
 
-  useOrdersSocket(eventId, fetchOrders)
+  useEffect(() => {
+    const unlock = () => {
+      primeKitchenAudioFromUserGesture()
+    }
+    window.addEventListener("pointerdown", unlock)
+    return () => window.removeEventListener("pointerdown", unlock)
+  }, [])
+
+  useOrdersSocket(eventId, fetchOrders, notifyNewOrderFromCashRegister)
 
   const handleOnClick = (id: number) => {
     deliveryOrder(id).then(() => fetchOrders())
   }
 
   return (
-    <CustomSimpleGrid cols={5}>
+    <Box>
+      <Text size="sm" c="dimmed" mb="sm">
+        Toque ou clique uma vez nesta página para ativar o som de novo pedido (exigência do navegador).
+      </Text>
+      <CustomSimpleGrid cols={5}>
       {orders.map((order: OrderListItem, index: number) => {
         return (
           <Box key={index}>
@@ -78,7 +94,8 @@ function Orders() {
       }
       )}
 
-    </CustomSimpleGrid>
+      </CustomSimpleGrid>
+    </Box>
   );
 }
 
