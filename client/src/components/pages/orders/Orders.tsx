@@ -1,5 +1,6 @@
 import { Box, Button, Group, Space, Table, Text, Textarea, Title } from "@mantine/core";
 import { deliveryOrder, getPendingOrders } from "../../../hooks/useAPI";
+import { useOrdersSocket } from "../../../hooks/useOrdersSocket";
 import CustomSimpleGrid from "../../CustomSimpleGrid";
 import { useCallback, useEffect, useState } from "react";
 import Order, { OrderListItem } from "../../../models/Order";
@@ -20,19 +21,10 @@ function Orders() {
     fetchOrders()
   }, [fetchOrders])
 
-  // Atualização periódica (substitui WebSocket removido).
-  useEffect(() => {
-    if (!eventId) return
-    const id = window.setInterval(() => {
-      fetchOrders()
-    }, 8000)
-    return () => window.clearInterval(id)
-  }, [eventId, fetchOrders])
+  useOrdersSocket(eventId, fetchOrders)
 
   const handleOnClick = (id: number) => {
-    deliveryOrder(id).then(() => {
-      setOrders(orders.filter((order) => order.order_id != id))
-    })
+    deliveryOrder(id).then(() => fetchOrders())
   }
 
   return (
