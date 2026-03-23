@@ -31,6 +31,7 @@ function OrdersCardList() {
           customer_name={order.customer?.customer_name ?? ""}
           order_amount={String(order.order_amount ?? 0)}
           paid_value={String(order.paid_value ?? 0)}
+          observation={order.observation ?? ""}
           deliveried={order.deliveried}
           onPaid={fetchOrders}
           onDeleted={fetchOrders}

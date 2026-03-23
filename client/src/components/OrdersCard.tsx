@@ -1,5 +1,5 @@
 import { Box, Button, CloseButton, Divider, Text, Tooltip } from "@mantine/core"
-import { CreditCardIcon, CalendarIcon, CheckIcon } from "@primer/octicons-react"
+import { CreditCardIcon, CalendarIcon, CheckIcon, InfoIcon } from "@primer/octicons-react"
 import { useState } from "react"
 import DecimalFormatter from "../helpers/Decimal"
 import { payOrder, deleteOrder, deliveryOrder } from "../hooks/useAPI"
@@ -9,13 +9,14 @@ interface OrdersCardProps {
   customer_name: string
   order_amount: string
   paid_value: string
+  observation?: string
   deliveried?: boolean
   onPaid?: () => void
   onDeleted?: () => void
   onDelivered?: () => void
 }
 
-function OrdersCard({ orderId, customer_name, order_amount, paid_value, deliveried, onPaid, onDeleted, onDelivered }: OrdersCardProps) {
+function OrdersCard({ orderId, customer_name, order_amount, paid_value, observation, deliveried, onPaid, onDeleted, onDelivered }: OrdersCardProps) {
   const [loading, setLoading] = useState(false)
   const amount = parseFloat(String(order_amount ?? 0)) || 0
   const paid = parseFloat(String(paid_value ?? 0)) || 0
@@ -50,7 +51,7 @@ function OrdersCard({ orderId, customer_name, order_amount, paid_value, deliveri
       w="100%"
       bg={isPaid ? "var(--orders-card-paid-background-color)" : "var(--orders-card-background-color)"}
       py={15}
-      style={{ position: "relative", minWidth: 200}}
+      style={{ position: "relative", minWidth: 200 }}
     >
       <Box style={{ position: "absolute", top: 8, right: 8 }}>
         <Tooltip label="Cancelar pedido">
@@ -66,6 +67,14 @@ function OrdersCard({ orderId, customer_name, order_amount, paid_value, deliveri
       </Box>
       <Text align="center" weight={600} style={{ color: "#1a1a1a" }}>{customer_name}</Text>
       <Text align="center" weight={600} size="lg" style={{ color: "#1a1a1a" }}>{DecimalFormatter.format(amount)}</Text>
+      {observation && (
+        <Box style={{ display: "flex", flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 6 }}>
+          <InfoIcon size={12} fill="#470404" />
+          <Text align="center" size="md" color="#470404" weight={100} style={{ whiteSpace: "pre-wrap" }}>
+            {observation}
+          </Text>
+        </Box>
+      )}
       <Divider my={10} style={{ borderColor: "rgba(0,0,0,0.12)" }} />
       <Box mt="sm" style={{ display: "flex", flexDirection: "row", flexWrap: "nowrap", alignItems: "center", justifyContent: "center", gap: 8 }}>
         {isPaid ? (
@@ -75,7 +84,7 @@ function OrdersCard({ orderId, customer_name, order_amount, paid_value, deliveri
               aria-label="Sinalizar que o pedido já está pago"
               rightIcon={<CalendarIcon size={18} />}
             >
-            Pago
+              Pago
             </Button>
           </Tooltip>
         ) : (
@@ -102,7 +111,7 @@ function OrdersCard({ orderId, customer_name, order_amount, paid_value, deliveri
               aria-label="Marcar pedido como pronto para entrega"
               leftIcon={<CheckIcon size={18} />}
             >
-            Pronto
+              Pronto
             </Button>
           </Tooltip>
         )}
