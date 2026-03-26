@@ -15,6 +15,7 @@ export interface OrdersCardType {
   customer_id: number,
   order_amount: string,
   paid_value: any,
+  observation?: string,
   deliveried?: boolean,
   customer: {
     customer_id: number,
