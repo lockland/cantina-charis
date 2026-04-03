@@ -51,12 +51,12 @@ func (c *ReportController) GetSummaries(f *fiber.Ctx) error {
 			on outgoings.event_id = events.id
 		left join (
 				select
-					sum(order_amount) as debits,
+					sum(order_amount - paid_value) as debits,
 					event_id
 				from
 					orders
 				where
-					paid_value < order_amount
+					CAST(paid_value AS REAL) < CAST(order_amount AS REAL)
 				group by
 					event_id
 			) as debits
