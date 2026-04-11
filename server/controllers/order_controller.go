@@ -1,6 +1,8 @@
 package controllers
 
 import (
+	"time"
+
 	"github.com/gofiber/fiber/v2"
 	"github.com/lockland/cantina-charis/server/database"
 	"github.com/lockland/cantina-charis/server/models"
@@ -201,7 +203,10 @@ func (c *OrderController) DeliveryOrder(f *fiber.Ctx) error {
 		return f.Status(fiber.StatusNotFound).SendString("Order not found")
 	}
 
-	database.Conn.Model(&models.Order{ID: id}).Update("Deliveried", true)
+	database.Conn.Model(&models.Order{ID: id}).Updates(models.Order{
+		Deliveried: true,
+		DoneAt:     time.Now(),
+	})
 	realtime.NotifyOrdersChanged(existing.EventID)
 	return f.Status(fiber.StatusOK).JSON(fiber.Map{"order_id": id})
 }
