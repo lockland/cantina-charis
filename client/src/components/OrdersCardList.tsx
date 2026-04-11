@@ -33,6 +33,7 @@ function OrdersCardList() {
           paid_value={String(order.paid_value ?? 0)}
           observation={order.observation ?? ""}
           deliveried={order.deliveried}
+          created_at={order.created_at}
           onPaid={fetchOrders}
           onDeleted={fetchOrders}
           onDelivered={fetchOrders}
