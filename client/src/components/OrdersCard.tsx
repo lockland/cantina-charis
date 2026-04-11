@@ -11,12 +11,13 @@ interface OrdersCardProps {
   paid_value: string
   observation?: string
   deliveried?: boolean
+  created_at?: string
   onPaid?: () => void
   onDeleted?: () => void
   onDelivered?: () => void
 }
 
-function OrdersCard({ orderId, customer_name, order_amount, paid_value, observation, deliveried, onPaid, onDeleted, onDelivered }: OrdersCardProps) {
+function OrdersCard({ orderId, customer_name, order_amount, paid_value, observation, deliveried, created_at, onPaid, onDeleted, onDelivered }: OrdersCardProps) {
   const [loading, setLoading] = useState(false)
   const amount = parseFloat(String(order_amount ?? 0)) || 0
   const paid = parseFloat(String(paid_value ?? 0)) || 0
@@ -66,7 +67,12 @@ function OrdersCard({ orderId, customer_name, order_amount, paid_value, observat
         </Tooltip>
       </Box>
       <Text align="center" weight={600} style={{ color: "#1a1a1a" }}>{customer_name}</Text>
-      <Text align="center" weight={600} size="lg" style={{ color: "#1a1a1a" }}>{DecimalFormatter.format(amount)}</Text>
+      {created_at && (
+        <Text align="center" size="sm" weight={600} color="#14213d">
+          Criado em: {new Date(created_at).toLocaleString("pt-BR")}
+        </Text>
+      )}
+      <Text align="center" weight={600} size={"lg"} style={{ color: "#1a1a1a" }}>{DecimalFormatter.format(amount)}</Text>
       {observation && (
         <Box style={{ display: "flex", flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 6 }}>
           <InfoIcon size={12} fill="#470404" />
