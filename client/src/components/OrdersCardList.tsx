@@ -3,7 +3,7 @@ import { useOrdersSocket } from "../hooks/useOrdersSocket"
 import OrdersCard from "./OrdersCard"
 import OrdersCustomerCard from "./OrdersCustomerCard"
 import CustomSimpleGrid from "./CustomSimpleGrid"
-import { useCallback, useEffect, useMemo, useState } from "react"
+import { useCallback, useEffect, useMemo, useState, type ReactElement } from "react"
 import { useCookiesHook } from "../hooks/useCookiesHook"
 import { OrdersCardType } from "../models/Order"
 
@@ -26,7 +26,7 @@ function OrdersCardList() {
     })
   }, [eventId])
 
-  const groupedOrders = useMemo(() => {
+  const groupByCustomerId = useMemo(() => {
     const groups = new Map<number, OrderGroup>()
 
     orders.forEach((order) => {
@@ -54,16 +54,16 @@ function OrdersCardList() {
       groups.set(customerId, nextGroup)
     })
 
-    return Array.from(groups.values())
+    return groups
   }, [orders])
 
-  const toggleCustomerMerge = (customerId: number) => {
+  const toggleCustomerMerge = useCallback((customerId: number) => {
     setMergedCustomerIds((current) =>
       current.includes(customerId)
         ? current.filter((id) => id !== customerId)
         : [...current, customerId]
     )
-  }
+  }, [])
 
   useEffect(() => {
     fetchOrders()
@@ -71,47 +71,60 @@ function OrdersCardList() {
 
   useOrdersSocket(eventId, fetchOrders)
 
-  return (
-    <CustomSimpleGrid m={10} cols={4}>
-      {groupedOrders.flatMap((group) => {
-        const isMerged = mergedCustomerIds.includes(group.customer_id)
-        const ordersForCustomer = orders.filter((order) => order.customer_id === group.customer_id)
+  const cards = useMemo(() => {
+    const mergedEmitted = new Set<number>()
+    const nodes: ReactElement[] = []
 
-        if (isMerged) {
-          return [
-            <OrdersCustomerCard
-              key={`group-${group.customer_id}`}
-              customer_name={group.customer_name}
-              orderIds={group.orderIds}
-              orderCount={group.orderIds.length}
-              totalAmount={group.totalAmount}
-              totalPaid={group.totalPaid}
-              onPaid={fetchOrders}
-              onUnmerge={() => toggleCustomerMerge(group.customer_id)}
-            />,
-          ]
+    for (const order of orders) {
+      const customerId = order.customer_id
+      const group = groupByCustomerId.get(customerId)
+      if (!group) {
+        continue
+      }
+
+      if (mergedCustomerIds.includes(customerId)) {
+        if (mergedEmitted.has(customerId)) {
+          continue
         }
-
-        return ordersForCustomer.map((order: OrdersCardType, index: number) => (
-          <OrdersCard
-            key={order.order_id ?? `${group.customer_id}-${index}`}
-            orderId={order.order_id ?? 0}
-            customer_name={order.customer?.customer_name ?? ""}
-            order_amount={String(order.order_amount ?? 0)}
-            paid_value={String(order.paid_value ?? 0)}
-            observation={order.observation ?? ""}
-            deliveried={order.deliveried}
-            created_at={order.created_at}
+        mergedEmitted.add(customerId)
+        nodes.push(
+          <OrdersCustomerCard
+            key={`group-${customerId}`}
+            customer_name={group.customer_name}
+            orderIds={group.orderIds}
+            orderCount={group.orderIds.length}
+            totalAmount={group.totalAmount}
+            totalPaid={group.totalPaid}
             onPaid={fetchOrders}
-            onDeleted={fetchOrders}
-            onDelivered={fetchOrders}
-            canMerge={group.orderIds.length > 1}
-            onMergeCustomer={() => toggleCustomerMerge(group.customer_id)}
+            onUnmerge={() => toggleCustomerMerge(customerId)}
           />
-        ))
-      })}
-    </CustomSimpleGrid>
-  )
+        )
+        continue
+      }
+
+      nodes.push(
+        <OrdersCard
+          key={order.order_id ?? `ord-${customerId}-${nodes.length}`}
+          orderId={order.order_id ?? 0}
+          customer_name={order.customer?.customer_name ?? ""}
+          order_amount={String(order.order_amount ?? 0)}
+          paid_value={String(order.paid_value ?? 0)}
+          observation={order.observation ?? ""}
+          deliveried={order.deliveried}
+          created_at={order.created_at}
+          onPaid={fetchOrders}
+          onDeleted={fetchOrders}
+          onDelivered={fetchOrders}
+          canMerge={group.orderIds.length > 1}
+          onMergeCustomer={() => toggleCustomerMerge(customerId)}
+        />
+      )
+    }
+
+    return nodes
+  }, [orders, groupByCustomerId, mergedCustomerIds, fetchOrders, toggleCustomerMerge])
+
+  return <CustomSimpleGrid m={10} cols={4}>{cards}</CustomSimpleGrid>
 }
 
 export default OrdersCardList
