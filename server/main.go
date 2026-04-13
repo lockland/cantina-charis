@@ -3,6 +3,7 @@ package main
 import (
 	"flag"
 	"log"
+	"os"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/lockland/cantina-charis/server/config"
@@ -11,6 +12,7 @@ import (
 
 func main() {
 	dbPath := flag.String("db", "./cantina.db", "caminho do arquivo do banco SQLite")
+	serverPort := flag.String("port", "8080", "porta do servidor HTTP")
 	flag.Parse()
 
 	database.Connect(*dbPath)
@@ -19,5 +21,10 @@ func main() {
 
 	config.Configure(app)
 
-	log.Fatal(app.Listen(":8080"))
+	port := os.Getenv("API_PORT")
+	if port == "" {
+		port = *serverPort
+	}
+
+	log.Fatal(app.Listen(":" + port))
 }
