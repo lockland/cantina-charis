@@ -12,8 +12,22 @@
   --primary-background-color: #213547;
   --initial-page-background: #293d55;
   --generic-blue: #2C406E;
-  --orders-card-background-color: #027A7B;
-  --orders-card-paid-background-color: #b8e0b8;
+  --orders-card-background-color: #027a7b;
+  --orders-card-paid-background-color: #c8e8c8;
+  /* Texto sobre cartão teal (pendente) — título verde-claro; linhas secundárias brancas como no mock */
+  --orders-card-teal-title-color: #b9fbc0;
+  --orders-card-on-teal-primary: #ffffff;
+  --orders-card-on-teal-secondary: #ffffff;
+  --orders-card-on-teal-subtle: rgba(255, 255, 255, 0.88);
+  /* Legibilidade do branco sobre o teal (label + data em duas linhas) */
+  /* Mais fino: combina com tipo xs em cartões estreitos (~1366px / 4 colunas) */
+  --orders-card-on-teal-text-shadow: 0 0.5px 1.5px rgba(0, 0, 0, 0.72);
+  /* Texto sobre cartão verde claro (pago) — tinta escura neutra para título/valor; cinza para “Criado em” */
+  --orders-card-paid-ink: #1a1a1a;
+  --orders-card-paid-secondary: #3d3d3d;
+  --orders-card-paid-muted: #4a4a4a;
+  --orders-card-divider-on-teal: rgba(255, 255, 255, 0.22);
+  --orders-card-divider-on-paid: rgba(0, 0, 0, 0.1);
   --secondary-background-color: #93B4D7;
   --button-color: #0505b8;
   --main-color: azure;
