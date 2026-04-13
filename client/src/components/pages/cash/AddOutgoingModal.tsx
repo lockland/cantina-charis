@@ -1,6 +1,7 @@
 import { Box, Button, Group, Modal, NumberInput, Select } from "@mantine/core"
 import { useForm } from "@mantine/form"
 import { useDisclosure, useMediaQuery } from "@mantine/hooks"
+import { showNotification } from "@mantine/notifications"
 import { RealIcon } from "./RealIcon"
 import { createOutgoing, getOutgoings } from "../../../hooks/useAPI";
 import { OutgoingOptionType, OutgoingType } from "../../../models/Outgoing";
@@ -31,11 +32,19 @@ function AddOutgoingModal() {
     }
   })
 
-  const handleOnSubmit = (outgoing: OutgoingType): void => {
-    console.log(outgoing)
-    createOutgoing(outgoing)
-    closeModal()
-    form.reset()
+  const handleOnSubmit = async (outgoing: OutgoingType): Promise<void> => {
+    try {
+      await createOutgoing(outgoing)
+      closeModal()
+      form.reset()
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Não foi possível registrar a despesa"
+      showNotification({
+        title: "Falha ao registrar despesa",
+        message,
+        color: "red",
+      })
+    }
   }
 
   return (

@@ -16,13 +16,19 @@ func (c *OutgoingController) CreateOutgoing(f *fiber.Ctx) error {
 	outgoing := new(models.Outgoing)
 
 	if error := f.BodyParser(outgoing); error != nil {
-		return error
+		return f.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error": "Não foi possível registrar a despesa",
+			"details": error.Error(),
+		})
 	}
 
 	result := database.Conn.Create(&outgoing)
 
 	if result.Error != nil {
-		return f.Status(fiber.StatusBadRequest).SendString(result.Error.Error())
+		return f.Status(fiber.StatusConflict).JSON(fiber.Map{
+			"error": "Despesa com descrição e valor já cadastrada neste evento",
+			"details": result.Error.Error(),
+		})
 	}
 
 	return f.JSON(fiber.Map{

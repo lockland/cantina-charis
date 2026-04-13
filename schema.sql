@@ -57,4 +57,7 @@ CREATE TABLE outgoing (
 	FOREIGN KEY (event_id) REFERENCES events (event_id)
 );
 
+CREATE UNIQUE INDEX IF NOT EXISTS idx_outgoing_event_description_amount
+	ON outgoing (event_id, outgoing_description, outgoing_amount);
+
 
