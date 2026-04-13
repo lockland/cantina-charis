@@ -1,4 +1,4 @@
-import { Box, Button, CloseButton, Divider, Text, Tooltip } from "@mantine/core"
+import { ActionIcon, Box, Button, Divider, Menu, Text, Tooltip } from "@mantine/core"
 import { CreditCardIcon, CalendarIcon, CheckIcon, InfoIcon } from "@primer/octicons-react"
 import { useState } from "react"
 import DecimalFormatter from "../helpers/Decimal"
@@ -15,9 +15,11 @@ interface OrdersCardProps {
   onPaid?: () => void
   onDeleted?: () => void
   onDelivered?: () => void
+  canMerge?: boolean
+  onMergeCustomer?: () => void
 }
 
-function OrdersCard({ orderId, customer_name, order_amount, paid_value, observation, deliveried, created_at, onPaid, onDeleted, onDelivered }: OrdersCardProps) {
+function OrdersCard({ orderId, customer_name, order_amount, paid_value, observation, deliveried, created_at, onPaid, onDeleted, onDelivered, canMerge, onMergeCustomer }: OrdersCardProps) {
   const [loading, setLoading] = useState(false)
   const amount = parseFloat(String(order_amount ?? 0)) || 0
   const paid = parseFloat(String(paid_value ?? 0)) || 0
@@ -54,17 +56,24 @@ function OrdersCard({ orderId, customer_name, order_amount, paid_value, observat
       py={15}
       style={{ position: "relative", minWidth: 200 }}
     >
-      <Box style={{ position: "absolute", top: 8, right: 8 }}>
-        <Tooltip label="Cancelar pedido">
-          <span>
-            <CloseButton
-              size="sm"
-              disabled={loading}
-              onClick={handleCancelOrder}
-              aria-label="Cancelar pedido"
-            />
-          </span>
-        </Tooltip>
+      <Box style={{ position: "absolute", top: 8, right: 8, display: "flex", alignItems: "center" }}>
+        <Menu shadow="sm" width={180} position="bottom-end">
+          <Menu.Target>
+            <ActionIcon variant="filled" size="lg" color="gray" aria-label="Mais opções do pedido">
+              <Text size="lg" style={{ lineHeight: 1 }}>
+                ⋮
+              </Text>
+            </ActionIcon>
+          </Menu.Target>
+          <Menu.Dropdown>
+            <Menu.Item color="red" onClick={handleCancelOrder}>
+              Excluir pedido
+            </Menu.Item>
+            {canMerge && onMergeCustomer && (
+              <Menu.Item onClick={onMergeCustomer}>Agrupar pedidos do cliente</Menu.Item>
+            )}
+          </Menu.Dropdown>
+        </Menu>
       </Box>
       <Text align="center" weight={600} style={{ color: "#1a1a1a" }}>{customer_name}</Text>
       {created_at && (
@@ -82,7 +91,7 @@ function OrdersCard({ orderId, customer_name, order_amount, paid_value, observat
         </Box>
       )}
       <Divider my={10} style={{ borderColor: "rgba(0,0,0,0.12)" }} />
-      <Box mt="sm" style={{ display: "flex", flexDirection: "row", flexWrap: "nowrap", alignItems: "center", justifyContent: "center", gap: 8 }}>
+      <Box mt="sm" style={{ display: "flex", flexDirection: "row", flexWrap: "wrap", alignItems: "center", justifyContent: "center", gap: 8 }}>
         {isPaid ? (
           <Tooltip label="Pedido já pago">
             <Button
