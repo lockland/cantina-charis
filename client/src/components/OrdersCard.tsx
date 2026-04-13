@@ -1,8 +1,42 @@
-import { ActionIcon, Box, Button, Divider, Menu, Text, Tooltip } from "@mantine/core"
-import { CreditCardIcon, CalendarIcon, CheckIcon, InfoIcon } from "@primer/octicons-react"
+import {
+  ActionIcon,
+  Box,
+  Button,
+  Card,
+  Divider,
+  Group,
+  Menu,
+  Stack,
+  Text,
+  Tooltip,
+} from "@mantine/core"
+import {
+  CalendarIcon,
+  CheckIcon,
+  CreditCardIcon,
+  EllipsisIcon,
+  InfoIcon,
+} from "@primer/octicons-react"
 import { useState } from "react"
 import DecimalFormatter from "../helpers/Decimal"
+import { formatOrderCreatedAt } from "../helpers/formatOrderCreatedAt"
+import { ORDERS_CARD_MENU_RAIL_PX, ordersCardMenuActionIconStyles } from "../helpers/ordersCardMenuButtonStyles"
 import { payOrder, deleteOrder, deliveryOrder } from "../hooks/useAPI"
+
+function MenuDotsIcon() {
+  return (
+    <Box
+      component="span"
+      style={{
+        display: "inline-flex",
+        transform: "rotate(90deg)",
+        color: "inherit",
+      }}
+    >
+      <EllipsisIcon size={18} fill="currentColor" />
+    </Box>
+  )
+}
 
 interface OrdersCardProps {
   orderId: number
@@ -19,7 +53,20 @@ interface OrdersCardProps {
   onMergeCustomer?: () => void
 }
 
-function OrdersCard({ orderId, customer_name, order_amount, paid_value, observation, deliveried, created_at, onPaid, onDeleted, onDelivered, canMerge, onMergeCustomer }: OrdersCardProps) {
+function OrdersCard({
+  orderId,
+  customer_name,
+  order_amount,
+  paid_value,
+  observation,
+  deliveried,
+  created_at,
+  onPaid,
+  onDeleted,
+  onDelivered,
+  canMerge,
+  onMergeCustomer,
+}: OrdersCardProps) {
   const [loading, setLoading] = useState(false)
   const amount = parseFloat(String(order_amount ?? 0)) || 0
   const paid = parseFloat(String(paid_value ?? 0)) || 0
@@ -49,89 +96,277 @@ function OrdersCard({ orderId, customer_name, order_amount, paid_value, observat
       .finally(() => setLoading(false))
   }
 
+  const cardBg = isPaid ? "var(--orders-card-paid-background-color)" : "var(--orders-card-background-color)"
+  const dividerColor = isPaid ? "var(--orders-card-divider-on-paid)" : "var(--orders-card-divider-on-teal)"
+
   return (
-    <Box
+    <Card
       w="100%"
-      bg={isPaid ? "var(--orders-card-paid-background-color)" : "var(--orders-card-background-color)"}
-      py={15}
-      style={{ position: "relative", minWidth: 200 }}
+      padding={0}
+      radius="md"
+      shadow="sm"
+      withBorder={false}
+      style={{
+        minWidth: 200,
+        backgroundColor: cardBg,
+        overflow: "hidden",
+      }}
     >
-      <Box style={{ position: "absolute", top: 8, right: 8, display: "flex", alignItems: "center" }}>
-        <Menu shadow="sm" width={180} position="bottom-end">
-          <Menu.Target>
-            <ActionIcon variant="filled" size="lg" color="gray" aria-label="Mais opções do pedido">
-              <Text size="lg" style={{ lineHeight: 1 }}>
-                ⋮
-              </Text>
-            </ActionIcon>
-          </Menu.Target>
-          <Menu.Dropdown>
-            <Menu.Item color="red" onClick={handleCancelOrder}>
-              Excluir pedido
-            </Menu.Item>
-            {canMerge && onMergeCustomer && (
-              <Menu.Item onClick={onMergeCustomer}>Agrupar pedidos do cliente</Menu.Item>
+      <Stack spacing={0}>
+        <Box
+          px="sm"
+          pt="xs"
+          style={{
+            display: "flex",
+            alignItems: "flex-start",
+          }}
+        >
+          <Box style={{ width: ORDERS_CARD_MENU_RAIL_PX, flexShrink: 0 }} aria-hidden />
+          <Stack spacing={4} align="center" style={{ flex: 1, minWidth: 0 }}>
+            <Text
+              ta="center"
+              fw={700}
+              size="md"
+              style={{ color: isPaid ? "var(--orders-card-paid-ink)" : "var(--orders-card-teal-title-color)" }}
+            >
+              {customer_name}
+            </Text>
+            {created_at &&
+              (isPaid ? (
+                <Stack spacing={2} align="center">
+                  <Text ta="center" size="xs" fw={400} lh={1.3} style={{ color: "var(--orders-card-paid-secondary)" }}>
+                    Criado em:
+                  </Text>
+                  <Text
+                    ta="center"
+                    size="xs"
+                    fw={400}
+                    lh={1.3}
+                    style={{
+                      color: "var(--orders-card-paid-secondary)",
+                      whiteSpace: "nowrap",
+                    }}
+                  >
+                    {formatOrderCreatedAt(created_at)}
+                  </Text>
+                </Stack>
+              ) : (
+                <Stack spacing={2} align="center">
+                  <Text
+                    ta="center"
+                    size="xs"
+                    fw={400}
+                    lh={1.3}
+                    style={{
+                      color: "rgba(255, 255, 255, 0.92)",
+                      textShadow: "var(--orders-card-on-teal-text-shadow)",
+                    }}
+                  >
+                    Criado em:
+                  </Text>
+                  <Text
+                    ta="center"
+                    size="xs"
+                    fw={400}
+                    lh={1.3}
+                    style={{
+                      color: "rgba(255, 255, 255, 0.92)",
+                      textShadow: "var(--orders-card-on-teal-text-shadow)",
+                      whiteSpace: "nowrap",
+                    }}
+                  >
+                    {formatOrderCreatedAt(created_at)}
+                  </Text>
+                </Stack>
+              ))}
+            <Text ta="center" fw={700} fz="xl" style={{ color: isPaid ? "var(--orders-card-paid-ink)" : "var(--orders-card-on-teal-primary)" }}>
+              {DecimalFormatter.format(amount)}
+            </Text>
+            {observation && (
+              <Group spacing={6} position="center" noWrap>
+                <InfoIcon size={12} fill={isPaid ? "#470404" : "rgba(255,230,200,0.95)"} />
+                <Text
+                  ta="center"
+                  size="sm"
+                  fw={500}
+                  style={{
+                    color: isPaid ? "#470404" : "rgba(255, 230, 200, 0.95)",
+                    whiteSpace: "pre-wrap",
+                  }}
+                >
+                  {observation}
+                </Text>
+              </Group>
             )}
-          </Menu.Dropdown>
-        </Menu>
-      </Box>
-      <Text align="center" weight={600} style={{ color: "#1a1a1a" }}>{customer_name}</Text>
-      {created_at && (
-        <Text align="center" size="sm" weight={600} color="#14213d">
-          Criado em: {new Date(created_at).toLocaleString("pt-BR")}
-        </Text>
-      )}
-      <Text align="center" weight={600} size={"lg"} style={{ color: "#1a1a1a" }}>{DecimalFormatter.format(amount)}</Text>
-      {observation && (
-        <Box style={{ display: "flex", flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 6 }}>
-          <InfoIcon size={12} fill="#470404" />
-          <Text align="center" size="md" color="#470404" weight={100} style={{ whiteSpace: "pre-wrap" }}>
-            {observation}
-          </Text>
+          </Stack>
+          <Box style={{ width: ORDERS_CARD_MENU_RAIL_PX, flexShrink: 0, display: "flex", justifyContent: "flex-end" }}>
+            <Menu shadow="md" width={200} position="bottom-end" withinPortal>
+              <Menu.Target>
+                <ActionIcon
+                  variant="transparent"
+                  size="lg"
+                  radius="md"
+                  aria-label="Mais opções do pedido"
+                  styles={ordersCardMenuActionIconStyles(isPaid)}
+                >
+                  <MenuDotsIcon />
+                </ActionIcon>
+              </Menu.Target>
+              <Menu.Dropdown>
+                <Menu.Item color="red" onClick={handleCancelOrder}>
+                  Excluir pedido
+                </Menu.Item>
+                {canMerge && onMergeCustomer && (
+                  <Menu.Item onClick={onMergeCustomer}>Agrupar pedidos do cliente</Menu.Item>
+                )}
+              </Menu.Dropdown>
+            </Menu>
+          </Box>
         </Box>
-      )}
-      <Divider my={10} style={{ borderColor: "rgba(0,0,0,0.12)" }} />
-      <Box mt="sm" style={{ display: "flex", flexDirection: "row", flexWrap: "wrap", alignItems: "center", justifyContent: "center", gap: 8 }}>
-        {isPaid ? (
-          <Tooltip label="Pedido já pago">
-            <Button
-              disabled
-              aria-label="Sinalizar que o pedido já está pago"
-              rightIcon={<CalendarIcon size={18} />}
-            >
-              Pago
-            </Button>
-          </Tooltip>
-        ) : (
-          <Tooltip label="Registrar pagamento do pedido">
-            <Button
-              loading={loading}
-              onClick={handlePay}
-              aria-label="Registrar pagamento do pedido"
-              bg="red"
-              color="red"
-              rightIcon={<CreditCardIcon size={18} />}
-            >
-              Pagar
-            </Button>
-          </Tooltip>
-        )}
-        {!deliveried && (
-          <Tooltip label="Marcar pedido como pronto para entrega">
-            <Button
-              variant="filled"
-              color="blue"
-              disabled={loading}
-              onClick={handleDelivered}
-              aria-label="Marcar pedido como pronto para entrega"
-              leftIcon={<CheckIcon size={18} />}
-            >
-              Pronto
-            </Button>
-          </Tooltip>
-        )}
-      </Box>
-    </Box>
+
+        <Divider my="sm" style={{ borderColor: dividerColor }} />
+
+        <Box px="sm" pb="md">
+          {isPaid ? (
+            !deliveried ? (
+              <Stack spacing="xs">
+                <Tooltip label="Pedido já pago">
+                  <Button
+                    fullWidth
+                    variant="outline"
+                    color="dark"
+                    disabled
+                    uppercase
+                    aria-label="Sinalizar que o pedido já está pago"
+                    rightIcon={<CalendarIcon size={18} />}
+                    styles={{
+                      root: {
+                        borderColor: "rgba(0, 0, 0, 0.18)",
+                        color: "var(--orders-card-paid-ink)",
+                        backgroundColor: "rgba(255, 255, 255, 0.75)",
+                        "&:disabled": {
+                          opacity: 1,
+                          color: "var(--orders-card-paid-ink)",
+                          borderColor: "rgba(0, 0, 0, 0.2)",
+                          backgroundColor: "rgba(255, 255, 255, 0.85)",
+                        },
+                      },
+                      label: { overflow: "visible" },
+                    }}
+                  >
+                    Pago
+                  </Button>
+                </Tooltip>
+                <Tooltip label="Marcar pedido como pronto para entrega">
+                  <Button
+                    fullWidth
+                    variant="filled"
+                    color="violet"
+                    uppercase
+                    disabled={loading}
+                    onClick={handleDelivered}
+                    aria-label="Marcar pedido como pronto para entrega"
+                    leftIcon={
+                      <Group spacing={4} noWrap>
+                        <CheckIcon size={18} />
+                      </Group>
+                    }
+                    styles={(theme) => ({
+                      root: {
+                        backgroundColor: theme.colors.violet[8],
+                        "&:hover": { backgroundColor: theme.colors.violet[9] },
+                      },
+                      label: { overflow: "visible" },
+                    })}
+                  >
+                    Pronto
+                  </Button>
+                </Tooltip>
+              </Stack>
+            ) : (
+              <Tooltip label="Pedido já pago">
+                <Button
+                  fullWidth
+                  variant="outline"
+                  color="dark"
+                  disabled
+                  uppercase
+                  aria-label="Sinalizar que o pedido já está pago"
+                  rightIcon={<CalendarIcon size={18} />}
+                  styles={{
+                    root: {
+                      borderColor: "rgba(0, 0, 0, 0.18)",
+                      color: "var(--orders-card-paid-ink)",
+                      backgroundColor: "rgba(255, 255, 255, 0.75)",
+                      "&:disabled": {
+                        opacity: 1,
+                        color: "var(--orders-card-paid-ink)",
+                        borderColor: "rgba(0, 0, 0, 0.2)",
+                        backgroundColor: "rgba(255, 255, 255, 0.85)",
+                      },
+                    },
+                    label: { overflow: "visible" },
+                  }}
+                >
+                  Pago
+                </Button>
+              </Tooltip>
+            )
+          ) : (
+            <Stack spacing="xs">
+              <Tooltip label="Registrar pagamento do pedido">
+                <Button
+                  fullWidth
+                  loading={loading}
+                  uppercase
+                  onClick={handlePay}
+                  aria-label="Registrar pagamento do pedido"
+                  color="red"
+                  variant="filled"
+                  rightIcon={<CreditCardIcon size={18} />}
+                  styles={(theme) => ({
+                    root: {
+                      backgroundColor: theme.colors.red[8],
+                      "&:hover": { backgroundColor: theme.colors.red[9] },
+                    },
+                    label: { overflow: "visible" },
+                  })}
+                >
+                  Pagar
+                </Button>
+              </Tooltip>
+              {!deliveried && (
+                <Tooltip label="Marcar pedido como pronto para entrega">
+                  <Button
+                    fullWidth
+                    variant="filled"
+                    color="violet"
+                    uppercase
+                    disabled={loading}
+                    onClick={handleDelivered}
+                    aria-label="Marcar pedido como pronto para entrega"
+                    leftIcon={
+                      <Group spacing={4} noWrap>
+                        <CheckIcon size={18} />
+                      </Group>
+                    }
+                    styles={(theme) => ({
+                      root: {
+                        backgroundColor: theme.colors.violet[8],
+                        "&:hover": { backgroundColor: theme.colors.violet[9] },
+                      },
+                      label: { overflow: "visible" },
+                    })}
+                  >
+                    Pronto
+                  </Button>
+                </Tooltip>
+              )}
+            </Stack>
+          )}
+        </Box>
+      </Stack>
+    </Card>
   )
 }
 

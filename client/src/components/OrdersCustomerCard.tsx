@@ -1,9 +1,25 @@
-import { ActionIcon, Box, Button, Divider, Menu, Text, Tooltip } from "@mantine/core"
-import { CreditCardIcon } from "@primer/octicons-react"
+import { ActionIcon, Box, Button, Card, Divider, Menu, Stack, Text, Tooltip } from "@mantine/core"
+import { CreditCardIcon, EllipsisIcon } from "@primer/octicons-react"
 import { useState } from "react"
 import { showNotification } from "@mantine/notifications"
 import DecimalFormatter from "../helpers/Decimal"
+import { ORDERS_CARD_MENU_RAIL_PX, ordersCardMenuActionIconStyles } from "../helpers/ordersCardMenuButtonStyles"
 import { payOrder } from "../hooks/useAPI"
+
+function MenuDotsIcon() {
+  return (
+    <Box
+      component="span"
+      style={{
+        display: "inline-flex",
+        transform: "rotate(90deg)",
+        color: "inherit",
+      }}
+    >
+      <EllipsisIcon size={18} fill="currentColor" />
+    </Box>
+  )
+}
 
 interface OrdersCustomerCardProps {
   customer_name: string
@@ -47,61 +63,131 @@ function OrdersCustomerCard({
     }
   }
 
-  return (
-    <Box
-      w="100%"
-      bg={isPaid ? "var(--orders-card-paid-background-color)" : "var(--orders-card-background-color)"}
-      py={15}
-      style={{ position: "relative", minWidth: 200 }}
-    >
-      <Box style={{ position: "absolute", top: 8, right: 8 }}>
-        <Menu shadow="sm" width={180} position="bottom-end">
-          <Menu.Target>
-            <ActionIcon variant="filled" size="lg" color="gray" aria-label="Mais opções do cliente">
-              <Text size="lg" style={{ lineHeight: 1 }}>
-                ⋮
-              </Text>
-            </ActionIcon>
-          </Menu.Target>
-          <Menu.Dropdown>
-            {onUnmerge && <Menu.Item onClick={onUnmerge}>Desagrupar cliente</Menu.Item>}
-          </Menu.Dropdown>
-        </Menu>
-      </Box>
+  const cardBg = isPaid ? "var(--orders-card-paid-background-color)" : "var(--orders-card-background-color)"
+  const dividerColor = isPaid ? "var(--orders-card-divider-on-paid)" : "var(--orders-card-divider-on-teal)"
 
-      <Text align="center" weight={600} style={{ color: "#1a1a1a" }}>
-        {customer_name}
-      </Text>
-      <Text align="center" size="sm" color="dimmed" mt="xs">
-        {orderCount} pedido{orderCount === 1 ? "" : "s"}
-      </Text>
-      <Text align="center" weight={600} size="lg" style={{ color: "#1a1a1a" }}>
-        {DecimalFormatter.format(totalAmount)}
-      </Text>
-      <Text align="center" size="sm" color="#470404" mt="xs">
-        Pendente {DecimalFormatter.format(pendingAmount)}
-      </Text>
-      <Divider my={10} style={{ borderColor: "rgba(0,0,0,0.12)" }} />
-      <Box style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap" }}>
-        <Tooltip label={isPaid ? "Todas as comandas já estão pagas" : "Registrar pagamento de todas as comandas"}>
-          <span>
-            <Button
-              loading={loading}
-              disabled={isPaid || orderIds.length === 0}
-              onClick={handlePay}
-              aria-label="Registrar pagamento de todas as comandas do cliente"
-              bg="red"
-              color="red"
-              rightIcon={<CreditCardIcon size={18} />}
-              fullWidth
-              style={{ flex: 1, minWidth: 140 }}
+  return (
+    <Card
+      w="100%"
+      padding={0}
+      radius="md"
+      shadow="sm"
+      withBorder={false}
+      style={{
+        minWidth: 200,
+        backgroundColor: cardBg,
+        overflow: "hidden",
+      }}
+    >
+      <Stack spacing={0}>
+        <Box
+          px="sm"
+          pt="xs"
+          style={{
+            display: "flex",
+            alignItems: "flex-start",
+          }}
+        >
+          <Box style={{ width: ORDERS_CARD_MENU_RAIL_PX, flexShrink: 0 }} aria-hidden />
+          <Stack spacing={6} align="center" style={{ flex: 1, minWidth: 0 }}>
+            <Text
+              ta="center"
+              fw={700}
+              size="lg"
+              style={{ color: isPaid ? "var(--orders-card-paid-ink)" : "var(--orders-card-teal-title-color)" }}
             >
-              {isPaid ? "Pago" : "Pagar todas"}
-            </Button>
-          </span>
-        </Tooltip>
-      </Box>
-    </Box>
+              {customer_name}
+            </Text>
+            <Text ta="center" size="sm" fw={500} style={{ color: isPaid ? "var(--orders-card-paid-secondary)" : "var(--orders-card-on-teal-secondary)" }}>
+              {orderCount} pedido{orderCount === 1 ? "" : "s"}
+            </Text>
+            <Text ta="center" fw={700} fz="xl" style={{ color: isPaid ? "var(--orders-card-paid-ink)" : "var(--orders-card-on-teal-primary)" }}>
+              {DecimalFormatter.format(totalAmount)}
+            </Text>
+            {!isPaid && (
+              <Text ta="center" size="sm" fw={500} style={{ color: "var(--orders-card-on-teal-subtle)" }}>
+                Pendente {DecimalFormatter.format(pendingAmount)}
+              </Text>
+            )}
+          </Stack>
+          <Box style={{ width: ORDERS_CARD_MENU_RAIL_PX, flexShrink: 0, display: "flex", justifyContent: "flex-end" }}>
+            <Menu shadow="md" width={200} position="bottom-end" withinPortal>
+              <Menu.Target>
+                <ActionIcon
+                  variant="transparent"
+                  size="lg"
+                  radius="md"
+                  aria-label="Mais opções do cliente"
+                  styles={ordersCardMenuActionIconStyles(isPaid)}
+                >
+                  <MenuDotsIcon />
+                </ActionIcon>
+              </Menu.Target>
+              <Menu.Dropdown>
+                {onUnmerge && <Menu.Item onClick={onUnmerge}>Desagrupar cliente</Menu.Item>}
+              </Menu.Dropdown>
+            </Menu>
+          </Box>
+        </Box>
+
+        <Divider my="sm" style={{ borderColor: dividerColor }} />
+
+        <Box px="sm" pb="md">
+          <Tooltip label={isPaid ? "Todas as comandas já estão pagas" : "Registrar pagamento de todas as comandas"}>
+            <span style={{ display: "block" }}>
+              {isPaid ? (
+                <Button
+                  fullWidth
+                  variant="outline"
+                  color="dark"
+                  disabled
+                  uppercase
+                  aria-label="Todas as comandas já estão pagas"
+                  rightIcon={<CreditCardIcon size={18} />}
+                  styles={{
+                    root: {
+                      borderColor: "rgba(0, 0, 0, 0.18)",
+                      color: "var(--orders-card-paid-ink)",
+                      backgroundColor: "rgba(255, 255, 255, 0.75)",
+                      "&:disabled": {
+                        opacity: 1,
+                        color: "var(--orders-card-paid-ink)",
+                        borderColor: "rgba(0, 0, 0, 0.2)",
+                        backgroundColor: "rgba(255, 255, 255, 0.85)",
+                      },
+                    },
+                    label: { overflow: "visible" },
+                  }}
+                >
+                  Pago
+                </Button>
+              ) : (
+                <Button
+                  fullWidth
+                  loading={loading}
+                  disabled={orderIds.length === 0}
+                  uppercase
+                  onClick={handlePay}
+                  aria-label="Registrar pagamento de todas as comandas do cliente"
+                  color="red"
+                  variant="filled"
+                  rightIcon={<CreditCardIcon size={18} />}
+                  styles={(theme) => ({
+                    root: {
+                      backgroundColor: theme.colors.red[8],
+                      "&:hover": { backgroundColor: theme.colors.red[9] },
+                    },
+                    label: { overflow: "visible" },
+                  })}
+                >
+                  Pagar todas
+                </Button>
+              )}
+            </span>
+          </Tooltip>
+        </Box>
+      </Stack>
+    </Card>
   )
 }
 

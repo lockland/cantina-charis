@@ -88,7 +88,7 @@ function OrdersCardList() {
               totalPaid={group.totalPaid}
               onPaid={fetchOrders}
               onUnmerge={() => toggleCustomerMerge(group.customer_id)}
-            />
+            />,
           ]
         }
 
