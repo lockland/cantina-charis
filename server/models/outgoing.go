@@ -8,11 +8,11 @@ import (
 
 type Outgoing struct {
 	ID          int             `json:"outgoing_id"`
-	Description string          `json:"outgoing_description"`
-	Amount      decimal.Decimal `json:"outgoing_amount" gorm:"default:0.00"`
+	Description string          `json:"outgoing_description" gorm:"uniqueIndex:idx_event_description_amount;not null"`
+	Amount      decimal.Decimal `json:"outgoing_amount" gorm:"default:0.00;uniqueIndex:idx_event_description_amount"`
 	CreatedAt   time.Time       `json:"created_at"`
 	UpdatedAt   time.Time       `json:"updated_at"`
-	EventID     int             `json:"event_id" validate:"required"`
+	EventID     int             `json:"event_id" validate:"required" gorm:"uniqueIndex:idx_event_description_amount"`
 	Event       Event           `json:"-"` // não serializar na API
 }
 

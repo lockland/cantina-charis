@@ -9,7 +9,15 @@ const fetcher = async (url: string, options: any = {}) => {
     window.location.reload()
     throw new Error('Unauthorized')
   }
-  return res.json()
+
+  const payload = await res.json()
+
+  if (!res.ok) {
+    const message = payload?.error || payload?.message || res.statusText
+    throw new Error(message)
+  }
+
+  return payload
 }
 
 export function getAuthMe(): Promise<{ role: string; username: string }> {
