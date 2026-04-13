@@ -5,6 +5,8 @@ import { showNotification } from "@mantine/notifications"
 import DecimalFormatter from "../helpers/Decimal"
 import { ORDERS_CARD_MENU_RAIL_PX, ordersCardMenuActionIconStyles } from "../helpers/ordersCardMenuButtonStyles"
 import { payOrder } from "../hooks/useAPI"
+import { OrderItemsModal } from "./OrderItemsModal"
+import type { OrderProductsSlice } from "./OrderProductsList"
 
 function MenuDotsIcon() {
   return (
@@ -27,6 +29,8 @@ interface OrdersCustomerCardProps {
   orderCount: number
   totalAmount: number
   totalPaid: number
+  /** Um slice por pedido do grupo (ordem da API). */
+  productSlices: OrderProductsSlice[]
   onPaid?: () => void
   onUnmerge?: () => void
 }
@@ -37,10 +41,12 @@ function OrdersCustomerCard({
   orderCount,
   totalAmount,
   totalPaid,
+  productSlices,
   onPaid,
   onUnmerge,
 }: OrdersCustomerCardProps) {
   const [loading, setLoading] = useState(false)
+  const [itemsModalOpen, setItemsModalOpen] = useState(false)
   const isPaid = totalPaid >= totalAmount
   const pendingAmount = Math.max(0, totalAmount - totalPaid)
 
@@ -124,11 +130,21 @@ function OrdersCustomerCard({
                 </ActionIcon>
               </Menu.Target>
               <Menu.Dropdown>
+                <Menu.Item onClick={() => setItemsModalOpen(true)} aria-label="Exibir itens de todas as comandas em um modal">
+                  Exibir itens
+                </Menu.Item>
                 {onUnmerge && <Menu.Item onClick={onUnmerge}>Desagrupar cliente</Menu.Item>}
               </Menu.Dropdown>
             </Menu>
           </Box>
         </Box>
+
+        <OrderItemsModal
+          opened={itemsModalOpen}
+          onClose={() => setItemsModalOpen(false)}
+          title={`Itens — ${customer_name} (${orderCount} pedido${orderCount === 1 ? "" : "s"})`}
+          slices={productSlices}
+        />
 
         <Divider my="sm" style={{ borderColor: dividerColor }} />
 

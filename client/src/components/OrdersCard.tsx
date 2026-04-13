@@ -20,6 +20,8 @@ import {
 import { useState } from "react"
 import DecimalFormatter from "../helpers/Decimal"
 import { formatOrderCreatedAt } from "../helpers/formatOrderCreatedAt"
+import { OrderItemsModal } from "./OrderItemsModal"
+import type { ProductType } from "../models/Product"
 import { ORDERS_CARD_MENU_RAIL_PX, ordersCardMenuActionIconStyles } from "../helpers/ordersCardMenuButtonStyles"
 import { payOrder, deleteOrder, deliveryOrder } from "../hooks/useAPI"
 
@@ -51,6 +53,7 @@ interface OrdersCardProps {
   onDelivered?: () => void
   canMerge?: boolean
   onMergeCustomer?: () => void
+  order_items?: ProductType[]
 }
 
 function OrdersCard({
@@ -66,8 +69,10 @@ function OrdersCard({
   onDelivered,
   canMerge,
   onMergeCustomer,
+  order_items,
 }: OrdersCardProps) {
   const [loading, setLoading] = useState(false)
+  const [itemsModalOpen, setItemsModalOpen] = useState(false)
   const amount = parseFloat(String(order_amount ?? 0)) || 0
   const paid = parseFloat(String(paid_value ?? 0)) || 0
   const isPaid = paid >= amount
@@ -98,6 +103,7 @@ function OrdersCard({
 
   const cardBg = isPaid ? "var(--orders-card-paid-background-color)" : "var(--orders-card-background-color)"
   const dividerColor = isPaid ? "var(--orders-card-divider-on-paid)" : "var(--orders-card-divider-on-teal)"
+  const productSlices = [{ orderId, items: order_items ?? [] }]
 
   return (
     <Card
@@ -216,6 +222,9 @@ function OrdersCard({
                 <Menu.Item color="red" onClick={handleCancelOrder}>
                   Excluir pedido
                 </Menu.Item>
+                <Menu.Item onClick={() => setItemsModalOpen(true)} aria-label="Exibir itens do pedido em um modal">
+                  Exibir itens
+                </Menu.Item>
                 {canMerge && onMergeCustomer && (
                   <Menu.Item onClick={onMergeCustomer}>Agrupar pedidos do cliente</Menu.Item>
                 )}
@@ -223,6 +232,13 @@ function OrdersCard({
             </Menu>
           </Box>
         </Box>
+
+        <OrderItemsModal
+          opened={itemsModalOpen}
+          onClose={() => setItemsModalOpen(false)}
+          title={`Itens — ${customer_name}`}
+          slices={productSlices}
+        />
 
         <Divider my="sm" style={{ borderColor: dividerColor }} />
 

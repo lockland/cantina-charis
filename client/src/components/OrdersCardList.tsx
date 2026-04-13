@@ -87,6 +87,12 @@ function OrdersCardList() {
           continue
         }
         mergedEmitted.add(customerId)
+        const productSlices = orders
+          .filter((o) => o.customer_id === customerId)
+          .map((o) => ({
+            orderId: o.order_id ?? 0,
+            items: o.order_items ?? [],
+          }))
         nodes.push(
           <OrdersCustomerCard
             key={`group-${customerId}`}
@@ -95,6 +101,7 @@ function OrdersCardList() {
             orderCount={group.orderIds.length}
             totalAmount={group.totalAmount}
             totalPaid={group.totalPaid}
+            productSlices={productSlices}
             onPaid={fetchOrders}
             onUnmerge={() => toggleCustomerMerge(customerId)}
           />
@@ -112,6 +119,7 @@ function OrdersCardList() {
           observation={order.observation ?? ""}
           deliveried={order.deliveried}
           created_at={order.created_at}
+          order_items={order.order_items}
           onPaid={fetchOrders}
           onDeleted={fetchOrders}
           onDelivered={fetchOrders}
