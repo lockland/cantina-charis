@@ -47,7 +47,7 @@ function OrderCreatedAt({ created_at, isPaid }: OrderCreatedAtProps) {
       <Text ta="center" size="xs" fw={400} lh={1.3} style={labelStyle}>
         Criado em:
       </Text>
-      <Text ta="center" size={isPaid ? "sm" : "md"} fw={400} lh={1.3} style={valueStyle}>
+      <Text ta="center" size="sm" fw={400} lh={1.3} style={valueStyle}>
         {formatOrderCreatedAt(created_at)}
       </Text>
     </Stack>
