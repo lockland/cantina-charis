@@ -155,6 +155,8 @@ func (c *OrderController) PayOrder(f *fiber.Ctx) error {
 	database.Conn.Save(order)
 	database.Conn.Model(customer).Update("DebitValue", customer.DebitValue)
 
+	realtime.NotifyOrdersChanged(order.EventID)
+
 	return f.Status(fiber.StatusOK).JSON(fiber.Map{"order_id": id, "paid_value": order.PaidValue})
 }
 
