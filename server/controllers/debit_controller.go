@@ -98,16 +98,17 @@ func (c *DebitController) PayDebits(f *fiber.Ctx) error {
 		return f.Status(fiber.StatusBadRequest).SendString("No outstanding orders for this customer")
 	}
 
-	newPaids := customer.Orders.ApplyPaymentValue(payload.CustomerPaidValue)
+	customer.Orders.ApplyPaymentValue(payload.CustomerPaidValue)
 	for i := range customer.Orders {
-		if customer.Orders[i].PaidValue.Equal(newPaids[i]) {
-			continue
-		}
-		if err := transaction.Model(&models.Order{ID: customer.Orders[i].ID}).Update("paid_value", newPaids[i]).Error; err != nil {
+		ord := &customer.Orders[i]
+		err := transaction.
+			Model(&models.Order{ID: ord.ID}).
+			Update("paid_value", ord.PaidValue).
+			Error
+		if err != nil {
 			transaction.Rollback()
 			return f.Status(fiber.StatusInternalServerError).SendString(err.Error())
 		}
-		customer.Orders[i].PaidValue = newPaids[i]
 	}
 
 	if err := transaction.Commit().Error; err != nil {

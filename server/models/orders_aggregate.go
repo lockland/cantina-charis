@@ -31,37 +31,32 @@ func (o Orders) Residual() decimal.Decimal {
 	return sum
 }
 
-// ApplyPaymentValue splits payment FIFO across orders (each up to its remaining balance).
-// Returns new PaidValue per index; negative payment yields a copy of current paid values (no-op).
-func (o Orders) ApplyPaymentValue(payment decimal.Decimal) []decimal.Decimal {
-	out := make([]decimal.Decimal, len(o))
+// ApplyPaymentValue splits payment FIFO across orders in place (each up to its remaining balance).
+// Negative payment is a no-op.
+func (o Orders) ApplyPaymentValue(payment decimal.Decimal) {
 	if len(o) == 0 {
-		return out
+		return
 	}
 	zero := decimal.Zero
 	if payment.LessThan(zero) {
-		for i := range o {
-			out[i] = o[i].PaidValue
-		}
-		return out
+		return
 	}
 	remaining := payment
-	for i, ord := range o {
+	for i := range o {
+		ord := &o[i]
 		currentPaid := ord.PaidValue
 		if currentPaid.GreaterThan(ord.OrderAmount) {
 			currentPaid = ord.OrderAmount
 		}
 		residual := ord.OrderAmount.Sub(currentPaid)
 		if residual.LessThanOrEqual(zero) {
-			out[i] = ord.PaidValue
 			continue
 		}
 		alloc := remaining
 		if alloc.GreaterThan(residual) {
 			alloc = residual
 		}
-		out[i] = ord.PaidValue.Add(alloc)
+		ord.PaidValue = ord.PaidValue.Add(alloc)
 		remaining = remaining.Sub(alloc)
 	}
-	return out
 }
