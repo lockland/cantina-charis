@@ -52,7 +52,7 @@ func (c *DebitController) GetDebits(f *fiber.Ctx) error {
 				"id":   customer.ID,
 				"name": customer.Name,
 			},
-			"total":  customer.Orders.Residual(),
+			"total":  customer.Orders.ResidualValue(),
 			"orders": orders,
 		})
 	}
@@ -137,7 +137,7 @@ func (c *DebitController) PayDebits(f *fiber.Ctx) error {
 			"id":   customer.ID,
 			"name": customer.Name,
 		},
-		"total":  customer.Orders.Residual(),
+		"total":  customer.Orders.ResidualValue(),
 		"orders": orders,
 	}
 

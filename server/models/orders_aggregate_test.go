@@ -44,14 +44,14 @@ func TestOrderResidual(t *testing.T) {
 	})
 }
 
-func TestOrdersResidual(t *testing.T) {
+func TestOrdersResidualValue(t *testing.T) {
 
 	t.Run("nil slice returns zero", func(t *testing.T) {
-		assert.True(t, (models.Orders(nil)).Residual().Equal(decimal.Zero))
+		assert.True(t, (models.Orders(nil)).ResidualValue().Equal(decimal.Zero))
 	})
 
 	t.Run("empty slice returns zero", func(t *testing.T) {
-		assert.True(t, (models.Orders{}).Residual().Equal(decimal.Zero))
+		assert.True(t, (models.Orders{}).ResidualValue().Equal(decimal.Zero))
 	})
 
 	t.Run("sums per-order residual", func(t *testing.T) {
@@ -60,7 +60,7 @@ func TestOrdersResidual(t *testing.T) {
 			{OrderAmount: dec("30"), PaidValue: dec("10")},
 		}
 		want := dec("50").Add(dec("20"))
-		assert.True(t, orders.Residual().Equal(want))
+		assert.True(t, orders.ResidualValue().Equal(want))
 	})
 }
 
