@@ -90,24 +90,15 @@ func (c *OrderController) PayOrder(f *fiber.Ctx) error {
 		return f.Status(fiber.StatusBadRequest).SendString("Invalid order id")
 	}
 
-	order := &models.Order{ID: id}
-	err = c.orders.FindOrderByID(order, id)
+	order, err := c.orders.PayOrderFull(id)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return f.Status(fiber.StatusNotFound).SendString("Order not found")
 		}
+		if errors.Is(err, service.ErrOrderAlreadyFullyPaid) {
+			return f.Status(fiber.StatusBadRequest).SendString("Order already paid")
+		}
 		return f.Status(fiber.StatusInternalServerError).SendString(err.Error())
-	}
-
-	if order.PaidValue.GreaterThanOrEqual(order.OrderAmount) {
-		return f.Status(fiber.StatusBadRequest).SendString("Order already paid")
-	}
-
-	order.PaidValue = order.OrderAmount
-
-	err = c.orders.SaveOrder(order)
-	if err != nil {
-		return f.Status(fiber.StatusBadRequest).SendString(err.Error())
 	}
 
 	realtime.NotifyOrdersChanged(order.EventID)
