@@ -3,7 +3,7 @@ import { useOrdersSocket } from "../hooks/useOrdersSocket"
 import OrdersCard from "./OrdersCard"
 import OrdersCustomerCard from "./OrdersCustomerCard"
 import CustomSimpleGrid from "./CustomSimpleGrid"
-import { useCallback, useEffect, useMemo, useState } from "react"
+import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { useCookiesHook } from "../hooks/useCookiesHook"
 import { OrdersCardType } from "../models/Order"
 
@@ -19,13 +19,26 @@ interface OrderGroup {
 function OrdersCardList() {
   const [orders, setOrders] = useState<OrdersCardType[]>([])
   const [mergedCustomerIds, setMergedCustomerIds] = useState<number[]>([])
+  const [batchPayInProgress, setBatchPayInProgress] = useState(false)
+  const batchPayInProgressRef = useRef(batchPayInProgress)
   const { eventId } = useCookiesHook()
+
+  const setBatchPayInProgressState = useCallback((value: boolean) => {
+    batchPayInProgressRef.current = value
+    setBatchPayInProgress(value)
+  }, [])
 
   const fetchOrders = useCallback(() => {
     getActiveOrders(eventId).then((response: OrdersCardType[]) => {
       setOrders(response)
     })
   }, [eventId])
+
+  const refreshOrders = useCallback(() => {
+    if (!batchPayInProgressRef.current) {
+      fetchOrders()
+    }
+  }, [fetchOrders])
 
   const groupByCustomerId = useMemo(() => {
     const groups = new Map<number, OrderGroup>()
@@ -72,7 +85,7 @@ function OrdersCardList() {
     fetchOrders()
   }, [fetchOrders])
 
-  useOrdersSocket(eventId, fetchOrders)
+  useOrdersSocket(eventId, refreshOrders)
 
   const renderOrderCard = (order: OrdersCardType, group: OrderGroup, index: number) => (
     <OrdersCard
@@ -112,6 +125,8 @@ function OrdersCardList() {
         totalPaid={group.totalPaid}
         productSlices={productSlices}
         onPaid={fetchOrders}
+        onBatchPayStart={() => setBatchPayInProgressState(true)}
+        onBatchPayEnd={() => setBatchPayInProgressState(false)}
         onUnmerge={() => toggleCustomerMerge(group.customer_id)}
       />
     )

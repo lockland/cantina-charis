@@ -32,6 +32,8 @@ interface OrdersCustomerCardProps {
   /** Um slice por pedido do grupo (ordem da API). */
   productSlices: OrderProductsSlice[]
   onPaid?: () => void
+  onBatchPayStart?: () => void
+  onBatchPayEnd?: () => void
   onUnmerge?: () => void
 }
 
@@ -43,6 +45,8 @@ function OrdersCustomerCard({
   totalPaid,
   productSlices,
   onPaid,
+  onBatchPayStart,
+  onBatchPayEnd,
   onUnmerge,
 }: OrdersCustomerCardProps) {
   const [loading, setLoading] = useState(false)
@@ -52,10 +56,9 @@ function OrdersCustomerCard({
 
   const handlePay = async () => {
     setLoading(true)
+    onBatchPayStart?.()
     try {
-      for (const orderId of orderIds) {
-        await payOrder(orderId)
-      }
+      await Promise.all(orderIds.map((orderId) => payOrder(orderId)))
       onPaid?.()
     } catch (error) {
       const message = error instanceof Error ? error.message : "Falha ao pagar as comandas"
@@ -66,6 +69,7 @@ function OrdersCustomerCard({
       })
     } finally {
       setLoading(false)
+      onBatchPayEnd?.()
     }
   }
 
