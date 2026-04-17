@@ -24,3 +24,8 @@ yarn build      # build de produção (também usado pelo Makefile)
 ```
 
 O `Makefile` na raiz já chama `yarn build` dentro de `client`.
+
+## API de pedidos e débitos
+
+- O débito por cliente é **calculado** a partir dos pedidos: soma de `order_amount - paid_value` onde ainda há saldo.
+- **`PUT /api/orders/:id/pay`** quita **sempre o pedido inteiro** (define `paid_value = order_amount`). Não há pagamento parcial incremental por essa rota; use criação do pedido com valor pago parcial ou **`PUT /api/debits/:customer_id/pay`** para repartir um pagamento entre pedidos em aberto.
