@@ -142,6 +142,8 @@ func (c *OrderController) PayOrder(f *fiber.Ctx) error {
 		return f.Status(fiber.StatusBadRequest).SendString(err.Error())
 	}
 
+	realtime.NotifyOrdersChanged(order.EventID)
+
 	return f.Status(fiber.StatusOK).JSON(fiber.Map{"order_id": id, "paid_value": order.PaidValue})
 }
 
