@@ -3,7 +3,6 @@ package controllers
 import (
 	"github.com/gofiber/fiber/v2"
 	"github.com/lockland/cantina-charis/server/database"
-	"github.com/lockland/cantina-charis/server/debits"
 	"github.com/lockland/cantina-charis/server/models"
 	"github.com/shopspring/decimal"
 	"gorm.io/gorm"
@@ -53,7 +52,7 @@ func (c *DebitController) GetDebits(f *fiber.Ctx) error {
 				"id":   customer.ID,
 				"name": customer.Name,
 			},
-			"total":  debits.TotalResidual(customer.Orders),
+			"total":  customer.Orders.Residual(),
 			"orders": orders,
 		})
 	}
@@ -99,7 +98,7 @@ func (c *DebitController) PayDebits(f *fiber.Ctx) error {
 		return f.Status(fiber.StatusBadRequest).SendString("No outstanding orders for this customer")
 	}
 
-	newPaids := debits.ApplyBulkPayment(customer.Orders, payload.CustomerPaidValue)
+	newPaids := customer.Orders.ApplyPaymentValue(payload.CustomerPaidValue)
 	for i := range customer.Orders {
 		if customer.Orders[i].PaidValue.Equal(newPaids[i]) {
 			continue
@@ -137,7 +136,7 @@ func (c *DebitController) PayDebits(f *fiber.Ctx) error {
 			"id":   customer.ID,
 			"name": customer.Name,
 		},
-		"total":  debits.TotalResidual(customer.Orders),
+		"total":  customer.Orders.Residual(),
 		"orders": orders,
 	}
 

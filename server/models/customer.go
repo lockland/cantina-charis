@@ -9,5 +9,5 @@ type Customer struct {
 	Name      string    `json:"customer_name" gorm:"uniqueIndex"`
 	CreatedAt time.Time `json:"created_at"`
 	UpdatedAt time.Time `json:"updated_at"`
-	Orders    []Order   `json:"orders"`
+	Orders    Orders    `json:"orders"`
 }
