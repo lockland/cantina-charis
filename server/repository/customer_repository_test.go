@@ -10,12 +10,13 @@ import (
 )
 
 func TestCustomerRepository_FindAll(t *testing.T) {
-	db := testutil.OpenSQLite(t)
-	require.NoError(t, db.Create(&models.Customer{Name: "A"}).Error)
-	require.NoError(t, db.Create(&models.Customer{Name: "B"}).Error)
-
-	r := NewCustomerRepository(db)
-	var got []models.Customer
-	require.NoError(t, r.FindAll(&got))
-	assert.Len(t, got, 2)
+	t.Run("given customers in db when find all then returns all rows", func(t *testing.T) {
+		db := testutil.OpenSQLite(t)
+		require.NoError(t, db.Create(&models.Customer{Name: "A"}).Error)
+		require.NoError(t, db.Create(&models.Customer{Name: "B"}).Error)
+		r := NewCustomerRepository(db)
+		var got []models.Customer
+		require.NoError(t, r.FindAll(&got))
+		assert.Len(t, got, 2)
+	})
 }

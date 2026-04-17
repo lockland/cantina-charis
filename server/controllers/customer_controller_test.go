@@ -13,18 +13,18 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestCustomerController_GetCustomers_JSON(t *testing.T) {
-	db := testutil.OpenSQLite(t)
-	require.NoError(t, db.Create(&models.Customer{Name: "Pat"}).Error)
-
-	ctrl := NewCustomerController(repository.NewCustomerRepository(db))
-	app := fiber.New()
-	app.Get("/", ctrl.GetCustomers)
-
-	req := httptest.NewRequest(fiber.MethodGet, "/", nil)
-	resp, err := app.Test(req)
-	require.NoError(t, err)
-	assert.Equal(t, fiber.StatusOK, resp.StatusCode)
-	body, _ := io.ReadAll(resp.Body)
-	assert.Contains(t, string(body), "Pat")
+func TestCustomerController_GetCustomers(t *testing.T) {
+	t.Run("given customer when get then json contains name", func(t *testing.T) {
+		db := testutil.OpenSQLite(t)
+		require.NoError(t, db.Create(&models.Customer{Name: "Pat"}).Error)
+		ctrl := NewCustomerController(repository.NewCustomerRepository(db))
+		app := fiber.New()
+		app.Get("/", ctrl.GetCustomers)
+		req := httptest.NewRequest(fiber.MethodGet, "/", nil)
+		resp, err := app.Test(req)
+		require.NoError(t, err)
+		assert.Equal(t, fiber.StatusOK, resp.StatusCode)
+		body, _ := io.ReadAll(resp.Body)
+		assert.Contains(t, string(body), "Pat")
+	})
 }

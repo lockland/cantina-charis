@@ -9,20 +9,22 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestReportRepository_ListEventSummaries_emptyDB(t *testing.T) {
-	db := testutil.OpenSQLite(t)
-	r := NewReportRepository(db)
-	got, err := r.ListEventSummaries()
-	require.NoError(t, err)
-	assert.Empty(t, got)
-}
+func TestReportRepository_ListEventSummaries(t *testing.T) {
+	t.Run("given empty db when listing then empty slice", func(t *testing.T) {
+		db := testutil.OpenSQLite(t)
+		r := NewReportRepository(db)
+		got, err := r.ListEventSummaries()
+		require.NoError(t, err)
+		assert.Empty(t, got)
+	})
 
-func TestReportRepository_ListEventSummaries_withEvent(t *testing.T) {
-	db := testutil.OpenSQLite(t)
-	require.NoError(t, db.Create(&models.Event{Name: "Gala", Open: true}).Error)
-	r := NewReportRepository(db)
-	got, err := r.ListEventSummaries()
-	require.NoError(t, err)
-	require.Len(t, got, 1)
-	assert.Equal(t, "Gala", got[0].Name)
+	t.Run("given event when listing then summary includes name", func(t *testing.T) {
+		db := testutil.OpenSQLite(t)
+		require.NoError(t, db.Create(&models.Event{Name: "Gala", Open: true}).Error)
+		r := NewReportRepository(db)
+		got, err := r.ListEventSummaries()
+		require.NoError(t, err)
+		require.Len(t, got, 1)
+		assert.Equal(t, "Gala", got[0].Name)
+	})
 }
