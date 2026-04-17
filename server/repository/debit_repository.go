@@ -31,6 +31,13 @@ func (r *DebitRepository) ListCustomersWithOpenOrders(customers *[]models.Custom
 		Find(customers).Error
 }
 
+func updateOrderPaidIfAllocated(tx *gorm.DB, ord *models.Order, zero decimal.Decimal) error {
+	if ord.PaidValue.Equal(zero) {
+		return nil
+	}
+	return tx.Model(&models.Order{ID: ord.ID}).Update("paid_value", ord.PaidValue).Error
+}
+
 // PayCustomerDebits loads open orders, applies payment in memory, persists paid_value in one transaction.
 // Returns ErrDebitCustomerNotFound, ErrDebitNoOutstandingWithPayment, or other DB errors.
 func (r *DebitRepository) PayCustomerDebits(customerID int, payment decimal.Decimal) (*models.Customer, error) {
@@ -60,11 +67,7 @@ func (r *DebitRepository) PayCustomerDebits(customerID int, payment decimal.Deci
 
 	customer.Orders.ApplyPaymentValue(payment)
 	for i := range customer.Orders {
-		ord := &customer.Orders[i]
-		err = tx.
-			Model(&models.Order{ID: ord.ID}).
-			Update("paid_value", ord.PaidValue).
-			Error
+		err = updateOrderPaidIfAllocated(tx, &customer.Orders[i], zero)
 		if err != nil {
 			tx.Rollback()
 			return nil, err

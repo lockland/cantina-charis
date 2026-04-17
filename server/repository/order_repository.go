@@ -34,16 +34,17 @@ func mergeOrderProducts(orderID, customerID int, lines []models.OrderProduct) []
 		return -1
 	}
 	for _, el := range lines {
-		if j := indexOf(el.ProductID); j > -1 {
+		j := indexOf(el.ProductID)
+		if j > -1 {
 			out[j].ProductQuantity += el.ProductQuantity
-			continue
+		} else {
+			out = append(out, models.OrderProduct{
+				OrderID:         orderID,
+				CustomerID:      customerID,
+				ProductID:       el.ProductID,
+				ProductQuantity: el.ProductQuantity,
+			})
 		}
-		out = append(out, models.OrderProduct{
-			OrderID:         orderID,
-			CustomerID:      customerID,
-			ProductID:       el.ProductID,
-			ProductQuantity: el.ProductQuantity,
-		})
 	}
 	return out
 }

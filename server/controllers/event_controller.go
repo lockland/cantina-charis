@@ -22,7 +22,8 @@ func NewEventController(events *repository.EventRepository) EventController {
 // GetEvents returns all events when "open" is omitted; with open=true/false filters by Open.
 func (c *EventController) GetEvents(f *fiber.Ctx) error {
 	var open *bool
-	if v, err := strconv.ParseBool(f.Query("open")); err == nil {
+	v, parseErr := strconv.ParseBool(f.Query("open"))
+	if parseErr == nil {
 		open = &v
 	}
 	events, err := c.events.ListEvents(open)
