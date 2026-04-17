@@ -9,68 +9,62 @@ import (
 	"gorm.io/gorm"
 )
 
-// DebitService applies debit payment rules and delegates read queries to the repository.
+// DebitService holds debit payment rules; persistence and transaction boundaries live in the embedded repository.
 type DebitService struct {
-	db   *gorm.DB
-	repo *repository.DebitRepository
+	*repository.DebitRepository
 }
 
-// NewDebitService builds a service with shared db (same handle as repository queries).
-func NewDebitService(db *gorm.DB) *DebitService {
-	return &DebitService{
-		db:   db,
-		repo: repository.NewDebitRepository(db),
-	}
+// NewDebitService builds a service backed by the given repository.
+func NewDebitService(repo *repository.DebitRepository) *DebitService {
+	return &DebitService{DebitRepository: repo}
 }
 
-// ListCustomersWithOpenOrders delegates to the repository.
-func (s *DebitService) ListCustomersWithOpenOrders(customers *[]models.Customer) error {
-	return s.repo.ListCustomersWithOpenOrders(customers)
-}
-
-func updateOrderPaidIfAllocated(tx *gorm.DB, ord *models.Order, zero decimal.Decimal) error {
-	if ord.PaidValue.Equal(zero) {
-		return nil
-	}
-	return tx.Model(&models.Order{ID: ord.ID}).Update("paid_value", ord.PaidValue).Error
-}
-
-// PayCustomerDebits loads open orders, applies payment in memory, persists paid_value in one transaction.
+// PayCustomerDebits applies FIFO payment to open orders inside a repository-managed transaction.
 func (s *DebitService) PayCustomerDebits(customerID int, payment decimal.Decimal) (*models.Customer, error) {
 	zero := decimal.NewFromInt(0)
-	var customer *models.Customer
-
-	err := s.db.Transaction(func(tx *gorm.DB) error {
-		customer = &models.Customer{ID: customerID}
-		err := tx.
-			Preload("Orders", func(db *gorm.DB) *gorm.DB {
-				return db.Order("created_at asc").
-					Where("CAST(paid_value AS REAL) < CAST(order_amount AS REAL)")
-			}).
-			Preload("Orders.Event").
-			First(customer, customerID).Error
-		if err != nil {
-			if errors.Is(err, gorm.ErrRecordNotFound) {
-				return ErrDebitCustomerNotFound
-			}
-			return err
-		}
-
-		if len(customer.Orders) == 0 && payment.GreaterThan(zero) {
-			return ErrDebitNoOutstandingWithPayment
-		}
-
-		customer.Orders.ApplyPaymentValue(payment)
-		for i := range customer.Orders {
-			err = updateOrderPaidIfAllocated(tx, &customer.Orders[i], zero)
-			if err != nil {
-				return err
-			}
-		}
-		return nil
+	var result *models.Customer
+	err := s.Transaction(func(tx *gorm.DB) error {
+		var err error
+		result, err = s.payCustomerDebitsTx(tx, customerID, payment, zero)
+		return err
 	})
+	return result, err
+}
+
+func mapFindCustomerPayErr(err error) error {
+	if errors.Is(err, gorm.ErrRecordNotFound) {
+		return ErrDebitCustomerNotFound
+	}
+	return err
+}
+
+func (s *DebitService) payCustomerDebitsTx(tx *gorm.DB, customerID int, payment, zero decimal.Decimal) (*models.Customer, error) {
+	customer, err := s.FindCustomerWithOpenOrdersForPayTx(tx, customerID)
 	if err != nil {
+		return nil, mapFindCustomerPayErr(err)
+	}
+	if len(customer.Orders) == 0 && payment.GreaterThan(zero) {
+		return nil, ErrDebitNoOutstandingWithPayment
+	}
+	customer.Orders.ApplyPaymentValue(payment)
+	if err := s.persistOrdersPaidTx(tx, customer.Orders, zero); err != nil {
 		return nil, err
 	}
 	return customer, nil
+}
+
+func (s *DebitService) persistOrdersPaidTx(tx *gorm.DB, orders models.Orders, zero decimal.Decimal) error {
+	for i := range orders {
+		if err := s.persistOneOrderPaidTx(tx, &orders[i], zero); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func (s *DebitService) persistOneOrderPaidTx(tx *gorm.DB, ord *models.Order, zero decimal.Decimal) error {
+	if ord.PaidValue.Equal(zero) {
+		return nil
+	}
+	return s.UpdateOrderPaidValueTx(tx, ord.ID, ord.PaidValue)
 }

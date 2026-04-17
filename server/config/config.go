@@ -148,7 +148,8 @@ func setupApiRoutes(app *fiber.App) {
 	customerController := controllers.NewCustomerController(customerRepo)
 	api.Get("/customers", customerController.GetCustomers)
 
-	debitController := controllers.NewDebitController(service.NewDebitService(db))
+	debitRepo := repository.NewDebitRepository(db)
+	debitController := controllers.NewDebitController(service.NewDebitService(debitRepo))
 	api.Get("/debits", debitController.GetDebits)
 	api.Put("/debits/:customer_id/pay", debitController.PayDebits)
 
