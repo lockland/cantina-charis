@@ -1,31 +1,29 @@
 package controllers
 
 import (
+	"errors"
+
 	"github.com/gofiber/fiber/v2"
-	"github.com/lockland/cantina-charis/server/database"
 	"github.com/lockland/cantina-charis/server/models"
+	"github.com/lockland/cantina-charis/server/repository"
 	"github.com/shopspring/decimal"
-	"gorm.io/gorm"
 )
 
-type DebitController struct{}
+type DebitController struct {
+	debits *repository.DebitRepository
+}
 
-func NewDebitController() DebitController {
-	return DebitController{}
+func NewDebitController(debits *repository.DebitRepository) DebitController {
+	return DebitController{debits: debits}
 }
 
 func (c *DebitController) GetDebits(f *fiber.Ctx) error {
 	var customers []models.Customer
 
-	database.Conn.Model(&models.Customer{}).
-		Joins(`INNER JOIN orders ON orders.customer_id = customers.id AND CAST(orders.paid_value AS REAL) < CAST(orders.order_amount AS REAL)`).
-		Distinct().
-		Preload("Orders", func(db *gorm.DB) *gorm.DB {
-			return db.Order("created_at asc").
-				Where("CAST(paid_value AS REAL) < CAST(order_amount AS REAL)")
-		}).
-		Preload("Orders.Event").
-		Find(&customers)
+	err := c.debits.ListCustomersWithOpenOrders(&customers)
+	if err != nil {
+		return f.Status(fiber.StatusInternalServerError).SendString(err.Error())
+	}
 
 	response := []fiber.Map{}
 
@@ -80,41 +78,14 @@ func (c *DebitController) PayDebits(f *fiber.Ctx) error {
 		return f.Status(fiber.StatusBadRequest).SendString("paid_value must not be negative")
 	}
 
-	customer := models.Customer{ID: id}
-
-	transaction := database.Conn.Begin()
-	err = transaction.
-		Preload("Orders", func(db *gorm.DB) *gorm.DB {
-			return db.Order("created_at asc").
-				Where("CAST(paid_value AS REAL) < CAST(order_amount AS REAL)")
-		}).
-		Preload("Orders.Event").
-		First(&customer, id).Error
+	customer, err := c.debits.PayCustomerDebits(id, payload.CustomerPaidValue)
 	if err != nil {
-		transaction.Rollback()
-		return f.Status(fiber.StatusNotFound).SendString("Customer not found")
-	}
-
-	if len(customer.Orders) == 0 && payload.CustomerPaidValue.GreaterThan(zero) {
-		transaction.Rollback()
-		return f.Status(fiber.StatusBadRequest).SendString("No outstanding orders for this customer")
-	}
-
-	customer.Orders.ApplyPaymentValue(payload.CustomerPaidValue)
-	for i := range customer.Orders {
-		ord := &customer.Orders[i]
-		err = transaction.
-			Model(&models.Order{ID: ord.ID}).
-			Update("paid_value", ord.PaidValue).
-			Error
-		if err != nil {
-			transaction.Rollback()
-			return f.Status(fiber.StatusInternalServerError).SendString(err.Error())
+		if errors.Is(err, repository.ErrDebitCustomerNotFound) {
+			return f.Status(fiber.StatusNotFound).SendString("Customer not found")
 		}
-	}
-
-	err = transaction.Commit().Error
-	if err != nil {
+		if errors.Is(err, repository.ErrDebitNoOutstandingWithPayment) {
+			return f.Status(fiber.StatusBadRequest).SendString("No outstanding orders for this customer")
+		}
 		return f.Status(fiber.StatusInternalServerError).SendString(err.Error())
 	}
 

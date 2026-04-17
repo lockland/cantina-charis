@@ -1,21 +1,22 @@
 package controllers
 
 import (
-	"time"
+	"errors"
 
 	"github.com/gofiber/fiber/v2"
-	"github.com/lockland/cantina-charis/server/database"
 	"github.com/lockland/cantina-charis/server/models"
 	"github.com/lockland/cantina-charis/server/realtime"
+	"github.com/lockland/cantina-charis/server/repository"
 	"github.com/shopspring/decimal"
 	"gorm.io/gorm"
-	"gorm.io/gorm/clause"
 )
 
-type OrderController struct{}
+type OrderController struct {
+	orders *repository.OrderRepository
+}
 
-func NewOrderController() OrderController {
-	return OrderController{}
+func NewOrderController(orders *repository.OrderRepository) OrderController {
+	return OrderController{orders: orders}
 }
 
 // https://pkg.go.dev/github.com/shopspring/decimal#section-readme
@@ -55,55 +56,23 @@ func (c *OrderController) CreateOrder(f *fiber.Ctx) error {
 		Observation: payload.Observation,
 	}
 
-	var result *gorm.DB
-
-	result = database.Conn.
-		Where(models.Customer{Name: payload.CustomerName}).
-		FirstOrCreate(&order.Customer)
-
-	if result.Error != nil {
-		return f.Status(fiber.StatusBadRequest).SendString(result.Error.Error())
+	err := c.orders.FirstOrCreateCustomerByName(payload.CustomerName, &order.Customer)
+	if err != nil {
+		return f.Status(fiber.StatusBadRequest).SendString(err.Error())
 	}
 
-	transaction := database.Conn.Begin()
-
-	result = transaction.Save(&order)
-	if result.Error != nil {
-		transaction.Rollback()
-		return f.Status(fiber.StatusBadRequest).SendString(result.Error.Error())
-	}
-
-	orderItems := make([]models.OrderProduct, 0)
-
-	contains := func(items []models.OrderProduct, id int) int {
-		for index, item := range items {
-			if item.ProductID == id {
-				return index
-			}
-		}
-
-		return -1
-	}
-
+	lines := make([]models.OrderProduct, 0, len(payload.Products))
 	for _, el := range payload.Products {
-		if index := contains(orderItems, el.ID); index > -1 {
-			orderItems[index].ProductQuantity += el.Quantity
-		} else {
-			orderItems = append(orderItems, models.OrderProduct{
-				OrderID:         order.ID,
-				CustomerID:      order.Customer.ID,
-				ProductID:       el.ID,
-				ProductQuantity: el.Quantity,
-			})
-		}
+		lines = append(lines, models.OrderProduct{
+			ProductID:       el.ID,
+			ProductQuantity: el.Quantity,
+		})
 	}
 
-	transaction.Save(&orderItems)
-
-	transaction.
-		Preload("OrderProduct.Product").
-		Preload(clause.Associations).Find(&order)
-	transaction.Commit()
+	err = c.orders.CreateOrderWithLines(&order, lines)
+	if err != nil {
+		return f.Status(fiber.StatusBadRequest).SendString(err.Error())
+	}
 
 	realtime.NotifyOrderCreated(payload.EventID)
 
@@ -113,9 +82,10 @@ func (c *OrderController) CreateOrder(f *fiber.Ctx) error {
 
 func (c *OrderController) GetOrders(f *fiber.Ctx) error {
 	orders := new([]models.Order)
-	database.Conn.
-		Preload("OrderProduct.Product").
-		Preload(clause.Associations).Find(&orders)
+	err := c.orders.ListAllOrders(orders)
+	if err != nil {
+		return f.Status(fiber.StatusInternalServerError).SendString(err.Error())
+	}
 	return f.JSON(orders)
 }
 
@@ -126,9 +96,12 @@ func (c *OrderController) PayOrder(f *fiber.Ctx) error {
 	}
 
 	order := &models.Order{ID: id}
-	err = database.Conn.First(order).Error
+	err = c.orders.FindOrderByID(order, id)
 	if err != nil {
-		return f.Status(fiber.StatusNotFound).SendString("Order not found")
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return f.Status(fiber.StatusNotFound).SendString("Order not found")
+		}
+		return f.Status(fiber.StatusInternalServerError).SendString(err.Error())
 	}
 
 	if order.PaidValue.GreaterThanOrEqual(order.OrderAmount) {
@@ -137,7 +110,7 @@ func (c *OrderController) PayOrder(f *fiber.Ctx) error {
 
 	order.PaidValue = order.OrderAmount
 
-	err = database.Conn.Save(order).Error
+	err = c.orders.SaveOrder(order)
 	if err != nil {
 		return f.Status(fiber.StatusBadRequest).SendString(err.Error())
 	}
@@ -153,29 +126,14 @@ func (c *OrderController) DeleteOrder(f *fiber.Ctx) error {
 		return f.Status(fiber.StatusBadRequest).SendString("Invalid order id")
 	}
 
-	order := &models.Order{ID: id}
-	err = database.Conn.First(order).Error
+	eventID, err := c.orders.DeleteOrderWithProducts(id)
 	if err != nil {
-		return f.Status(fiber.StatusNotFound).SendString("Order not found")
-	}
-
-	tx := database.Conn.Begin()
-	err = tx.Where("order_id = ?", id).Delete(&models.OrderProduct{}).Error
-	if err != nil {
-		tx.Rollback()
-		return f.Status(fiber.StatusInternalServerError).SendString(err.Error())
-	}
-	err = tx.Delete(order).Error
-	if err != nil {
-		tx.Rollback()
-		return f.Status(fiber.StatusInternalServerError).SendString(err.Error())
-	}
-	err = tx.Commit().Error
-	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return f.Status(fiber.StatusNotFound).SendString("Order not found")
+		}
 		return f.Status(fiber.StatusInternalServerError).SendString(err.Error())
 	}
 
-	eventID := order.EventID
 	realtime.NotifyOrdersChanged(eventID)
 
 	return f.Status(fiber.StatusOK).JSON(fiber.Map{"order_id": id})
@@ -187,16 +145,14 @@ func (c *OrderController) DeliveryOrder(f *fiber.Ctx) error {
 		return f.Status(fiber.StatusBadRequest).SendString("Invalid id")
 	}
 
-	var existing models.Order
-	err = database.Conn.Select("id", "event_id").First(&existing, id).Error
+	eventID, err := c.orders.MarkOrderDelivered(id)
 	if err != nil {
-		return f.Status(fiber.StatusNotFound).SendString("Order not found")
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return f.Status(fiber.StatusNotFound).SendString("Order not found")
+		}
+		return f.Status(fiber.StatusInternalServerError).SendString(err.Error())
 	}
 
-	database.Conn.Model(&models.Order{ID: id}).Updates(models.Order{
-		Deliveried: true,
-		DoneAt:     time.Now(),
-	})
-	realtime.NotifyOrdersChanged(existing.EventID)
+	realtime.NotifyOrdersChanged(eventID)
 	return f.Status(fiber.StatusOK).JSON(fiber.Map{"order_id": id})
 }

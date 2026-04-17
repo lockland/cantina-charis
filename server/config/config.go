@@ -11,8 +11,10 @@ import (
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/cors"
 	"github.com/lockland/cantina-charis/server/controllers"
+	"github.com/lockland/cantina-charis/server/database"
 	"github.com/lockland/cantina-charis/server/middleware"
 	"github.com/lockland/cantina-charis/server/realtime"
+	"github.com/lockland/cantina-charis/server/repository"
 )
 
 const viewsIndex = "./views/index.html"
@@ -106,14 +108,17 @@ func setupApiRoutes(app *fiber.App) {
 		}
 	}))
 
-	orderController := controllers.NewOrderController()
+	db := database.Conn
+	orderRepo := repository.NewOrderRepository(db)
+	orderController := controllers.NewOrderController(orderRepo)
 	api.Post("/orders", orderController.CreateOrder)
 	api.Get("/orders", orderController.GetOrders)
 	api.Put("/orders/:id/pay", orderController.PayOrder)
 	api.Delete("/orders/:id", orderController.DeleteOrder)
 	api.Put("/orders/:id/done", orderController.DeliveryOrder)
 
-	eventController := controllers.NewEventController()
+	eventRepo := repository.NewEventRepository(db)
+	eventController := controllers.NewEventController(eventRepo)
 	api.Post("/events", eventController.CreateEvent)
 	api.Get("/events", eventController.GetEvents)
 	api.Get("/events/:id", eventController.GetEvent)
@@ -123,7 +128,8 @@ func setupApiRoutes(app *fiber.App) {
 	api.Get("/events/:id/orders/active", eventController.GetActiveOrders)
 	api.Get("/events/:id/orders", eventController.GetOrders)
 
-	productController := controllers.NewProductController()
+	productRepo := repository.NewProductRepository(db)
+	productController := controllers.NewProductController(productRepo)
 	api.Post("/products", productController.CreateProduct)
 	api.Get("/products", productController.GetProducts)
 	api.Get("/products/enabled", productController.GetEnabledProducts)
@@ -132,19 +138,23 @@ func setupApiRoutes(app *fiber.App) {
 	api.Delete("/products/:id", productController.DeleteProduct)
 	api.Put("/products/:id/toggle", productController.ToggleProduct)
 
-	outgoingController := controllers.NewOutgoingController()
+	outgoingRepo := repository.NewOutgoingRepository(db)
+	outgoingController := controllers.NewOutgoingController(outgoingRepo)
 	api.Post("/outgoings", outgoingController.CreateOutgoing)
 	api.Get("/outgoings", outgoingController.GetOutgoings)
 
-	customerController := controllers.NewCustomerController()
+	customerRepo := repository.NewCustomerRepository(db)
+	customerController := controllers.NewCustomerController(customerRepo)
 	api.Get("/customers", customerController.GetCustomers)
 
-	debitController := controllers.NewDebitController()
+	debitRepo := repository.NewDebitRepository(db)
+	debitController := controllers.NewDebitController(debitRepo)
 	api.Get("/debits", debitController.GetDebits)
 	api.Put("/debits/:customer_id/pay", debitController.PayDebits)
 
 	// Grupo /reports: rotas fixas antes de :param (balance/:lastDays, payments/:customer_id)
-	reportController := controllers.NewReportController()
+	reportRepo := repository.NewReportRepository(db)
+	reportController := controllers.NewReportController(reportRepo)
 	reports := api.Group("/reports")
 	reports.Get("/summaries", reportController.GetSummaries)
 	reports.Get("/outgoings", reportController.GetOutgoingsByDateRange)

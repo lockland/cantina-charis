@@ -1,51 +1,63 @@
 package controllers
 
 import (
+	"errors"
 	"strconv"
 
 	"github.com/gofiber/fiber/v2"
-	"github.com/lockland/cantina-charis/server/database"
 	"github.com/lockland/cantina-charis/server/models"
-	"gorm.io/gorm/clause"
+	"github.com/lockland/cantina-charis/server/repository"
+	"gorm.io/gorm"
 )
 
-type EventController struct{}
+type EventController struct {
+	events *repository.EventRepository
+}
 
-func NewEventController() EventController {
-	return EventController{}
+func NewEventController(events *repository.EventRepository) EventController {
+	return EventController{events: events}
 }
 
 // https://pkg.go.dev/github.com/shopspring/decimal#section-readme
 // GetEvents returns all events when "open" is omitted; with open=true/false filters by Open.
 func (c *EventController) GetEvents(f *fiber.Ctx) error {
-	events := new([]models.Event)
-	q := database.Conn.Order("created_at desc")
-	open, parseOpenErr := strconv.ParseBool(f.Query("open"))
-	if parseOpenErr == nil {
-		q = q.Where("Open = ?", open)
+	var open *bool
+	if v, err := strconv.ParseBool(f.Query("open")); err == nil {
+		open = &v
 	}
-	q.Find(events)
+	events, err := c.events.ListEvents(open)
+	if err != nil {
+		return f.Status(fiber.StatusInternalServerError).SendString(err.Error())
+	}
 	return f.JSON(events)
 }
 
 func (c *EventController) GetEvent(f *fiber.Ctx) error {
-	eventId, _ := strconv.Atoi(f.Params("id"))
-	event := new(models.Event)
-	database.Conn.First(&event, eventId)
+	eventId, err := f.ParamsInt("id")
+	if err != nil {
+		return f.Status(fiber.StatusBadRequest).SendString("Invalid id")
+	}
+	var event models.Event
+	err = c.events.FindByID(eventId, &event)
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return f.Status(fiber.StatusNotFound).SendString("Event not found")
+		}
+		return f.Status(fiber.StatusInternalServerError).SendString(err.Error())
+	}
 	return f.JSON(event)
 }
 
 func (c *EventController) CloseEvent(f *fiber.Ctx) error {
 	id, err := f.ParamsInt("id")
-	event := &models.Event{
-		ID: id,
-	}
-
 	if err != nil {
 		return f.Status(401).SendString("Invalid id")
 	}
 
-	database.Conn.Model(&event).Update("Open", false)
+	err = c.events.Close(id)
+	if err != nil {
+		return f.Status(fiber.StatusInternalServerError).SendString(err.Error())
+	}
 	return f.Status(fiber.StatusOK).JSON(fiber.Map{"event_id": id})
 }
 
@@ -57,7 +69,10 @@ func (c *EventController) CreateEvent(f *fiber.Ctx) error {
 		return err
 	}
 
-	database.Conn.Create(&event)
+	err = c.events.Create(event)
+	if err != nil {
+		return f.Status(fiber.StatusInternalServerError).SendString(err.Error())
+	}
 	return f.JSON(event)
 }
 
@@ -66,14 +81,11 @@ func (c *EventController) GetOrders(f *fiber.Ctx) error {
 	if err != nil {
 		return f.Status(401).SendString("Invalid id")
 	}
-	event := models.Event{ID: id}
-	database.Conn.
-		Preload("Orders").
-		Preload("Orders.OrderProduct.Product").
-		Preload("Orders.Customer").
-		Preload(clause.Associations).
-		Find(&event)
-	return f.JSON(event.Orders)
+	orders, err := c.events.FindOrdersForEvent(id)
+	if err != nil {
+		return f.Status(fiber.StatusInternalServerError).SendString(err.Error())
+	}
+	return f.JSON(orders)
 }
 
 func (c *EventController) GetEventOutgoings(f *fiber.Ctx) error {
@@ -81,8 +93,10 @@ func (c *EventController) GetEventOutgoings(f *fiber.Ctx) error {
 	if err != nil {
 		return f.Status(fiber.StatusBadRequest).SendString("Invalid event id")
 	}
-	var outgoings []models.Outgoing
-	database.Conn.Where("event_id = ?", id).Order("created_at").Find(&outgoings)
+	outgoings, err := c.events.FindOutgoingsByEventID(id)
+	if err != nil {
+		return f.Status(fiber.StatusInternalServerError).SendString(err.Error())
+	}
 	return f.JSON(outgoings)
 }
 
@@ -91,14 +105,11 @@ func (c *EventController) GetPendingOrders(f *fiber.Ctx) error {
 	if err != nil {
 		return f.Status(401).SendString("Invalid id")
 	}
-	event := models.Event{ID: id}
-	database.Conn.
-		Preload("Orders", "deliveried = ?", false).
-		Preload("Orders.OrderProduct.Product").
-		Preload("Orders.Customer").
-		Preload(clause.Associations).
-		Find(&event)
-	return f.JSON(event.Orders)
+	orders, err := c.events.FindPendingOrdersForEvent(id)
+	if err != nil {
+		return f.Status(fiber.StatusInternalServerError).SendString(err.Error())
+	}
+	return f.JSON(orders)
 }
 
 func (c *EventController) GetActiveOrders(f *fiber.Ctx) error {
@@ -106,12 +117,9 @@ func (c *EventController) GetActiveOrders(f *fiber.Ctx) error {
 	if err != nil {
 		return f.Status(401).SendString("Invalid id")
 	}
-	event := models.Event{ID: id}
-	database.Conn.
-		Preload("Orders", "deliveried = ? OR CAST(paid_value AS REAL) < CAST(order_amount AS REAL)", false).
-		Preload("Orders.OrderProduct.Product").
-		Preload("Orders.Customer").
-		Preload(clause.Associations).
-		Find(&event)
-	return f.JSON(event.Orders)
+	orders, err := c.events.FindActiveOrdersForEvent(id)
+	if err != nil {
+		return f.Status(fiber.StatusInternalServerError).SendString(err.Error())
+	}
+	return f.JSON(orders)
 }
