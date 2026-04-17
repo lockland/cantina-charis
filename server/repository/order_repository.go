@@ -23,32 +23,6 @@ func (r *OrderRepository) FirstOrCreateCustomerByName(name string, customer *mod
 	return r.db.Where(models.Customer{Name: name}).FirstOrCreate(customer).Error
 }
 
-func mergeOrderProducts(orderID, customerID int, lines []models.OrderProduct) []models.OrderProduct {
-	out := make([]models.OrderProduct, 0, len(lines))
-	indexOf := func(id int) int {
-		for i, p := range out {
-			if p.ProductID == id {
-				return i
-			}
-		}
-		return -1
-	}
-	for _, el := range lines {
-		j := indexOf(el.ProductID)
-		if j > -1 {
-			out[j].ProductQuantity += el.ProductQuantity
-		} else {
-			out = append(out, models.OrderProduct{
-				OrderID:         orderID,
-				CustomerID:      customerID,
-				ProductID:       el.ProductID,
-				ProductQuantity: el.ProductQuantity,
-			})
-		}
-	}
-	return out
-}
-
 // CreateOrderWithLines saves the order and merged line items in one transaction, then reloads associations.
 func (r *OrderRepository) CreateOrderWithLines(order *models.Order, lines []models.OrderProduct) error {
 	tx := r.db.Begin()
@@ -59,7 +33,7 @@ func (r *OrderRepository) CreateOrderWithLines(order *models.Order, lines []mode
 		return err
 	}
 
-	items := mergeOrderProducts(order.ID, order.Customer.ID, lines)
+	items := models.MergeOrderProductLines(order.ID, order.Customer.ID, lines)
 	err = tx.Save(&items).Error
 	if err != nil {
 		tx.Rollback()

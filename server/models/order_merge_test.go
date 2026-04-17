@@ -1,4 +1,4 @@
-package repository
+package models_test
 
 import (
 	"testing"
@@ -7,13 +7,13 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestMergeOrderProducts_sameProductId_sumsQuantity(t *testing.T) {
+func TestMergeOrderProductLines_sameProductId_sumsQuantity(t *testing.T) {
 	lines := []models.OrderProduct{
 		{ProductID: 10, ProductQuantity: 2},
 		{ProductID: 10, ProductQuantity: 3},
 		{ProductID: 7, ProductQuantity: 1},
 	}
-	got := mergeOrderProducts(100, 5, lines)
+	got := models.MergeOrderProductLines(100, 5, lines)
 	assert.Len(t, got, 2)
 	assert.Equal(t, 100, got[0].OrderID)
 	assert.Equal(t, 5, got[0].CustomerID)
@@ -23,6 +23,6 @@ func TestMergeOrderProducts_sameProductId_sumsQuantity(t *testing.T) {
 	assert.Equal(t, 1, got[1].ProductQuantity)
 }
 
-func TestMergeOrderProducts_emptyInput(t *testing.T) {
-	assert.Empty(t, mergeOrderProducts(1, 2, nil))
+func TestMergeOrderProductLines_emptyInput(t *testing.T) {
+	assert.Empty(t, models.MergeOrderProductLines(1, 2, nil))
 }

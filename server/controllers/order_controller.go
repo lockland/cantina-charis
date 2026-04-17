@@ -6,16 +6,16 @@ import (
 	"github.com/gofiber/fiber/v2"
 	"github.com/lockland/cantina-charis/server/models"
 	"github.com/lockland/cantina-charis/server/realtime"
-	"github.com/lockland/cantina-charis/server/repository"
+	"github.com/lockland/cantina-charis/server/service"
 	"github.com/shopspring/decimal"
 	"gorm.io/gorm"
 )
 
 type OrderController struct {
-	orders *repository.OrderRepository
+	orders *service.OrderService
 }
 
-func NewOrderController(orders *repository.OrderRepository) OrderController {
+func NewOrderController(orders *service.OrderService) OrderController {
 	return OrderController{orders: orders}
 }
 
@@ -56,11 +56,6 @@ func (c *OrderController) CreateOrder(f *fiber.Ctx) error {
 		Observation: payload.Observation,
 	}
 
-	err := c.orders.FirstOrCreateCustomerByName(payload.CustomerName, &order.Customer)
-	if err != nil {
-		return f.Status(fiber.StatusBadRequest).SendString(err.Error())
-	}
-
 	lines := make([]models.OrderProduct, 0, len(payload.Products))
 	for _, el := range payload.Products {
 		lines = append(lines, models.OrderProduct{
@@ -69,7 +64,7 @@ func (c *OrderController) CreateOrder(f *fiber.Ctx) error {
 		})
 	}
 
-	err = c.orders.CreateOrderWithLines(&order, lines)
+	err := c.orders.PlaceOrder(payload.CustomerName, &order, lines)
 	if err != nil {
 		return f.Status(fiber.StatusBadRequest).SendString(err.Error())
 	}

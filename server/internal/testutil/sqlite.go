@@ -1,4 +1,4 @@
-package repository
+package testutil
 
 import (
 	"path/filepath"
@@ -11,7 +11,8 @@ import (
 	"gorm.io/gorm/logger"
 )
 
-func openTestDB(t *testing.T) *gorm.DB {
+// OpenSQLite returns a migrated GORM handle on a temporary SQLite file (tests only).
+func OpenSQLite(t *testing.T) *gorm.DB {
 	t.Helper()
 	path := filepath.Join(t.TempDir(), "test.db")
 	db, err := gorm.Open(sqlite.Open(path), &gorm.Config{

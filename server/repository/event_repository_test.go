@@ -3,13 +3,14 @@ package repository
 import (
 	"testing"
 
+	"github.com/lockland/cantina-charis/server/internal/testutil"
 	"github.com/lockland/cantina-charis/server/models"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
 func TestListEvents_openFilterNil_returnsAll(t *testing.T) {
-	db := openTestDB(t)
+	db := testutil.OpenSQLite(t)
 	a := models.Event{Name: "A"}
 	b := models.Event{Name: "B"}
 	require.NoError(t, db.Create(&a).Error)
@@ -23,7 +24,7 @@ func TestListEvents_openFilterNil_returnsAll(t *testing.T) {
 }
 
 func TestListEvents_openFilterTrue_returnsOnlyOpen(t *testing.T) {
-	db := openTestDB(t)
+	db := testutil.OpenSQLite(t)
 	openEv := models.Event{Name: "OpenEv"}
 	closedEv := models.Event{Name: "ClosedEv"}
 	require.NoError(t, db.Create(&openEv).Error)
@@ -40,7 +41,7 @@ func TestListEvents_openFilterTrue_returnsOnlyOpen(t *testing.T) {
 }
 
 func TestListEvents_openFilterFalse_returnsOnlyClosed(t *testing.T) {
-	db := openTestDB(t)
+	db := testutil.OpenSQLite(t)
 	openEv := models.Event{Name: "OpenEv2"}
 	closedEv := models.Event{Name: "ClosedEv2"}
 	require.NoError(t, db.Create(&openEv).Error)

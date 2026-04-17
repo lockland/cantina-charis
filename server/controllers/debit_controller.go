@@ -5,15 +5,15 @@ import (
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/lockland/cantina-charis/server/models"
-	"github.com/lockland/cantina-charis/server/repository"
+	"github.com/lockland/cantina-charis/server/service"
 	"github.com/shopspring/decimal"
 )
 
 type DebitController struct {
-	debits *repository.DebitRepository
+	debits *service.DebitService
 }
 
-func NewDebitController(debits *repository.DebitRepository) DebitController {
+func NewDebitController(debits *service.DebitService) DebitController {
 	return DebitController{debits: debits}
 }
 
@@ -80,10 +80,10 @@ func (c *DebitController) PayDebits(f *fiber.Ctx) error {
 
 	customer, err := c.debits.PayCustomerDebits(id, payload.CustomerPaidValue)
 	if err != nil {
-		if errors.Is(err, repository.ErrDebitCustomerNotFound) {
+		if errors.Is(err, service.ErrDebitCustomerNotFound) {
 			return f.Status(fiber.StatusNotFound).SendString("Customer not found")
 		}
-		if errors.Is(err, repository.ErrDebitNoOutstandingWithPayment) {
+		if errors.Is(err, service.ErrDebitNoOutstandingWithPayment) {
 			return f.Status(fiber.StatusBadRequest).SendString("No outstanding orders for this customer")
 		}
 		return f.Status(fiber.StatusInternalServerError).SendString(err.Error())

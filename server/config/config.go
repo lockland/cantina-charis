@@ -15,6 +15,7 @@ import (
 	"github.com/lockland/cantina-charis/server/middleware"
 	"github.com/lockland/cantina-charis/server/realtime"
 	"github.com/lockland/cantina-charis/server/repository"
+	"github.com/lockland/cantina-charis/server/service"
 )
 
 const viewsIndex = "./views/index.html"
@@ -110,7 +111,7 @@ func setupApiRoutes(app *fiber.App) {
 
 	db := database.Conn
 	orderRepo := repository.NewOrderRepository(db)
-	orderController := controllers.NewOrderController(orderRepo)
+	orderController := controllers.NewOrderController(service.NewOrderService(orderRepo))
 	api.Post("/orders", orderController.CreateOrder)
 	api.Get("/orders", orderController.GetOrders)
 	api.Put("/orders/:id/pay", orderController.PayOrder)
@@ -147,8 +148,7 @@ func setupApiRoutes(app *fiber.App) {
 	customerController := controllers.NewCustomerController(customerRepo)
 	api.Get("/customers", customerController.GetCustomers)
 
-	debitRepo := repository.NewDebitRepository(db)
-	debitController := controllers.NewDebitController(debitRepo)
+	debitController := controllers.NewDebitController(service.NewDebitService(db))
 	api.Get("/debits", debitController.GetDebits)
 	api.Put("/debits/:customer_id/pay", debitController.PayDebits)
 

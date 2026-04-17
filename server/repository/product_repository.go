@@ -37,11 +37,12 @@ func (r *ProductRepository) ToggleEnabled(id int) (*models.Product, error) {
 	if err != nil {
 		return nil, err
 	}
-	err = r.db.Model(&p).Update("Enabled", !p.Enabled).Error
+	newVal := !p.Enabled
+	err = r.db.Model(&p).Updates(map[string]interface{}{"enabled": newVal}).Error
 	if err != nil {
 		return nil, err
 	}
-	p.Enabled = !p.Enabled
+	p.Enabled = newVal
 	return &p, nil
 }
 

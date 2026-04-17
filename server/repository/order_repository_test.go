@@ -3,27 +3,33 @@ package repository
 import (
 	"testing"
 
+	"github.com/lockland/cantina-charis/server/internal/testutil"
 	"github.com/lockland/cantina-charis/server/models"
+	"github.com/shopspring/decimal"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"gorm.io/gorm"
 )
 
+func decOrder(s string) decimal.Decimal {
+	return decimal.RequireFromString(s)
+}
+
 func TestCreateOrderWithLines_mergesDuplicateProductLines(t *testing.T) {
-	db := openTestDB(t)
+	db := testutil.OpenSQLite(t)
 	ev := models.Event{Name: "OE", Open: true}
 	require.NoError(t, db.Create(&ev).Error)
 	c := models.Customer{Name: "CustMerge"}
 	require.NoError(t, db.Create(&c).Error)
-	p := models.Product{Name: "P1", Price: dec("2")}
+	p := models.Product{Name: "P1", Price: decOrder("2")}
 	require.NoError(t, db.Create(&p).Error)
 
 	order := models.Order{
 		EventID:     ev.ID,
 		CustomerID:  c.ID,
 		Customer:    c,
-		OrderAmount: dec("100"),
-		PaidValue:   dec("0"),
+		OrderAmount: decOrder("100"),
+		PaidValue:   decOrder("0"),
 	}
 	lines := []models.OrderProduct{
 		{ProductID: p.ID, ProductQuantity: 2},
@@ -42,19 +48,19 @@ func TestCreateOrderWithLines_mergesDuplicateProductLines(t *testing.T) {
 }
 
 func TestDeleteOrderWithProducts_removesOrderAndLines(t *testing.T) {
-	db := openTestDB(t)
+	db := testutil.OpenSQLite(t)
 	ev := models.Event{Name: "OD", Open: true}
 	require.NoError(t, db.Create(&ev).Error)
 	c := models.Customer{Name: "CustDel"}
 	require.NoError(t, db.Create(&c).Error)
-	p := models.Product{Name: "P2", Price: dec("1")}
+	p := models.Product{Name: "P2", Price: decOrder("1")}
 	require.NoError(t, db.Create(&p).Error)
 	order := models.Order{
 		EventID:     ev.ID,
 		CustomerID:  c.ID,
 		Customer:    c,
-		OrderAmount: dec("10"),
-		PaidValue:   dec("0"),
+		OrderAmount: decOrder("10"),
+		PaidValue:   decOrder("0"),
 	}
 	require.NoError(t, db.Create(&order).Error)
 	op := models.OrderProduct{
@@ -77,7 +83,7 @@ func TestDeleteOrderWithProducts_removesOrderAndLines(t *testing.T) {
 }
 
 func TestMarkOrderDelivered_setsDeliveried(t *testing.T) {
-	db := openTestDB(t)
+	db := testutil.OpenSQLite(t)
 	ev := models.Event{Name: "OM", Open: true}
 	require.NoError(t, db.Create(&ev).Error)
 	c := models.Customer{Name: "CustMark"}
@@ -86,8 +92,8 @@ func TestMarkOrderDelivered_setsDeliveried(t *testing.T) {
 		EventID:     ev.ID,
 		CustomerID:  c.ID,
 		Customer:    c,
-		OrderAmount: dec("5"),
-		PaidValue:   dec("5"),
+		OrderAmount: decOrder("5"),
+		PaidValue:   decOrder("5"),
 		Deliveried:  false,
 	}
 	require.NoError(t, db.Create(&order).Error)
