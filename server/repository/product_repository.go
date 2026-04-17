@@ -59,20 +59,13 @@ func (r *ProductRepository) Update(product *models.Product) error {
 // DeleteByID removes order_products referencing the product then the product row.
 // Returns rows affected for the product delete (0 if missing).
 func (r *ProductRepository) DeleteByID(id int) (productRows int64, err error) {
-	tx := r.db.Begin()
-	err = tx.Where("product_id = ?", id).Delete(&models.OrderProduct{}).Error
-	if err != nil {
-		tx.Rollback()
-		return 0, err
-	}
-	res := tx.Delete(&models.Product{}, id)
-	if res.Error != nil {
-		tx.Rollback()
-		return 0, res.Error
-	}
-	err = tx.Commit().Error
-	if err != nil {
-		return 0, err
-	}
-	return res.RowsAffected, nil
+	err = r.db.Transaction(func(tx *gorm.DB) error {
+		if err := tx.Where("product_id = ?", id).Delete(&models.OrderProduct{}).Error; err != nil {
+			return err
+		}
+		res := tx.Delete(&models.Product{}, id)
+		productRows = res.RowsAffected
+		return res.Error
+	})
+	return productRows, err
 }

@@ -25,36 +25,19 @@ func (r *OrderRepository) FirstOrCreateCustomerByName(name string, customer *mod
 
 // CreateOrderWithLines saves the order and merged line items in one transaction, then reloads associations.
 func (r *OrderRepository) CreateOrderWithLines(order *models.Order, lines []models.OrderProduct) error {
-	tx := r.db.Begin()
-
-	err := tx.Save(order).Error
-	if err != nil {
-		tx.Rollback()
-		return err
-	}
-
-	items := models.MergeOrderProductLines(order.ID, order.Customer.ID, lines)
-	err = tx.Save(&items).Error
-	if err != nil {
-		tx.Rollback()
-		return err
-	}
-
-	err = tx.
-		Preload("OrderProduct.Product").
-		Preload(clause.Associations).
-		Find(order).Error
-	if err != nil {
-		tx.Rollback()
-		return err
-	}
-
-	err = tx.Commit().Error
-	if err != nil {
-		_ = tx.Rollback()
-		return err
-	}
-	return nil
+	return r.db.Transaction(func(tx *gorm.DB) error {
+		if err := tx.Save(order).Error; err != nil {
+			return err
+		}
+		items := models.MergeOrderProductLines(order.ID, order.Customer.ID, lines)
+		if err := tx.Save(&items).Error; err != nil {
+			return err
+		}
+		return tx.
+			Preload("OrderProduct.Product").
+			Preload(clause.Associations).
+			Find(order).Error
+	})
 }
 
 // ListAllOrders loads all orders with preloads used by the API.
@@ -86,18 +69,12 @@ func (r *OrderRepository) DeleteOrderWithProducts(orderID int) (eventID int, err
 	}
 	eventID = order.EventID
 
-	tx := r.db.Begin()
-	err = tx.Where("order_id = ?", orderID).Delete(&models.OrderProduct{}).Error
-	if err != nil {
-		tx.Rollback()
-		return 0, err
-	}
-	err = tx.Delete(order).Error
-	if err != nil {
-		tx.Rollback()
-		return 0, err
-	}
-	err = tx.Commit().Error
+	err = r.db.Transaction(func(tx *gorm.DB) error {
+		if err := tx.Where("order_id = ?", orderID).Delete(&models.OrderProduct{}).Error; err != nil {
+			return err
+		}
+		return tx.Delete(order).Error
+	})
 	if err != nil {
 		return 0, err
 	}
