@@ -20,7 +20,8 @@ func NewEventController() EventController {
 func (c *EventController) GetEvents(f *fiber.Ctx) error {
 	events := new([]models.Event)
 	q := database.Conn.Order("created_at desc")
-	if open, err := strconv.ParseBool(f.Query("open")); err == nil {
+	open, parseOpenErr := strconv.ParseBool(f.Query("open"))
+	if parseOpenErr == nil {
 		q = q.Where("Open = ?", open)
 	}
 	q.Find(events)
@@ -51,8 +52,9 @@ func (c *EventController) CloseEvent(f *fiber.Ctx) error {
 func (c *EventController) CreateEvent(f *fiber.Ctx) error {
 	event := new(models.Event)
 
-	if error := f.BodyParser(event); error != nil {
-		return error
+	err := f.BodyParser(event)
+	if err != nil {
+		return err
 	}
 
 	database.Conn.Create(&event)

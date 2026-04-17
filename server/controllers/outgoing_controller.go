@@ -15,10 +15,11 @@ func NewOutgoingController() OutgoingController {
 func (c *OutgoingController) CreateOutgoing(f *fiber.Ctx) error {
 	outgoing := new(models.Outgoing)
 
-	if error := f.BodyParser(outgoing); error != nil {
+	err := f.BodyParser(outgoing)
+	if err != nil {
 		return f.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"error": "Não foi possível registrar a despesa",
-			"details": error.Error(),
+			"details": err.Error(),
 		})
 	}
 

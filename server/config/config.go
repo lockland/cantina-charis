@@ -29,7 +29,8 @@ func serveSPAOrStatic(c *fiber.Ctx) error {
 	if err != nil || strings.HasPrefix(rel, "..") {
 		return c.SendFile(viewsIndex)
 	}
-	if err := c.SendFile(clean); err != nil {
+	sendErr := c.SendFile(clean)
+	if sendErr != nil {
 		return c.SendFile(viewsIndex)
 	}
 	return nil
@@ -98,7 +99,8 @@ func setupApiRoutes(app *fiber.App) {
 		}
 		defer realtime.Unregister(eventID, cc)
 		for {
-			if _, _, err := c.ReadMessage(); err != nil {
+			_, _, readErr := c.ReadMessage()
+			if readErr != nil {
 				break
 			}
 		}

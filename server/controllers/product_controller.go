@@ -52,8 +52,9 @@ func (c *ProductController) ToggleProduct(f *fiber.Ctx) error {
 func (c *ProductController) CreateProduct(f *fiber.Ctx) error {
 	product := new(models.Product)
 
-	if error := f.BodyParser(product); error != nil {
-		return error
+	err := f.BodyParser(product)
+	if err != nil {
+		return err
 	}
 
 	result := database.Conn.Create(&product)
@@ -67,8 +68,9 @@ func (c *ProductController) CreateProduct(f *fiber.Ctx) error {
 func (c *ProductController) UpdateProduct(f *fiber.Ctx) error {
 	product := new(models.Product)
 
-	if error := f.BodyParser(product); error != nil {
-		return error
+	err := f.BodyParser(product)
+	if err != nil {
+		return err
 	}
 
 	result := database.Conn.Model(&product).Updates(product)

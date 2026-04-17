@@ -70,8 +70,9 @@ func (c *DebitController) PayDebits(f *fiber.Ctx) error {
 		CustomerPaidValue decimal.Decimal `json:"paid_value"`
 	}{}
 
-	if error := f.BodyParser(&payload); error != nil {
-		return error
+	err = f.BodyParser(&payload)
+	if err != nil {
+		return err
 	}
 
 	zero := decimal.NewFromInt(0)
@@ -82,13 +83,14 @@ func (c *DebitController) PayDebits(f *fiber.Ctx) error {
 	customer := models.Customer{ID: id}
 
 	transaction := database.Conn.Begin()
-	if err := transaction.
+	err = transaction.
 		Preload("Orders", func(db *gorm.DB) *gorm.DB {
 			return db.Order("created_at asc").
 				Where("CAST(paid_value AS REAL) < CAST(order_amount AS REAL)")
 		}).
 		Preload("Orders.Event").
-		First(&customer, id).Error; err != nil {
+		First(&customer, id).Error
+	if err != nil {
 		transaction.Rollback()
 		return f.Status(fiber.StatusNotFound).SendString("Customer not found")
 	}
@@ -101,7 +103,7 @@ func (c *DebitController) PayDebits(f *fiber.Ctx) error {
 	customer.Orders.ApplyPaymentValue(payload.CustomerPaidValue)
 	for i := range customer.Orders {
 		ord := &customer.Orders[i]
-		err := transaction.
+		err = transaction.
 			Model(&models.Order{ID: ord.ID}).
 			Update("paid_value", ord.PaidValue).
 			Error
@@ -111,7 +113,8 @@ func (c *DebitController) PayDebits(f *fiber.Ctx) error {
 		}
 	}
 
-	if err := transaction.Commit().Error; err != nil {
+	err = transaction.Commit().Error
+	if err != nil {
 		return f.Status(fiber.StatusInternalServerError).SendString(err.Error())
 	}
 

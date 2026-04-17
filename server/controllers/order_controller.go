@@ -126,7 +126,8 @@ func (c *OrderController) PayOrder(f *fiber.Ctx) error {
 	}
 
 	order := &models.Order{ID: id}
-	if err := database.Conn.First(order).Error; err != nil {
+	err = database.Conn.First(order).Error
+	if err != nil {
 		return f.Status(fiber.StatusNotFound).SendString("Order not found")
 	}
 
@@ -136,7 +137,8 @@ func (c *OrderController) PayOrder(f *fiber.Ctx) error {
 
 	order.PaidValue = order.OrderAmount
 
-	if err := database.Conn.Save(order).Error; err != nil {
+	err = database.Conn.Save(order).Error
+	if err != nil {
 		return f.Status(fiber.StatusBadRequest).SendString(err.Error())
 	}
 
@@ -150,20 +152,24 @@ func (c *OrderController) DeleteOrder(f *fiber.Ctx) error {
 	}
 
 	order := &models.Order{ID: id}
-	if err := database.Conn.First(order).Error; err != nil {
+	err = database.Conn.First(order).Error
+	if err != nil {
 		return f.Status(fiber.StatusNotFound).SendString("Order not found")
 	}
 
 	tx := database.Conn.Begin()
-	if err := tx.Where("order_id = ?", id).Delete(&models.OrderProduct{}).Error; err != nil {
+	err = tx.Where("order_id = ?", id).Delete(&models.OrderProduct{}).Error
+	if err != nil {
 		tx.Rollback()
 		return f.Status(fiber.StatusInternalServerError).SendString(err.Error())
 	}
-	if err := tx.Delete(order).Error; err != nil {
+	err = tx.Delete(order).Error
+	if err != nil {
 		tx.Rollback()
 		return f.Status(fiber.StatusInternalServerError).SendString(err.Error())
 	}
-	if err := tx.Commit().Error; err != nil {
+	err = tx.Commit().Error
+	if err != nil {
 		return f.Status(fiber.StatusInternalServerError).SendString(err.Error())
 	}
 
@@ -180,7 +186,8 @@ func (c *OrderController) DeliveryOrder(f *fiber.Ctx) error {
 	}
 
 	var existing models.Order
-	if err := database.Conn.Select("id", "event_id").First(&existing, id).Error; err != nil {
+	err = database.Conn.Select("id", "event_id").First(&existing, id).Error
+	if err != nil {
 		return f.Status(fiber.StatusNotFound).SendString("Order not found")
 	}
 

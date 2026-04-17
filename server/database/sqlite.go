@@ -44,7 +44,8 @@ func migrateDropCustomerDebitColumn(db *gorm.DB) {
 		Name string `gorm:"column:name"`
 	}
 	var cols []col
-	if err := db.Raw(`SELECT name FROM pragma_table_info('customers')`).Scan(&cols).Error; err != nil {
+	err := db.Raw(`SELECT name FROM pragma_table_info('customers')`).Scan(&cols).Error
+	if err != nil {
 		log.Printf("migrateDropCustomerDebitColumn: pragma_table_info: %v", err)
 		return
 	}
@@ -58,7 +59,8 @@ func migrateDropCustomerDebitColumn(db *gorm.DB) {
 	if !hasDebit {
 		return
 	}
-	if err := db.Exec(`ALTER TABLE customers DROP COLUMN debit_value`).Error; err != nil {
+	err = db.Exec(`ALTER TABLE customers DROP COLUMN debit_value`).Error
+	if err != nil {
 		log.Printf("migrateDropCustomerDebitColumn: DROP COLUMN debit_value: %v", err)
 	}
 }
