@@ -3,6 +3,7 @@ package controllers
 import (
 	"github.com/gofiber/fiber/v2"
 	"github.com/lockland/cantina-charis/server/database"
+	"github.com/lockland/cantina-charis/server/debits"
 	"github.com/lockland/cantina-charis/server/models"
 	"github.com/shopspring/decimal"
 	"gorm.io/gorm"
@@ -17,12 +18,14 @@ func NewDebitController() DebitController {
 func (c *DebitController) GetDebits(f *fiber.Ctx) error {
 	var customers []models.Customer
 
-	database.Conn.
+	database.Conn.Model(&models.Customer{}).
+		Joins(`INNER JOIN orders ON orders.customer_id = customers.id AND CAST(orders.paid_value AS REAL) < CAST(orders.order_amount AS REAL)`).
+		Distinct().
 		Preload("Orders", func(db *gorm.DB) *gorm.DB {
-			return db.Order("created_at").Where("paid_value <> order_amount")
+			return db.Order("created_at asc").
+				Where("CAST(paid_value AS REAL) < CAST(order_amount AS REAL)")
 		}).
 		Preload("Orders.Event").
-		Where("debit_value <> 0").
 		Find(&customers)
 
 	response := []fiber.Map{}
@@ -50,7 +53,7 @@ func (c *DebitController) GetDebits(f *fiber.Ctx) error {
 				"id":   customer.ID,
 				"name": customer.Name,
 			},
-			"total":  customer.DebitValue,
+			"total":  debits.TotalResidual(customer.Orders),
 			"orders": orders,
 		})
 	}
@@ -72,40 +75,45 @@ func (c *DebitController) PayDebits(f *fiber.Ctx) error {
 		return error
 	}
 
-	customer := models.Customer{
-		ID: id,
+	zero := decimal.NewFromInt(0)
+	if payload.CustomerPaidValue.LessThan(zero) {
+		return f.Status(fiber.StatusBadRequest).SendString("paid_value must not be negative")
 	}
+
+	customer := models.Customer{ID: id}
 
 	transaction := database.Conn.Begin()
-	transaction.
-		Preload("Orders", "paid_value <> order_amount").
+	if err := transaction.
+		Preload("Orders", func(db *gorm.DB) *gorm.DB {
+			return db.Order("created_at asc").
+				Where("CAST(paid_value AS REAL) < CAST(order_amount AS REAL)")
+		}).
 		Preload("Orders.Event").
-		Find(&customer)
-
-	zero := decimal.NewFromInt(0)
-	if customer.DebitValue.Sub(payload.CustomerPaidValue).LessThan(zero) {
-		customer.DebitValue = zero
-	} else {
-		customer.DebitValue = customer.DebitValue.Sub(payload.CustomerPaidValue)
+		First(&customer, id).Error; err != nil {
+		transaction.Rollback()
+		return f.Status(fiber.StatusNotFound).SendString("Customer not found")
 	}
 
-	for index, order := range customer.Orders {
-		residual_value := order.OrderAmount.Sub(order.PaidValue)
+	if len(customer.Orders) == 0 && payload.CustomerPaidValue.GreaterThan(zero) {
+		transaction.Rollback()
+		return f.Status(fiber.StatusBadRequest).SendString("No outstanding orders for this customer")
+	}
 
-		if order.OrderAmount.LessThanOrEqual(payload.CustomerPaidValue) && order.PaidValue.Equal(zero) {
-			customer.Orders[index].PaidValue = order.OrderAmount
-			payload.CustomerPaidValue = payload.CustomerPaidValue.Sub(order.OrderAmount)
-		} else if residual_value.LessThanOrEqual(payload.CustomerPaidValue) && order.PaidValue.GreaterThan(zero) {
-			customer.Orders[index].PaidValue = order.OrderAmount
-			payload.CustomerPaidValue = payload.CustomerPaidValue.Sub(residual_value)
-		} else {
-			customer.Orders[index].PaidValue = payload.CustomerPaidValue
-			payload.CustomerPaidValue = zero
+	newPaids := debits.ApplyBulkPayment(customer.Orders, payload.CustomerPaidValue)
+	for i := range customer.Orders {
+		if customer.Orders[i].PaidValue.Equal(newPaids[i]) {
+			continue
 		}
+		if err := transaction.Model(&models.Order{ID: customer.Orders[i].ID}).Update("paid_value", newPaids[i]).Error; err != nil {
+			transaction.Rollback()
+			return f.Status(fiber.StatusInternalServerError).SendString(err.Error())
+		}
+		customer.Orders[i].PaidValue = newPaids[i]
 	}
 
-	transaction.Save(&customer)
-	transaction.Commit()
+	if err := transaction.Commit().Error; err != nil {
+		return f.Status(fiber.StatusInternalServerError).SendString(err.Error())
+	}
 
 	orders := []fiber.Map{}
 	for _, order := range customer.Orders {
@@ -129,7 +137,7 @@ func (c *DebitController) PayDebits(f *fiber.Ctx) error {
 			"id":   customer.ID,
 			"name": customer.Name,
 		},
-		"total":  customer.DebitValue,
+		"total":  debits.TotalResidual(customer.Orders),
 		"orders": orders,
 	}
 

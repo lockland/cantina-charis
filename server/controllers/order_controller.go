@@ -55,19 +55,11 @@ func (c *OrderController) CreateOrder(f *fiber.Ctx) error {
 		Observation: payload.Observation,
 	}
 
-	debitValue := payload.OrderAmount.Sub(payload.CustomerPaidValue)
-
-	if debitValue.IsNegative() {
-		debitValue = decimal.NewFromInt(0)
-	}
-
 	var result *gorm.DB
 
 	result = database.Conn.
 		Where(models.Customer{Name: payload.CustomerName}).
 		FirstOrCreate(&order.Customer)
-
-	order.Customer.DebitValue = order.Customer.DebitValue.Add(debitValue)
 
 	if result.Error != nil {
 		return f.Status(fiber.StatusBadRequest).SendString(result.Error.Error())
@@ -134,26 +126,19 @@ func (c *OrderController) PayOrder(f *fiber.Ctx) error {
 	}
 
 	order := &models.Order{ID: id}
-	if err := database.Conn.Preload("Customer").First(order).Error; err != nil {
+	if err := database.Conn.First(order).Error; err != nil {
 		return f.Status(fiber.StatusNotFound).SendString("Order not found")
 	}
 
-	zero := decimal.NewFromInt(0)
 	if order.PaidValue.GreaterThanOrEqual(order.OrderAmount) {
 		return f.Status(fiber.StatusBadRequest).SendString("Order already paid")
 	}
 
-	residual := order.OrderAmount.Sub(order.PaidValue)
 	order.PaidValue = order.OrderAmount
 
-	customer := &order.Customer
-	customer.DebitValue = customer.DebitValue.Sub(residual)
-	if customer.DebitValue.LessThan(zero) {
-		customer.DebitValue = zero
+	if err := database.Conn.Save(order).Error; err != nil {
+		return f.Status(fiber.StatusBadRequest).SendString(err.Error())
 	}
-
-	database.Conn.Save(order)
-	database.Conn.Model(customer).Update("DebitValue", customer.DebitValue)
 
 	return f.Status(fiber.StatusOK).JSON(fiber.Map{"order_id": id, "paid_value": order.PaidValue})
 }
@@ -165,26 +150,22 @@ func (c *OrderController) DeleteOrder(f *fiber.Ctx) error {
 	}
 
 	order := &models.Order{ID: id}
-	if err := database.Conn.Preload("Customer").First(order).Error; err != nil {
+	if err := database.Conn.First(order).Error; err != nil {
 		return f.Status(fiber.StatusNotFound).SendString("Order not found")
 	}
 
-	zero := decimal.NewFromInt(0)
-	residual := order.OrderAmount.Sub(order.PaidValue)
-	if residual.LessThan(zero) {
-		residual = zero
-	}
-
 	tx := database.Conn.Begin()
-	tx.Where("order_id = ?", id).Delete(&models.OrderProduct{})
-	tx.Delete(order)
-	customer := &order.Customer
-	customer.DebitValue = customer.DebitValue.Sub(residual)
-	if customer.DebitValue.LessThan(zero) {
-		customer.DebitValue = zero
+	if err := tx.Where("order_id = ?", id).Delete(&models.OrderProduct{}).Error; err != nil {
+		tx.Rollback()
+		return f.Status(fiber.StatusInternalServerError).SendString(err.Error())
 	}
-	tx.Model(customer).Update("DebitValue", customer.DebitValue)
-	tx.Commit()
+	if err := tx.Delete(order).Error; err != nil {
+		tx.Rollback()
+		return f.Status(fiber.StatusInternalServerError).SendString(err.Error())
+	}
+	if err := tx.Commit().Error; err != nil {
+		return f.Status(fiber.StatusInternalServerError).SendString(err.Error())
+	}
 
 	eventID := order.EventID
 	realtime.NotifyOrdersChanged(eventID)
