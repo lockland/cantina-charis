@@ -1,13 +1,13 @@
 
 import { TextInput, Button, Box, NumberInput, Center, Space } from '@mantine/core';
 import { useForm } from '@mantine/form';
-import { useCookiesHook } from "../../../hooks/useCookiesHook"
 import { RealIcon } from '../cash/RealIcon';
 import Event from '../../../models/Event';
 import { createEvent } from '../../../hooks/useAPI';
+import { useSharedContext } from '../../../hooks/useSharedContext';
 
 function InitialPage({ setOpened }: any) {
-  const { setEventData } = useCookiesHook()
+  const { setOpenEvent } = useSharedContext()
 
   const form = useForm({
     initialValues: {
@@ -30,7 +30,7 @@ function InitialPage({ setOpened }: any) {
     console.log(eventInfo)
 
     createEvent(eventInfo).then((data) => {
-      setEventData(Event.buildFromData(data))
+      setOpenEvent(Event.buildFromData(data))
       setOpened("cashpage")
     })
   }

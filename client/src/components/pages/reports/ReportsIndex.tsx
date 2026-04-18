@@ -52,19 +52,17 @@ export default function ReportsIndex() {
               bg="var(--orders-card-background-color)"
               radius="md"
               shadow="sm"
-              styles={(theme) => ({
-                root: {
-                  boxSizing: "border-box",
-                  textDecoration: "none",
-                  color: "inherit",
-                  boxShadow: "0 2px 8px rgba(0,0,0,0.12)",
-                  transition: `transform 0.2s ${theme.transitionTimingFunction}, box-shadow 0.2s ${theme.transitionTimingFunction}`,
-                  zIndex: 0,
-                  "&:hover": {
-                    transform: "translateY(-4px)",
-                    boxShadow: "0 8px 24px rgba(0,0,0,0.18)",
-                    zIndex: 1,
-                  },
+              sx={(theme) => ({
+                boxSizing: "border-box",
+                textDecoration: "none",
+                color: "inherit",
+                boxShadow: "0 2px 8px rgba(0,0,0,0.12)",
+                transition: `transform 0.2s ${theme.transitionTimingFunction}, box-shadow 0.2s ${theme.transitionTimingFunction}`,
+                zIndex: 0,
+                "&:hover": {
+                  transform: "translateY(-4px)",
+                  boxShadow: "0 8px 24px rgba(0,0,0,0.18)",
+                  zIndex: 1,
                 },
               })}
             >

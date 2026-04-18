@@ -12,10 +12,8 @@ export default function BackToReportsLink() {
       radius="md"
       mb="md"
       c="dark.7"
-      styles={(theme) => ({
-        root: {
-          backgroundColor: theme.other?.secondaryBackground as string,
-        },
+      sx={(theme) => ({
+        backgroundColor: theme.other?.secondaryBackground as string,
       })}
     >
       ← Voltar aos relatórios

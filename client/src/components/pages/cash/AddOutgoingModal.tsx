@@ -5,12 +5,13 @@ import { showNotification } from "@mantine/notifications"
 import { RealIcon } from "./RealIcon"
 import { createOutgoing, getOutgoings } from "../../../hooks/useAPI";
 import { OutgoingOptionType, OutgoingType } from "../../../models/Outgoing";
-import { useCookiesHook } from "../../../hooks/useCookiesHook";
 import { useEffect, useState } from "react";
 import { buildOutgoingDescriptionList } from "../../../helpers/SelectLists";
+import { useSharedContext } from "../../../hooks/useSharedContext";
 
 function AddOutgoingModal() {
   const [outgoingDescriptions, setOutgoingDescriptions] = useState<OutgoingOptionType[]>([]);
+  const { openEvent, openEventHydrated } = useSharedContext()
 
   useEffect(() => {
     getOutgoings().then((response: OutgoingType[]) => {
@@ -19,8 +20,6 @@ function AddOutgoingModal() {
     })
   }, [])
 
-  const { eventId } = useCookiesHook()
-
   const isMobile = useMediaQuery("(max-width: 787px)");
   const [opened, { open, close: closeModal }] = useDisclosure(false)
 
@@ -28,9 +27,15 @@ function AddOutgoingModal() {
     initialValues: {
       outgoing_description: "",
       outgoing_amount: undefined,
-      event_id: eventId
+      event_id: openEvent.event_id
     }
   })
+
+  useEffect(() => {
+    if (openEventHydrated && openEvent.event_id > 0) {
+      form.setFieldValue("event_id", openEvent.event_id)
+    }
+  }, [openEventHydrated, openEvent.event_id]) // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleOnSubmit = async (outgoing: OutgoingType): Promise<void> => {
     try {
