@@ -7,13 +7,13 @@ import (
 )
 
 type Outgoing struct {
-	ID          int             `json:"outgoing_id"`
-	Description string          `json:"outgoing_description" gorm:"uniqueIndex:idx_event_description_amount;not null"`
-	Amount      decimal.Decimal `json:"outgoing_amount" gorm:"default:0.00;uniqueIndex:idx_event_description_amount"`
+	ID          int             `json:"outgoing_id" gorm:"primaryKey"`
+	Description string          `json:"outgoing_description" gorm:"type:text;not null;uniqueIndex:idx_event_description_amount"`
+	Amount      decimal.Decimal `json:"outgoing_amount" gorm:"type:numeric;default:0.00;uniqueIndex:idx_event_description_amount"`
 	CreatedAt   time.Time       `json:"created_at"`
 	UpdatedAt   time.Time       `json:"updated_at"`
 	EventID     int             `json:"event_id" validate:"required" gorm:"uniqueIndex:idx_event_description_amount"`
-	Event       Event           `json:"-"` // não serializar na API
+	Event       Event           `json:"-"`
 }
 
 // OutgoingReportRow é o formato de item retornado pelo relatório de despesas por período.

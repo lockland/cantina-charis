@@ -1,21 +1,22 @@
 package controllers
 
 import (
-	"time"
+	"errors"
 
 	"github.com/gofiber/fiber/v2"
-	"github.com/lockland/cantina-charis/server/database"
 	"github.com/lockland/cantina-charis/server/models"
 	"github.com/lockland/cantina-charis/server/realtime"
+	"github.com/lockland/cantina-charis/server/service"
 	"github.com/shopspring/decimal"
 	"gorm.io/gorm"
-	"gorm.io/gorm/clause"
 )
 
-type OrderController struct{}
+type OrderController struct {
+	orders *service.OrderService
+}
 
-func NewOrderController() OrderController {
-	return OrderController{}
+func NewOrderController(orders *service.OrderService) OrderController {
+	return OrderController{orders: orders}
 }
 
 // https://pkg.go.dev/github.com/shopspring/decimal#section-readme
@@ -55,63 +56,18 @@ func (c *OrderController) CreateOrder(f *fiber.Ctx) error {
 		Observation: payload.Observation,
 	}
 
-	debitValue := payload.OrderAmount.Sub(payload.CustomerPaidValue)
-
-	if debitValue.IsNegative() {
-		debitValue = decimal.NewFromInt(0)
-	}
-
-	var result *gorm.DB
-
-	result = database.Conn.
-		Where(models.Customer{Name: payload.CustomerName}).
-		FirstOrCreate(&order.Customer)
-
-	order.Customer.DebitValue = order.Customer.DebitValue.Add(debitValue)
-
-	if result.Error != nil {
-		return f.Status(fiber.StatusBadRequest).SendString(result.Error.Error())
-	}
-
-	transaction := database.Conn.Begin()
-
-	result = transaction.Save(&order)
-	if result.Error != nil {
-		transaction.Rollback()
-		return f.Status(fiber.StatusBadRequest).SendString(result.Error.Error())
-	}
-
-	orderItems := make([]models.OrderProduct, 0)
-
-	contains := func(items []models.OrderProduct, id int) int {
-		for index, item := range items {
-			if item.ProductID == id {
-				return index
-			}
-		}
-
-		return -1
-	}
-
+	lines := make([]models.OrderProduct, 0, len(payload.Products))
 	for _, el := range payload.Products {
-		if index := contains(orderItems, el.ID); index > -1 {
-			orderItems[index].ProductQuantity += el.Quantity
-		} else {
-			orderItems = append(orderItems, models.OrderProduct{
-				OrderID:         order.ID,
-				CustomerID:      order.Customer.ID,
-				ProductID:       el.ID,
-				ProductQuantity: el.Quantity,
-			})
-		}
+		lines = append(lines, models.OrderProduct{
+			ProductID:       el.ID,
+			ProductQuantity: el.Quantity,
+		})
 	}
 
-	transaction.Save(&orderItems)
-
-	transaction.
-		Preload("OrderProduct.Product").
-		Preload(clause.Associations).Find(&order)
-	transaction.Commit()
+	err := c.orders.PlaceOrder(payload.CustomerName, &order, lines)
+	if err != nil {
+		return f.Status(fiber.StatusBadRequest).SendString(err.Error())
+	}
 
 	realtime.NotifyOrderCreated(payload.EventID)
 
@@ -121,9 +77,10 @@ func (c *OrderController) CreateOrder(f *fiber.Ctx) error {
 
 func (c *OrderController) GetOrders(f *fiber.Ctx) error {
 	orders := new([]models.Order)
-	database.Conn.
-		Preload("OrderProduct.Product").
-		Preload(clause.Associations).Find(&orders)
+	err := c.orders.ListAllOrders(orders)
+	if err != nil {
+		return f.Status(fiber.StatusInternalServerError).SendString(err.Error())
+	}
 	return f.JSON(orders)
 }
 
@@ -133,27 +90,16 @@ func (c *OrderController) PayOrder(f *fiber.Ctx) error {
 		return f.Status(fiber.StatusBadRequest).SendString("Invalid order id")
 	}
 
-	order := &models.Order{ID: id}
-	if err := database.Conn.Preload("Customer").First(order).Error; err != nil {
-		return f.Status(fiber.StatusNotFound).SendString("Order not found")
+	order, err := c.orders.PayOrderFull(id)
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return f.Status(fiber.StatusNotFound).SendString("Order not found")
+		}
+		if errors.Is(err, service.ErrOrderAlreadyFullyPaid) {
+			return f.Status(fiber.StatusBadRequest).SendString("Order already paid")
+		}
+		return f.Status(fiber.StatusInternalServerError).SendString(err.Error())
 	}
-
-	zero := decimal.NewFromInt(0)
-	if order.PaidValue.GreaterThanOrEqual(order.OrderAmount) {
-		return f.Status(fiber.StatusBadRequest).SendString("Order already paid")
-	}
-
-	residual := order.OrderAmount.Sub(order.PaidValue)
-	order.PaidValue = order.OrderAmount
-
-	customer := &order.Customer
-	customer.DebitValue = customer.DebitValue.Sub(residual)
-	if customer.DebitValue.LessThan(zero) {
-		customer.DebitValue = zero
-	}
-
-	database.Conn.Save(order)
-	database.Conn.Model(customer).Update("DebitValue", customer.DebitValue)
 
 	realtime.NotifyOrdersChanged(order.EventID)
 
@@ -166,29 +112,14 @@ func (c *OrderController) DeleteOrder(f *fiber.Ctx) error {
 		return f.Status(fiber.StatusBadRequest).SendString("Invalid order id")
 	}
 
-	order := &models.Order{ID: id}
-	if err := database.Conn.Preload("Customer").First(order).Error; err != nil {
-		return f.Status(fiber.StatusNotFound).SendString("Order not found")
+	eventID, err := c.orders.DeleteOrderWithProducts(id)
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return f.Status(fiber.StatusNotFound).SendString("Order not found")
+		}
+		return f.Status(fiber.StatusInternalServerError).SendString(err.Error())
 	}
 
-	zero := decimal.NewFromInt(0)
-	residual := order.OrderAmount.Sub(order.PaidValue)
-	if residual.LessThan(zero) {
-		residual = zero
-	}
-
-	tx := database.Conn.Begin()
-	tx.Where("order_id = ?", id).Delete(&models.OrderProduct{})
-	tx.Delete(order)
-	customer := &order.Customer
-	customer.DebitValue = customer.DebitValue.Sub(residual)
-	if customer.DebitValue.LessThan(zero) {
-		customer.DebitValue = zero
-	}
-	tx.Model(customer).Update("DebitValue", customer.DebitValue)
-	tx.Commit()
-
-	eventID := order.EventID
 	realtime.NotifyOrdersChanged(eventID)
 
 	return f.Status(fiber.StatusOK).JSON(fiber.Map{"order_id": id})
@@ -200,15 +131,14 @@ func (c *OrderController) DeliveryOrder(f *fiber.Ctx) error {
 		return f.Status(fiber.StatusBadRequest).SendString("Invalid id")
 	}
 
-	var existing models.Order
-	if err := database.Conn.Select("id", "event_id").First(&existing, id).Error; err != nil {
-		return f.Status(fiber.StatusNotFound).SendString("Order not found")
+	eventID, err := c.orders.MarkOrderDelivered(id)
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return f.Status(fiber.StatusNotFound).SendString("Order not found")
+		}
+		return f.Status(fiber.StatusInternalServerError).SendString(err.Error())
 	}
 
-	database.Conn.Model(&models.Order{ID: id}).Updates(models.Order{
-		Deliveried: true,
-		DoneAt:     time.Now(),
-	})
-	realtime.NotifyOrdersChanged(existing.EventID)
+	realtime.NotifyOrdersChanged(eventID)
 	return f.Status(fiber.StatusOK).JSON(fiber.Map{"order_id": id})
 }

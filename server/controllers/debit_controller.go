@@ -1,29 +1,29 @@
 package controllers
 
 import (
+	"errors"
+
 	"github.com/gofiber/fiber/v2"
-	"github.com/lockland/cantina-charis/server/database"
 	"github.com/lockland/cantina-charis/server/models"
+	"github.com/lockland/cantina-charis/server/service"
 	"github.com/shopspring/decimal"
-	"gorm.io/gorm"
 )
 
-type DebitController struct{}
+type DebitController struct {
+	debits *service.DebitService
+}
 
-func NewDebitController() DebitController {
-	return DebitController{}
+func NewDebitController(debits *service.DebitService) DebitController {
+	return DebitController{debits: debits}
 }
 
 func (c *DebitController) GetDebits(f *fiber.Ctx) error {
 	var customers []models.Customer
 
-	database.Conn.
-		Preload("Orders", func(db *gorm.DB) *gorm.DB {
-			return db.Order("created_at").Where("paid_value <> order_amount")
-		}).
-		Preload("Orders.Event").
-		Where("debit_value <> 0").
-		Find(&customers)
+	err := c.debits.ListCustomersWithOpenOrders(&customers)
+	if err != nil {
+		return f.Status(fiber.StatusInternalServerError).SendString(err.Error())
+	}
 
 	response := []fiber.Map{}
 
@@ -50,7 +50,7 @@ func (c *DebitController) GetDebits(f *fiber.Ctx) error {
 				"id":   customer.ID,
 				"name": customer.Name,
 			},
-			"total":  customer.DebitValue,
+			"total":  customer.Orders.ResidualValue(),
 			"orders": orders,
 		})
 	}
@@ -68,44 +68,26 @@ func (c *DebitController) PayDebits(f *fiber.Ctx) error {
 		CustomerPaidValue decimal.Decimal `json:"paid_value"`
 	}{}
 
-	if error := f.BodyParser(&payload); error != nil {
-		return error
+	err = f.BodyParser(&payload)
+	if err != nil {
+		return err
 	}
-
-	customer := models.Customer{
-		ID: id,
-	}
-
-	transaction := database.Conn.Begin()
-	transaction.
-		Preload("Orders", "paid_value <> order_amount").
-		Preload("Orders.Event").
-		Find(&customer)
 
 	zero := decimal.NewFromInt(0)
-	if customer.DebitValue.Sub(payload.CustomerPaidValue).LessThan(zero) {
-		customer.DebitValue = zero
-	} else {
-		customer.DebitValue = customer.DebitValue.Sub(payload.CustomerPaidValue)
+	if payload.CustomerPaidValue.LessThan(zero) {
+		return f.Status(fiber.StatusBadRequest).SendString("paid_value must not be negative")
 	}
 
-	for index, order := range customer.Orders {
-		residual_value := order.OrderAmount.Sub(order.PaidValue)
-
-		if order.OrderAmount.LessThanOrEqual(payload.CustomerPaidValue) && order.PaidValue.Equal(zero) {
-			customer.Orders[index].PaidValue = order.OrderAmount
-			payload.CustomerPaidValue = payload.CustomerPaidValue.Sub(order.OrderAmount)
-		} else if residual_value.LessThanOrEqual(payload.CustomerPaidValue) && order.PaidValue.GreaterThan(zero) {
-			customer.Orders[index].PaidValue = order.OrderAmount
-			payload.CustomerPaidValue = payload.CustomerPaidValue.Sub(residual_value)
-		} else {
-			customer.Orders[index].PaidValue = payload.CustomerPaidValue
-			payload.CustomerPaidValue = zero
+	customer, err := c.debits.PayCustomerDebits(id, payload.CustomerPaidValue)
+	if err != nil {
+		if errors.Is(err, service.ErrDebitCustomerNotFound) {
+			return f.Status(fiber.StatusNotFound).SendString("Customer not found")
 		}
+		if errors.Is(err, service.ErrDebitNoOutstandingWithPayment) {
+			return f.Status(fiber.StatusBadRequest).SendString("No outstanding orders for this customer")
+		}
+		return f.Status(fiber.StatusInternalServerError).SendString(err.Error())
 	}
-
-	transaction.Save(&customer)
-	transaction.Commit()
 
 	orders := []fiber.Map{}
 	for _, order := range customer.Orders {
@@ -129,7 +111,7 @@ func (c *DebitController) PayDebits(f *fiber.Ctx) error {
 			"id":   customer.ID,
 			"name": customer.Name,
 		},
-		"total":  customer.DebitValue,
+		"total":  customer.Orders.ResidualValue(),
 		"orders": orders,
 	}
 

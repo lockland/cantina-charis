@@ -1,5 +1,8 @@
 .ONESHELL: # Applies to every targets in the file!
 
+test tests:
+	go test ./...
+
 build:
 	rm dist/views dist/cantina-charis -rf
 	mkdir -p dist

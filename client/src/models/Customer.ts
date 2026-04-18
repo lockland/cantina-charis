@@ -6,5 +6,4 @@ export interface CustomerNamesOptionType {
 export interface CustomerType {
   customer_id: number,
   customer_name: string,
-  debit_value?: any
 }
