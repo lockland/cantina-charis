@@ -3,7 +3,6 @@ import "./NavBar.css"
 import { CloseBtn } from "./CloseBtn";
 import { Container } from "@mantine/core";
 import { useState } from "react";
-import { useCookiesHook } from "../../hooks/useCookiesHook";
 import { useSharedContext } from "../../hooks/useSharedContext";
 
 interface NavBarProps {
@@ -12,9 +11,9 @@ interface NavBarProps {
 
 function NavBar({ maw }: NavBarProps) {
   const [open, setOpen] = useState(false)
-  const { isEventCreated } = useCookiesHook()
-  const { role } = useSharedContext()
+  const { role, openEvent, openEventHydrated } = useSharedContext()
   const isViewer = role === "viewer"
+  const hasOpenEvent = openEventHydrated && openEvent.event_id > 0
 
   return (
     <div className="navbar">
@@ -45,7 +44,7 @@ function NavBar({ maw }: NavBarProps) {
             )}
           </ul>
         </nav>
-        {isEventCreated && !isViewer ? <CloseBtn /> : ""}
+        {hasOpenEvent && !isViewer ? <CloseBtn /> : ""}
       </Container>
     </div>
   );

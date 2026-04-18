@@ -4,8 +4,8 @@ import OrdersCard from "./OrdersCard"
 import OrdersCustomerCard from "./OrdersCustomerCard"
 import CustomSimpleGrid from "./CustomSimpleGrid"
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
-import { useCookiesHook } from "../hooks/useCookiesHook"
 import { OrdersCardType } from "../models/Order"
+import { useSharedContext } from "../hooks/useSharedContext"
 
 interface OrderGroup {
   customer_id: number
@@ -21,7 +21,8 @@ function OrdersCardList() {
   const [mergedCustomerIds, setMergedCustomerIds] = useState<number[]>([])
   const [batchPayInProgress, setBatchPayInProgress] = useState(false)
   const batchPayInProgressRef = useRef(batchPayInProgress)
-  const { eventId } = useCookiesHook()
+  const { openEvent, openEventHydrated } = useSharedContext()
+  const eventId = openEvent.event_id
 
   const setBatchPayInProgressState = useCallback((value: boolean) => {
     batchPayInProgressRef.current = value
@@ -29,10 +30,13 @@ function OrdersCardList() {
   }, [])
 
   const fetchOrders = useCallback(() => {
+    if (!openEventHydrated || eventId <= 0) {
+      return
+    }
     getActiveOrders(eventId).then((response: OrdersCardType[]) => {
       setOrders(response)
     })
-  }, [eventId])
+  }, [eventId, openEventHydrated])
 
   const refreshOrders = useCallback(() => {
     if (!batchPayInProgressRef.current) {

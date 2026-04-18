@@ -14,13 +14,10 @@ import Debits from './components/pages/debits/Debits';
 import Home from './components/pages/home/Home';
 import { Container, Space } from '@mantine/core';
 
-export const COOKIE_NAME = 'app'
-
 import { useSharedContext } from "./hooks/useSharedContext"
 import { useEffect } from 'react';
 import { getAuthMe, getOpenEvent } from './hooks/useAPI';
 import Event from './models/Event';
-import { useCookiesHook } from './hooks/useCookiesHook';
 
 function ViewerRouteGuard({ children }: { children: React.ReactNode }) {
   const { role } = useSharedContext()
@@ -38,27 +35,22 @@ function ViewerRouteGuard({ children }: { children: React.ReactNode }) {
 }
 
 function App() {
-  const { setEventData, removeAppCookie } = useCookiesHook()
-  const { homePage, setHomePage, setRole } = useSharedContext()
+  const { setHomePage, setRole, setOpenEvent, setOpenEventHydrated } = useSharedContext()
 
   useEffect(() => {
     getAuthMe()
       .then((data) => setRole(data.role))
-      .catch(() => {})
+      .catch(() => { })
   }, [setRole])
 
   useEffect(() => {
-
     getOpenEvent().then((event: Event) => {
-      if (event.event_id > 0) {
-        setEventData(event)
-        setHomePage("cashpage")
-      } else {
-        removeAppCookie()
-        setHomePage("initial")
-      }
+      const page = (event.event_id > 0) ? "cashpage" : "initial"
+      setOpenEvent(event)
+      setOpenEventHydrated(true)
+      setHomePage(page)
     })
-  }, [homePage])
+  }, [setHomePage, setOpenEvent, setOpenEventHydrated])
 
   const maw = "100vw"
 

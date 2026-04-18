@@ -24,10 +24,15 @@ export function getAuthMe(): Promise<{ role: string; username: string }> {
   return fetcher('/api/auth/me')
 }
 
-export function getOpenEvent() {
+export function getOpenEvent(): Promise<Event> {
   return fetcher("/api/events?open=true")
-    .then((events) => Event.buildFromData(events[0]))
-    .catch(() => new Event)
+    .then((events: unknown) => {
+      if (!Array.isArray(events) || events.length === 0) {
+        return new Event()
+      }
+      return Event.buildFromData(events[0] as EventType)
+    })
+    .catch(() => new Event())
 }
 
 /** All events (open and closed) for comboboxes/reports. */
@@ -46,7 +51,7 @@ export function createEvent(values: EventType) {
 }
 
 export function closeEvent(eventId: number) {
-  return fetcher(`/api/events/${eventId}/close  `, { method: "PUT" })
+  return fetcher(`/api/events/${eventId}/close`, { method: "PUT" })
 }
 
 export function createOutgoing(values: OutgoingType) {
