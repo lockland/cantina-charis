@@ -1,7 +1,7 @@
 package controllers
 
 import (
-	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v3"
 	"github.com/lockland/cantina-charis/server/models"
 	"github.com/lockland/cantina-charis/server/repository"
 )
@@ -14,18 +14,17 @@ func NewOutgoingController(outgoings *repository.OutgoingRepository) OutgoingCon
 	return OutgoingController{outgoings: outgoings}
 }
 
-func (c *OutgoingController) CreateOutgoing(f *fiber.Ctx) error {
+func (c *OutgoingController) CreateOutgoing(f fiber.Ctx) error {
 	outgoing := new(models.Outgoing)
 
-	err := f.BodyParser(outgoing)
-	if err != nil {
+	if err := f.Bind().Body(outgoing); err != nil {
 		return f.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"error":   "Não foi possível registrar a despesa",
 			"details": err.Error(),
 		})
 	}
 
-	err = c.outgoings.Create(outgoing)
+	err := c.outgoings.Create(outgoing)
 	if err != nil {
 		return f.Status(fiber.StatusConflict).JSON(fiber.Map{
 			"error":   "Despesa com descrição e valor já cadastrada neste evento",
@@ -39,7 +38,7 @@ func (c *OutgoingController) CreateOutgoing(f *fiber.Ctx) error {
 	})
 }
 
-func (c *OutgoingController) GetOutgoings(f *fiber.Ctx) error {
+func (c *OutgoingController) GetOutgoings(f fiber.Ctx) error {
 	var list []models.Outgoing
 	err := c.outgoings.FindAll(&list)
 	if err != nil {

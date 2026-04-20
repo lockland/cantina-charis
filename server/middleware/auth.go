@@ -10,7 +10,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v3"
 )
 
 const (
@@ -103,7 +103,7 @@ func validateSessionCookie(cookie string) (role, username string, ok bool) {
 }
 
 func Auth() fiber.Handler {
-	return func(c *fiber.Ctx) error {
+	return func(c fiber.Ctx) error {
 		role, username := "", ""
 
 		if cookie := c.Cookies(sessionCookieName); cookie != "" {

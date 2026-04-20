@@ -4,11 +4,11 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v3"
 )
 
 func Authorize() fiber.Handler {
-	return func(c *fiber.Ctx) error {
+	return func(c fiber.Ctx) error {
 		role, _ := c.Locals("role").(string)
 		if role != "viewer" {
 			return c.Next()

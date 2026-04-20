@@ -8,8 +8,9 @@ import (
 	"time"
 
 	"github.com/gofiber/contrib/websocket"
-	"github.com/gofiber/fiber/v2"
-	"github.com/gofiber/fiber/v2/middleware/cors"
+	"github.com/gofiber/fiber/v3"
+	"github.com/gofiber/fiber/v3/middleware/cors"
+	"github.com/gofiber/fiber/v3/middleware/static"
 	"github.com/lockland/cantina-charis/server/controllers"
 	"github.com/lockland/cantina-charis/server/database"
 	"github.com/lockland/cantina-charis/server/middleware"
@@ -21,7 +22,7 @@ import (
 const viewsIndex = "./views/index.html"
 
 // serveSPAOrStatic serve ficheiros em ./views ou index.html para rotas SPA (path sem extensão). Conteúdo em views é público.
-func serveSPAOrStatic(c *fiber.Ctx) error {
+func serveSPAOrStatic(c fiber.Ctx) error {
 	path := c.Path()
 	if path == "/" || !strings.Contains(path, ".") {
 		return c.SendFile(viewsIndex)
@@ -40,10 +41,10 @@ func serveSPAOrStatic(c *fiber.Ctx) error {
 }
 
 // FiberConfig retorna a config do Fiber com ErrorHandler custom.
-// Ver: https://docs.gofiber.io/v2.x/guide/error-handling
+// Ver: https://docs.gofiber.io/v3.x/guide/error-handling
 func FiberConfig() fiber.Config {
 	return fiber.Config{
-		ErrorHandler: func(c *fiber.Ctx, err error) error {
+		ErrorHandler: func(c fiber.Ctx, err error) error {
 			code := fiber.StatusInternalServerError
 			var e *fiber.Error
 			if errors.As(err, &e) {
@@ -74,24 +75,29 @@ func useCors(app *fiber.App) {
 }
 
 // setupApiRoutes registra rotas sob /api com Auth+Authorize.
-// Ordem: rotas fixas antes de rotas com parâmetros (recomendado em https://docs.gofiber.io/v2.x/guide/routing).
+// Ordem: rotas fixas antes de rotas com parâmetros (recomendado em https://docs.gofiber.io/v3.x/guide/routing).
 func setupApiRoutes(app *fiber.App) {
 	api := app.Group("/api")
 
-	api.Get("/auth/me", func(c *fiber.Ctx) error {
+	api.Get("/auth/me", func(c fiber.Ctx) error {
 		role, _ := c.Locals("role").(string)
 		username, _ := c.Locals("username").(string)
 		return c.JSON(fiber.Map{"role": role, "username": username})
 	})
 
-	api.Get("/ws/orders", func(c *fiber.Ctx) error {
-		if websocket.IsWebSocketUpgrade(c) {
-			return c.Next()
+	api.Get("/ws/orders", func(c fiber.Ctx) error {
+		if !websocket.IsWebSocketUpgrade(c) {
+			return fiber.ErrUpgradeRequired
 		}
-		return fiber.ErrUpgradeRequired
-	}, websocket.New(func(c *websocket.Conn) {
 		eventID, err := strconv.Atoi(c.Query("event_id"))
 		if err != nil || eventID <= 0 {
+			return c.Status(fiber.StatusBadRequest).SendString("query param event_id (positive integer) is required")
+		}
+		c.Locals("ws_event_id", eventID)
+		return c.Next()
+	}, websocket.New(func(c *websocket.Conn) {
+		eventID, _ := c.Locals("ws_event_id").(int)
+		if eventID <= 0 {
 			_ = c.Close()
 			return
 		}
@@ -164,14 +170,14 @@ func setupApiRoutes(app *fiber.App) {
 }
 
 func setupSPAAndStatic(app *fiber.App) {
-	// /assets/* servido pelo Static; demais GETs (/, /reports/outgoings, favicon, etc.) por serveSPAOrStatic (ficheiro ou index.html).
-	app.Static("/assets", "./views/assets", fiber.Static{
+	// /assets/* servido pelo middleware static; demais GETs (/, /reports/outgoings, favicon, etc.) por serveSPAOrStatic (ficheiro ou index.html).
+	app.Use("/assets", static.New("./views/assets", static.Config{
 		Compress:      true,
 		ByteRange:     true,
 		Browse:        false,
 		CacheDuration: 10 * time.Second,
 		MaxAge:        3600,
-	})
+	}))
 
 	app.Get("/", serveSPAOrStatic)
 	app.Get("/*", serveSPAOrStatic)
