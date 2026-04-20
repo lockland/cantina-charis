@@ -1,12 +1,13 @@
 import { ActionIcon } from "@mantine/core";
 import { ShutdownIcon } from "./shutdown-icon";
-import { useCookiesHook } from "../../hooks/useCookiesHook";
 import { useNavigate } from "react-router-dom";
 import { closeEvent } from "../../hooks/useAPI";
+import { useSharedContext } from "../../hooks/useSharedContext";
+import Event from "../../models/Event";
 
 
 export function CloseBtn() {
-  const { removeAppCookie, eventId } = useCookiesHook()
+  const { openEvent, setOpenEvent, setHomePage } = useSharedContext()
   const navigate = useNavigate()
 
   const handleOnClick = (): void => {
@@ -15,9 +16,14 @@ export function CloseBtn() {
       return
     }
 
-    closeEvent(eventId)
-    removeAppCookie()
-    navigate("reports")
+    const id = openEvent.event_id
+    void closeEvent(id)
+      .then(() => {
+        setOpenEvent(new Event())
+        setHomePage("initial")
+        navigate("/reports")
+      })
+      .catch(() => {})
   }
 
   return (

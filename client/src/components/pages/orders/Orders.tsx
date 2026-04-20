@@ -8,18 +8,22 @@ import {
 import CustomSimpleGrid from "../../CustomSimpleGrid";
 import { useCallback, useEffect, useState } from "react";
 import Order, { OrderListItem } from "../../../models/Order";
-import { useCookiesHook } from "../../../hooks/useCookiesHook";
 import { ProductType } from "../../../models/Product";
+import { useSharedContext } from "../../../hooks/useSharedContext";
 
 function Orders() {
   const [orders, setOrders] = useState<OrderListItem[]>([])
-  const { eventId } = useCookiesHook()
+  const { openEvent, openEventHydrated } = useSharedContext()
+  const eventId = openEvent.event_id
 
   const fetchOrders = useCallback(() => {
+    if (!openEventHydrated || eventId <= 0) {
+      return
+    }
     getPendingOrders(eventId).then((response: OrderListItem[]) => {
       setOrders(response.map((orderData) => Order.buildFromData(orderData)))
     })
-  }, [eventId])
+  }, [eventId, openEventHydrated])
 
   useEffect(() => {
     fetchOrders()

@@ -4,37 +4,20 @@ import ProductsTable from "./ProductsTable"
 import SummaryCardList from "../../SummaryCardList"
 import OrderItemRow from "../../../models/OrderItemRow"
 import { FormProvider, useForm } from "../../../hooks/formContext"
-import { FormEvent, useState } from "react"
-import { useNavigate } from "react-router-dom"
+import { FormEvent, useEffect, useState } from "react"
 import { OrderFormValues } from "../../../models/Order"
 import { createOrder } from "../../../hooks/useAPI"
-import { useCookiesHook } from "../../../hooks/useCookiesHook"
+import { useSharedContext } from "../../../hooks/useSharedContext"
 
 function OrderForm() {
 
   const [buttonDisabled, setButtonDisabled] = useState(true)
-  const navigate = useNavigate()
-  const { eventId } = useCookiesHook()
-
-  const handleOnSubmit = (values: OrderFormValues, event: FormEvent<HTMLFormElement>) => {
-    const resp = prompt("Alguma observação para o pedido?")
-    if (null === resp) return
-
-    values.observation = resp
-    event.preventDefault();
-    createOrder(values).then(() => {
-      console.info("sent values", values)
-      refreshPage()
-    })
-  }
-
-  const refreshPage = () => {
-    navigate(0)
-  }
+  const [cashSessionVersion, setCashSessionVersion] = useState(0)
+  const { openEvent, openEventHydrated, setOrderAmount, setOrderItemList } = useSharedContext()
 
   const form = useForm({
     initialValues: {
-      event_id: eventId,
+      event_id: openEvent.event_id,
       customer_name: "",
       observation: "",
       customer_paid_value: "0",
@@ -48,13 +31,43 @@ function OrderForm() {
     },
   });
 
+  useEffect(() => {
+    if (openEventHydrated && openEvent.event_id > 0) {
+      form.setFieldValue("event_id", openEvent.event_id)
+    }
+  }, [openEventHydrated, openEvent.event_id]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  const handleOnSubmit = (values: OrderFormValues, event: FormEvent<HTMLFormElement>) => {
+    const resp = prompt("Alguma observação para o pedido?")
+    if (null === resp) return
+
+    values.observation = resp
+    event.preventDefault();
+    createOrder(values).then(() => {
+      console.info("sent values", values)
+      setOrderAmount(0)
+      setOrderItemList([])
+      form.setValues({
+        event_id: values.event_id,
+        customer_name: "",
+        observation: "",
+        customer_paid_value: "0",
+        order_amount: "0",
+        products: [],
+      })
+      form.clearErrors()
+      setButtonDisabled(true)
+      setCashSessionVersion((v) => v + 1)
+    })
+  }
+
   return (
     <Box>
       <FormProvider form={form}>
         <form onSubmit={form.onSubmit(handleOnSubmit)} onReset={form.onReset}>
-          <OrderItemInputs />
+          <OrderItemInputs cashSessionVersion={cashSessionVersion} />
           <ProductsTable />
-          <SummaryCardList setButtonDisabled={setButtonDisabled} />
+          <SummaryCardList key={cashSessionVersion} setButtonDisabled={setButtonDisabled} />
           <Button type="submit" size="lg" mt="md" fullWidth disabled={buttonDisabled}>
             Registrar Pedido
           </Button>

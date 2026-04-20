@@ -6,7 +6,6 @@ import { MantineProvider } from '@mantine/core'
 import { DatesProvider } from '@mantine/dates'
 import { Notifications } from '@mantine/notifications'
 import 'dayjs/locale/pt-br'
-import { CookiesProvider } from 'react-cookie'
 import { SharedContextProvider } from './contexts/sharedContext.tsx'
 import { theme } from './theme'
 
@@ -16,9 +15,7 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
       <DatesProvider settings={{ locale: 'pt-br', firstDayOfWeek: 0 }}>
         <Notifications position="top-right" zIndex={4000} limit={5} />
         <SharedContextProvider>
-          <CookiesProvider>
-            <App />
-          </CookiesProvider>
+          <App />
         </SharedContextProvider>
       </DatesProvider>
     </MantineProvider>

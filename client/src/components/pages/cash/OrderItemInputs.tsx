@@ -9,7 +9,7 @@ import { getCustomerNames, getEnabledProducts } from "../../../hooks/useAPI"
 import { CustomerType, CustomerNamesOptionType } from "../../../models/Customer"
 import { ProductDetails, ProductOptionType } from "../../../models/Product"
 
-function OrderItemInputs() {
+function OrderItemInputs({ cashSessionVersion }: { cashSessionVersion: number }) {
 
   const [customerNames, setCustomerNames] = useState<CustomerNamesOptionType[]>([]);
   const [products, setProducts] = useState<ProductOptionType[]>([]);
@@ -28,6 +28,11 @@ function OrderItemInputs() {
 
   const [quantity, setQuantity] = useState(1)
   const [productIndex, setProductIndex] = useState("0")
+
+  useEffect(() => {
+    setQuantity(1)
+    setProductIndex("0")
+  }, [cashSessionVersion])
 
   const form = useFormContext()
   const { orderAmount, setOrderAmount, setOrderItemList } = useSharedContext()
