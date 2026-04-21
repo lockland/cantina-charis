@@ -1,4 +1,5 @@
-import { Box, Button, Grid, NumberInput, Select, Space } from "@mantine/core"
+import { Box, Button, Grid, Space } from "@mantine/core"
+import { AppNumberInput, AppSelect } from "../../../ui"
 import OrderItemRow from "../../../models/OrderItemRow"
 import { useEffect, useState } from "react"
 import { useFormContext } from "../../../hooks/formContext"
@@ -66,7 +67,7 @@ function OrderItemInputs({ cashSessionVersion }: { cashSessionVersion: number })
   return (
     <Box>
 
-      <Select
+      <AppSelect
         size="md"
         onCreate={(query) => {
           const item: CustomerNamesOptionType = { value: query, label: query };
@@ -89,7 +90,7 @@ function OrderItemInputs({ cashSessionVersion }: { cashSessionVersion: number })
 
       <Grid>
         <Grid.Col md={6} lg={9}>
-          <Select
+          <AppSelect
             onChange={(value: string) => setProductIndex(value)}
             data={products}
             searchable
@@ -106,7 +107,7 @@ function OrderItemInputs({ cashSessionVersion }: { cashSessionVersion: number })
           />
         </Grid.Col>
         <Grid.Col md={6} lg={3}>
-          <NumberInput
+          <AppNumberInput
             min={1}
             size="md"
             label="Quantidade"

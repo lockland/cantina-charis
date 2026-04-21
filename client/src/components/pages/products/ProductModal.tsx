@@ -1,7 +1,6 @@
-import { useMediaQuery } from "@mantine/hooks";
 import ProductListItem from "../../../models/Product";
-import { Button, Group, Modal, NumberInput, Space, TextInput } from "@mantine/core";
-import { useForm } from "@mantine/form";
+import { Button, Group, Modal, Space } from "@mantine/core";
+import { AppTextInput, CurrencyNumberInput, useForm, useMediaQuery } from "../../../ui";
 import { RealIcon } from "../cash/RealIcon";
 
 interface ModalProps {
@@ -40,29 +39,25 @@ function ProductModal({ product, opened, closeModal, onSubmit, modalTitle }: Mod
       <form
         onSubmit={form.onSubmit(onSubmit)}
       >
-        <TextInput
+        <AppTextInput
           label="Identificador"
           {...form.getInputProps('product_id')}
           readOnly
         />
 
         <Space mt="md" />
-        <TextInput
+        <AppTextInput
           label="Nome do produto"
           withAsterisk
           {...form.getInputProps('product_name')}
         />
         <Space mt="md" />
 
-        <NumberInput
+        <CurrencyNumberInput
           label="Valor do produto"
           icon={<RealIcon />}
-          precision={2}
-          hideControls
           withAsterisk
           {...form.getInputProps('product_price')}
-          decimalSeparator=','
-          thousandsSeparator='.'
         />
         <Group mt="md">
           <Button fullWidth type="submit">Salvar</Button>

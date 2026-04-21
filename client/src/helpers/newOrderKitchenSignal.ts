@@ -1,4 +1,4 @@
-import { showNotification } from "@mantine/notifications"
+import { showNotification } from "../ui"
 
 const NOTIFICATION_TITLE = "Novo pedido"
 const NOTIFICATION_MESSAGE = "Um novo pedido foi registrado no caixa."

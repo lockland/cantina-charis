@@ -1,7 +1,7 @@
 import { ActionIcon, Box, CloseButton, Group, Switch, Title, Tooltip } from "@mantine/core"
 import EditIcon from "./EditIcon"
 import EditProductModal from "./EditProductModal";
-import { useDisclosure } from "@mantine/hooks";
+import { useDisclosure } from "../../../ui";
 import Product from "../../../models/Product";
 import { toggleProductStatus, deleteProduct } from "../../../hooks/useAPI";
 
