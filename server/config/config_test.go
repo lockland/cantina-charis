@@ -4,7 +4,7 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v3"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -12,7 +12,7 @@ import (
 func TestFiberConfig(t *testing.T) {
 	t.Run("given fiber error when request then plain text body and status from error", func(t *testing.T) {
 		app := fiber.New(FiberConfig())
-		app.Get("/boom", func(c *fiber.Ctx) error {
+		app.Get("/boom", func(c fiber.Ctx) error {
 			return fiber.NewError(fiber.StatusTeapot, "short and stout")
 		})
 		req := httptest.NewRequest(fiber.MethodGet, "/boom", nil)

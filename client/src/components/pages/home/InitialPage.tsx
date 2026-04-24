@@ -1,6 +1,6 @@
 
-import { TextInput, Button, Box, NumberInput, Center, Space } from '@mantine/core';
-import { useForm } from '@mantine/form';
+import { Button, Box, Center, Space } from '@mantine/core';
+import { AppTextInput, CurrencyNumberInput, useForm } from '../../../ui';
 import { RealIcon } from '../cash/RealIcon';
 import Event from '../../../models/Event';
 import { createEvent } from '../../../hooks/useAPI';
@@ -16,8 +16,8 @@ function InitialPage({ setOpened }: any) {
     },
 
     validate: {
-      eventName: (value) => (value.length < 3 ? "Preencha o nome do evento por favor!" : null),
-      initialCashValue: (value: number) => ((value || 0) <= 0 ? "Preencha o valor inicial do caixa!" : null),
+      eventName: (value: string) => (value.length < 3 ? "Preencha o nome do evento por favor!" : null),
+      initialCashValue: (value: number | undefined) => (((value ?? 0) <= 0) ? "Preencha o valor inicial do caixa!" : null),
     }
   });
 
@@ -46,7 +46,7 @@ function InitialPage({ setOpened }: any) {
             boxShadow: "2px 6px 23px -5px rgba(0,0,0,1)"
           }}
         >
-          <TextInput
+          <AppTextInput
             withAsterisk
             label="Evento"
             placeholder="Nome do evento"
@@ -55,17 +55,13 @@ function InitialPage({ setOpened }: any) {
             size="lg"
           />
           <Space h="md" />
-          <NumberInput
+          <CurrencyNumberInput
             icon={<RealIcon />}
             withAsterisk
-            hideControls
             label="Valor caixa"
             placeholder="10000,00"
             {...form.getInputProps('initialCashValue')}
             size="lg"
-            precision={2}
-            decimalSeparator=','
-            thousandsSeparator='.'
           />
 
           <Button type="submit" mt="md" size="lg" fullWidth>

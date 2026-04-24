@@ -1,7 +1,12 @@
-import { Box, Button, Group, Modal, NumberInput, Select } from "@mantine/core"
-import { useForm } from "@mantine/form"
-import { useDisclosure, useMediaQuery } from "@mantine/hooks"
-import { showNotification } from "@mantine/notifications"
+import { Box, Button, Group, Modal } from "@mantine/core"
+import {
+  AppSelect,
+  CurrencyNumberInput,
+  useForm,
+  useDisclosure,
+  useMediaQuery,
+  showNotification,
+} from "../../../ui"
 import { RealIcon } from "./RealIcon"
 import { createOutgoing, getOutgoings } from "../../../hooks/useAPI";
 import { OutgoingOptionType, OutgoingType } from "../../../models/Outgoing";
@@ -62,7 +67,7 @@ function AddOutgoingModal() {
         transitionProps={{ transition: 'fade', duration: 200 }}
       >
         <form onSubmit={form.onSubmit(handleOnSubmit)} onReset={form.onReset}>
-          <Select
+          <AppSelect
             size="md"
             onCreate={(query) => {
               const item: OutgoingOptionType = { value: query, label: query };
@@ -81,18 +86,14 @@ function AddOutgoingModal() {
             {...form.getInputProps("outgoing_description")}
           />
 
-          <NumberInput
+          <CurrencyNumberInput
             size="lg"
             icon={<RealIcon />}
             label="Valor"
-            precision={2}
-            hideControls
             required
             mt="md"
             placeholder="0"
             {...form.getInputProps("outgoing_amount")}
-            decimalSeparator=','
-            thousandsSeparator='.'
           />
           <Button size="lg" type="submit" fullWidth mt="md">Salvar</Button>
         </form>

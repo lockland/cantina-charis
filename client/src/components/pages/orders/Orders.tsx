@@ -1,4 +1,5 @@
-import { Box, Button, Group, Space, Table, Text, Textarea, Title } from "@mantine/core";
+import { Box, Button, Group, Space, Table, Text, Title } from "@mantine/core";
+import { AppTextarea } from "../../../ui";
 import { deliveryOrder, getPendingOrders } from "../../../hooks/useAPI";
 import { useOrdersSocket } from "../../../hooks/useOrdersSocket";
 import {
@@ -63,7 +64,7 @@ function Orders() {
 
               {order.observation && (
                 <Box>
-                  <Textarea
+                  <AppTextarea
                     size="md"
                     label="Observações"
                     placeholder="Observações"

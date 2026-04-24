@@ -1,4 +1,5 @@
-import { Flex, Select, Space, Table, Title, useMantineTheme } from "@mantine/core"
+import { Flex, Space, Table, Title, useMantineTheme } from "@mantine/core"
+import { AppSelect } from "../../../ui"
 import DecimalFormatter from "../../../helpers/Decimal"
 import { SoldProductRow } from "./soldProductsReport"
 
@@ -22,7 +23,7 @@ export default function ReportSoldProductsTab({
         <Title>Produtos vendidos</Title>
         <Title order={2}>Valor arrecadado no evento: {soldProductsTotal}</Title>
       </Flex>
-      <Select
+      <AppSelect
         size="md"
         data={eventOptions}
         searchable

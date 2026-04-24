@@ -9,6 +9,7 @@ export default defineConfig({
       output: {
         manualChunks: (id) => {
           if (id.includes('node_modules')) {
+            // Mantine v7: manter @mantine + react no mesmo chunk; acrescentar postcss-preset-mantine no client.
             // React and Mantine must stay in the same chunk (Mantine uses React.forwardRef)
             if (
               id.includes('@mantine') ||

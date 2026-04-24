@@ -2,7 +2,7 @@ import { useNavigate } from "react-router-dom";
 import ProductModal from "./ProductModal";
 import { Box, Button, Group } from "@mantine/core";
 import Product, { ProductType } from "../../../models/Product";
-import { useDisclosure } from "@mantine/hooks";
+import { useDisclosure } from "../../../ui";
 import { createProduct } from "../../../hooks/useAPI";
 
 function AddProductModal() {

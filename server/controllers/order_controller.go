@@ -3,7 +3,7 @@ package controllers
 import (
 	"errors"
 
-	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v3"
 	"github.com/lockland/cantina-charis/server/models"
 	"github.com/lockland/cantina-charis/server/realtime"
 	"github.com/lockland/cantina-charis/server/service"
@@ -20,11 +20,11 @@ func NewOrderController(orders *service.OrderService) OrderController {
 }
 
 // https://pkg.go.dev/github.com/shopspring/decimal#section-readme
-func (c *OrderController) GetOrder(f *fiber.Ctx) error {
+func (c *OrderController) GetOrder(f fiber.Ctx) error {
 	return f.JSON([]models.Order{})
 }
 
-func (c *OrderController) CreateOrder(f *fiber.Ctx) error {
+func (c *OrderController) CreateOrder(f fiber.Ctx) error {
 	payload := struct {
 		EventID           int             `json:"event_id"`
 		CustomerName      string          `json:"customer_name"`
@@ -40,7 +40,9 @@ func (c *OrderController) CreateOrder(f *fiber.Ctx) error {
 		} `json:"products"`
 	}{}
 
-	f.BodyParser(&payload)
+	if err := f.Bind().Body(&payload); err != nil {
+		return f.Status(fiber.StatusBadRequest).SendString(err.Error())
+	}
 
 	paidValue := payload.CustomerPaidValue
 
@@ -81,7 +83,7 @@ func (c *OrderController) CreateOrder(f *fiber.Ctx) error {
 
 }
 
-func (c *OrderController) GetOrders(f *fiber.Ctx) error {
+func (c *OrderController) GetOrders(f fiber.Ctx) error {
 	orders := new([]models.Order)
 	err := c.orders.ListAllOrders(orders)
 	if err != nil {
@@ -90,9 +92,9 @@ func (c *OrderController) GetOrders(f *fiber.Ctx) error {
 	return f.JSON(orders)
 }
 
-func (c *OrderController) PayOrder(f *fiber.Ctx) error {
-	id, err := f.ParamsInt("id")
-	if err != nil {
+func (c *OrderController) PayOrder(f fiber.Ctx) error {
+	id := fiber.Params[int](f, "id")
+	if id <= 0 {
 		return f.Status(fiber.StatusBadRequest).SendString("Invalid order id")
 	}
 
@@ -112,9 +114,9 @@ func (c *OrderController) PayOrder(f *fiber.Ctx) error {
 	return f.Status(fiber.StatusOK).JSON(fiber.Map{"order_id": id, "paid_value": order.PaidValue})
 }
 
-func (c *OrderController) DeleteOrder(f *fiber.Ctx) error {
-	id, err := f.ParamsInt("id")
-	if err != nil {
+func (c *OrderController) DeleteOrder(f fiber.Ctx) error {
+	id := fiber.Params[int](f, "id")
+	if id <= 0 {
 		return f.Status(fiber.StatusBadRequest).SendString("Invalid order id")
 	}
 
@@ -131,9 +133,9 @@ func (c *OrderController) DeleteOrder(f *fiber.Ctx) error {
 	return f.Status(fiber.StatusOK).JSON(fiber.Map{"order_id": id})
 }
 
-func (c *OrderController) DeliveryOrder(f *fiber.Ctx) error {
-	id, err := f.ParamsInt("id")
-	if err != nil {
+func (c *OrderController) DeliveryOrder(f fiber.Ctx) error {
+	id := fiber.Params[int](f, "id")
+	if id <= 0 {
 		return f.Status(fiber.StatusBadRequest).SendString("Invalid id")
 	}
 
