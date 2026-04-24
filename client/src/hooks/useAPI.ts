@@ -3,17 +3,22 @@ import { OrderFormValues } from '../models/Order';
 import { OutgoingType } from '../models/Outgoing';
 import { ProductDetails, ProductType } from '../models/Product';
 
-const fetcher = async (url: string, options: any = {}) => {
-  const res = await fetch(url, { ...options, credentials: 'include' as RequestCredentials })
-  if (res.status === 401) {
+function throwIfUnauthorized(status: number): void {
+  if (status === 401) {
     window.location.reload()
     throw new Error('Unauthorized')
   }
+}
+
+const jsonHeaders = { 'Content-Type': 'application/json' }
+
+const fetcher = async (url: string, options: any = {}) => {
+  const res = await fetch(url, { ...options, credentials: 'include' as RequestCredentials })
+  throwIfUnauthorized(res.status)
 
   const payload = await res.json()
 
   if (!res.ok) {
-    // Check for event closed error and redirect to home
     if (payload?.code === 'EVENT_CLOSED') {
       window.location.href = '/'
       throw new Error(payload.error || 'evento fechado')
@@ -24,6 +29,14 @@ const fetcher = async (url: string, options: any = {}) => {
   }
 
   return payload
+}
+
+function fetcherJson(method: 'POST' | 'PUT', url: string, body: unknown) {
+  return fetcher(url, {
+    method,
+    headers: jsonHeaders,
+    body: JSON.stringify(body),
+  })
 }
 
 export function getAuthMe(): Promise<{ role: string; username: string }> {
@@ -47,13 +60,7 @@ export function getAllEvents() {
 }
 
 export function createEvent(values: EventType) {
-  return fetcher("/api/events", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify(values),
-  })
+  return fetcherJson('POST', '/api/events', values)
 }
 
 export function closeEvent(eventId: number) {
@@ -61,13 +68,7 @@ export function closeEvent(eventId: number) {
 }
 
 export function createOutgoing(values: OutgoingType) {
-  return fetcher("/api/outgoings", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify(values),
-  })
+  return fetcherJson('POST', '/api/outgoings', values)
 }
 
 export function getOutgoings() {
@@ -83,13 +84,7 @@ export function getEnabledProducts() {
 }
 
 export function createOrder(values: OrderFormValues) {
-  return fetcher("/api/orders", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify(values),
-  })
+  return fetcherJson('POST', '/api/orders', values)
 }
 
 export function getOrders(eventId: number) {
@@ -122,22 +117,13 @@ export function getProducts() {
 }
 
 export function createProduct(values: ProductType) {
-  return fetcher("/api/products", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify(values),
-  })
+  return fetcherJson('POST', '/api/products', values)
 }
 
 export function deleteProduct(productId: number) {
   return fetch(`/api/products/${productId}`, { method: "DELETE", credentials: "include" }).then(
     (res) => {
-      if (res.status === 401) {
-        window.location.reload()
-        throw new Error("Unauthorized")
-      }
+      throwIfUnauthorized(res.status)
       if (res.status === 204 || res.ok) return
       return res.json().then(() => {}, () => {})
     }
@@ -149,13 +135,7 @@ export function toggleProductStatus(productId: number) {
 }
 
 export function updateProduct(values: ProductDetails) {
-  return fetcher("/api/products", {
-    method: "PUT",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify(values),
-  })
+  return fetcherJson('PUT', '/api/products', values)
 }
 
 export function getDebits() {
@@ -163,13 +143,7 @@ export function getDebits() {
 }
 
 export function payDebits(customerId: number, paidValue: number) {
-  return fetcher(`/api/debits/${customerId}/pay`, {
-    method: "PUT",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({ paid_value: paidValue }),
-  })
+  return fetcherJson('PUT', `/api/debits/${customerId}/pay`, { paid_value: paidValue })
 }
 
 export function payOrder(orderId: number) {

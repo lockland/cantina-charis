@@ -18,12 +18,8 @@ func NewOutgoingService(out *repository.OutgoingRepository, evts *repository.Eve
 
 // CreateOutgoing persists an outgoing if the event exists and is open.
 func (s *OutgoingService) CreateOutgoing(o *models.Outgoing) error {
-	isOpen, err := s.evts.IsOpen(o.EventID)
-	if err != nil {
+	if err := ensureEventOpenForCreate(s.evts, o.EventID); err != nil {
 		return err
-	}
-	if !isOpen {
-		return ErrEventClosed
 	}
 	return s.out.Create(o)
 }

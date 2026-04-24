@@ -31,16 +31,10 @@ func (c *OutgoingController) CreateOutgoing(f *fiber.Ctx) error {
 	err = c.outgoings.CreateOutgoing(outgoing)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return f.Status(fiber.StatusNotFound).JSON(fiber.Map{
-				"error": "Evento não encontrado",
-				"code":  "EVENT_NOT_FOUND",
-			})
+			return respondEventNotFoundJSON(f)
 		}
 		if errors.Is(err, service.ErrEventClosed) {
-			return f.Status(fiber.StatusForbidden).JSON(fiber.Map{
-				"error": "evento fechado",
-				"code":  "EVENT_CLOSED",
-			})
+			return respondEventClosedJSON(f)
 		}
 		return f.Status(fiber.StatusConflict).JSON(fiber.Map{
 			"error":   "Despesa com descrição e valor já cadastrada neste evento",
