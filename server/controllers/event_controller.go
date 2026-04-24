@@ -6,15 +6,15 @@ import (
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/lockland/cantina-charis/server/models"
-	"github.com/lockland/cantina-charis/server/repository"
+	"github.com/lockland/cantina-charis/server/service"
 	"gorm.io/gorm"
 )
 
 type EventController struct {
-	events *repository.EventRepository
+	events *service.EventService
 }
 
-func NewEventController(events *repository.EventRepository) EventController {
+func NewEventController(events *service.EventService) EventController {
 	return EventController{events: events}
 }
 

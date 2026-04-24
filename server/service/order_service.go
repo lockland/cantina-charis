@@ -21,6 +21,7 @@ func NewOrderService(orderRepo *repository.OrderRepository, eventRepo *repositor
 
 // PlaceOrder ensures the customer exists, then persists the order and lines (merge via models.MergeOrderProductLines in the repository).
 func (s *OrderService) PlaceOrder(customerName string, order *models.Order, lines []models.OrderProduct) error {
+	// Check if event is open before creating order
 	isOpen, err := s.EventRepository.IsOpen(order.EventID)
 	if err != nil {
 		return err

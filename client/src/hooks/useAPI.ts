@@ -13,6 +13,7 @@ const fetcher = async (url: string, options: any = {}) => {
   const payload = await res.json()
 
   if (!res.ok) {
+    // Check for event closed error and redirect to home
     if (payload?.code === 'EVENT_CLOSED') {
       window.location.href = '/'
       throw new Error(payload.error || 'evento fechado')

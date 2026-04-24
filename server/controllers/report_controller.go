@@ -4,27 +4,21 @@ import (
 	"time"
 
 	"github.com/gofiber/fiber/v2"
-	"github.com/lockland/cantina-charis/server/models"
-	"github.com/lockland/cantina-charis/server/repository"
+	"github.com/lockland/cantina-charis/server/service"
 )
 
 type ReportController struct {
-	reports *repository.ReportRepository
+	reports *service.ReportService
 }
 
-func NewReportController(reports *repository.ReportRepository) ReportController {
+func NewReportController(reports *service.ReportService) ReportController {
 	return ReportController{reports: reports}
 }
 
 func (c *ReportController) GetSummaries(f *fiber.Ctx) error {
-	result, err := c.reports.ListEventSummaries()
+	result, err := c.reports.ListEventSummariesWithBalances()
 	if err != nil {
 		return f.Status(fiber.StatusInternalServerError).SendString(err.Error())
-	}
-
-	for i := range result {
-		result[i].Balance = result[i].OpenAmount.Add(result[i].Incoming).Sub(result[i].Outgoing)
-		result[i].LiquidFunds = result[i].Incoming.Sub(result[i].Outgoing)
 	}
 
 	return f.JSON(result)
@@ -77,14 +71,9 @@ func (c *ReportController) GetOutgoingsByDateRange(f *fiber.Ctx) error {
 	}
 	toEnd := to.Add(24 * time.Hour)
 
-	outgoings, err := c.reports.FindOutgoingsInDateRange(from, toEnd)
+	rows, err := c.reports.OutgoingReportRowsInRange(from, toEnd)
 	if err != nil {
 		return f.Status(fiber.StatusInternalServerError).SendString(err.Error())
-	}
-
-	rows := make([]models.OutgoingReportRow, 0, len(outgoings))
-	for i := range outgoings {
-		rows = append(rows, outgoings[i].ReportRow())
 	}
 	return f.JSON(rows)
 }

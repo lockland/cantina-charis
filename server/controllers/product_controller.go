@@ -5,15 +5,15 @@ import (
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/lockland/cantina-charis/server/models"
-	"github.com/lockland/cantina-charis/server/repository"
+	"github.com/lockland/cantina-charis/server/service"
 	"gorm.io/gorm"
 )
 
 type ProductController struct {
-	products *repository.ProductRepository
+	products *service.ProductService
 }
 
-func NewProductController(products *repository.ProductRepository) ProductController {
+func NewProductController(products *service.ProductService) ProductController {
 	return ProductController{products: products}
 }
 

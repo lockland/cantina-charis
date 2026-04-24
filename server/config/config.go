@@ -112,6 +112,7 @@ func setupApiRoutes(app *fiber.App) {
 	db := database.Conn
 	orderRepo := repository.NewOrderRepository(db)
 	eventRepo := repository.NewEventRepository(db)
+	eventSvc := service.NewEventService(eventRepo)
 	orderController := controllers.NewOrderController(service.NewOrderService(orderRepo, eventRepo))
 	api.Post("/orders", orderController.CreateOrder)
 	api.Get("/orders", orderController.GetOrders)
@@ -119,7 +120,7 @@ func setupApiRoutes(app *fiber.App) {
 	api.Delete("/orders/:id", orderController.DeleteOrder)
 	api.Put("/orders/:id/done", orderController.DeliveryOrder)
 
-	eventController := controllers.NewEventController(eventRepo)
+	eventController := controllers.NewEventController(eventSvc)
 	api.Post("/events", eventController.CreateEvent)
 	api.Get("/events", eventController.GetEvents)
 	api.Get("/events/:id", eventController.GetEvent)
@@ -130,7 +131,7 @@ func setupApiRoutes(app *fiber.App) {
 	api.Get("/events/:id/orders", eventController.GetOrders)
 
 	productRepo := repository.NewProductRepository(db)
-	productController := controllers.NewProductController(productRepo)
+	productController := controllers.NewProductController(service.NewProductService(productRepo))
 	api.Post("/products", productController.CreateProduct)
 	api.Get("/products", productController.GetProducts)
 	api.Get("/products/enabled", productController.GetEnabledProducts)
@@ -140,12 +141,12 @@ func setupApiRoutes(app *fiber.App) {
 	api.Put("/products/:id/toggle", productController.ToggleProduct)
 
 	outgoingRepo := repository.NewOutgoingRepository(db)
-	outgoingController := controllers.NewOutgoingController(outgoingRepo, eventRepo)
+	outgoingController := controllers.NewOutgoingController(service.NewOutgoingService(outgoingRepo, eventRepo))
 	api.Post("/outgoings", outgoingController.CreateOutgoing)
 	api.Get("/outgoings", outgoingController.GetOutgoings)
 
 	customerRepo := repository.NewCustomerRepository(db)
-	customerController := controllers.NewCustomerController(customerRepo)
+	customerController := controllers.NewCustomerController(service.NewCustomerService(customerRepo))
 	api.Get("/customers", customerController.GetCustomers)
 
 	debitRepo := repository.NewDebitRepository(db)
@@ -155,7 +156,7 @@ func setupApiRoutes(app *fiber.App) {
 
 	// Grupo /reports: rotas fixas antes de :param (balance/:lastDays, payments/:customer_id)
 	reportRepo := repository.NewReportRepository(db)
-	reportController := controllers.NewReportController(reportRepo)
+	reportController := controllers.NewReportController(service.NewReportService(reportRepo))
 	reports := api.Group("/reports")
 	reports.Get("/summaries", reportController.GetSummaries)
 	reports.Get("/outgoings", reportController.GetOutgoingsByDateRange)
