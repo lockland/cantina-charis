@@ -11,6 +11,7 @@ import (
 	"github.com/lockland/cantina-charis/server/internal/testutil"
 	"github.com/lockland/cantina-charis/server/models"
 	"github.com/lockland/cantina-charis/server/repository"
+	"github.com/lockland/cantina-charis/server/service"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -20,7 +21,7 @@ func TestOutgoingController(t *testing.T) {
 		db := testutil.OpenSQLite(t)
 		ev := models.Event{Name: "Ev", Open: true}
 		require.NoError(t, db.Create(&ev).Error)
-		ctrl := NewOutgoingController(repository.NewOutgoingRepository(db))
+		ctrl := NewOutgoingController(service.NewOutgoingService(repository.NewOutgoingRepository(db), repository.NewEventRepository(db)))
 		app := fiber.New()
 		app.Post("/outgoings", ctrl.CreateOutgoing)
 		app.Get("/outgoings", ctrl.GetOutgoings)

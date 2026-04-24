@@ -9,4 +9,6 @@ var (
 	ErrDebitNoOutstandingWithPayment = errors.New("no outstanding orders for this customer")
 	// ErrOrderAlreadyFullyPaid is returned when a full payment is requested but paid_value already covers order_amount.
 	ErrOrderAlreadyFullyPaid = errors.New("order already fully paid")
+	// ErrEventClosed is returned when trying to create a record on a closed event.
+	ErrEventClosed = errors.New("event is closed")
 )
