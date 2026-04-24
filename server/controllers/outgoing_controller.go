@@ -1,17 +1,21 @@
 package controllers
 
 import (
+	"errors"
+
 	"github.com/gofiber/fiber/v2"
 	"github.com/lockland/cantina-charis/server/models"
 	"github.com/lockland/cantina-charis/server/repository"
+	"gorm.io/gorm"
 )
 
 type OutgoingController struct {
 	outgoings *repository.OutgoingRepository
+	events    *repository.EventRepository
 }
 
-func NewOutgoingController(outgoings *repository.OutgoingRepository) OutgoingController {
-	return OutgoingController{outgoings: outgoings}
+func NewOutgoingController(outgoings *repository.OutgoingRepository, events *repository.EventRepository) OutgoingController {
+	return OutgoingController{outgoings: outgoings, events: events}
 }
 
 func (c *OutgoingController) CreateOutgoing(f *fiber.Ctx) error {
@@ -22,6 +26,23 @@ func (c *OutgoingController) CreateOutgoing(f *fiber.Ctx) error {
 		return f.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"error":   "Não foi possível registrar a despesa",
 			"details": err.Error(),
+		})
+	}
+
+	isOpen, err := c.events.IsOpen(outgoing.EventID)
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return f.Status(fiber.StatusNotFound).JSON(fiber.Map{
+				"error": "Evento não encontrado",
+				"code":  "EVENT_NOT_FOUND",
+			})
+		}
+		return f.Status(fiber.StatusInternalServerError).SendString(err.Error())
+	}
+	if !isOpen {
+		return f.Status(fiber.StatusForbidden).JSON(fiber.Map{
+			"error": "evento fechado",
+			"code":  "EVENT_CLOSED",
 		})
 	}
 

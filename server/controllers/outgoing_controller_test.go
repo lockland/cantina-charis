@@ -20,7 +20,7 @@ func TestOutgoingController(t *testing.T) {
 		db := testutil.OpenSQLite(t)
 		ev := models.Event{Name: "Ev", Open: true}
 		require.NoError(t, db.Create(&ev).Error)
-		ctrl := NewOutgoingController(repository.NewOutgoingRepository(db))
+		ctrl := NewOutgoingController(repository.NewOutgoingRepository(db), repository.NewEventRepository(db))
 		app := fiber.New()
 		app.Post("/outgoings", ctrl.CreateOutgoing)
 		app.Get("/outgoings", ctrl.GetOutgoings)

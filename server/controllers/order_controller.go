@@ -66,6 +66,18 @@ func (c *OrderController) CreateOrder(f *fiber.Ctx) error {
 
 	err := c.orders.PlaceOrder(payload.CustomerName, &order, lines)
 	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return f.Status(fiber.StatusNotFound).JSON(fiber.Map{
+				"error": "Evento não encontrado",
+				"code":  "EVENT_NOT_FOUND",
+			})
+		}
+		if errors.Is(err, service.ErrEventClosed) {
+			return f.Status(fiber.StatusForbidden).JSON(fiber.Map{
+				"error": "evento fechado",
+				"code":  "EVENT_CLOSED",
+			})
+		}
 		return f.Status(fiber.StatusBadRequest).SendString(err.Error())
 	}
 

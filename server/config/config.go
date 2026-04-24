@@ -111,14 +111,14 @@ func setupApiRoutes(app *fiber.App) {
 
 	db := database.Conn
 	orderRepo := repository.NewOrderRepository(db)
-	orderController := controllers.NewOrderController(service.NewOrderService(orderRepo))
+	eventRepo := repository.NewEventRepository(db)
+	orderController := controllers.NewOrderController(service.NewOrderService(orderRepo, eventRepo))
 	api.Post("/orders", orderController.CreateOrder)
 	api.Get("/orders", orderController.GetOrders)
 	api.Put("/orders/:id/pay", orderController.PayOrder)
 	api.Delete("/orders/:id", orderController.DeleteOrder)
 	api.Put("/orders/:id/done", orderController.DeliveryOrder)
 
-	eventRepo := repository.NewEventRepository(db)
 	eventController := controllers.NewEventController(eventRepo)
 	api.Post("/events", eventController.CreateEvent)
 	api.Get("/events", eventController.GetEvents)
@@ -140,7 +140,7 @@ func setupApiRoutes(app *fiber.App) {
 	api.Put("/products/:id/toggle", productController.ToggleProduct)
 
 	outgoingRepo := repository.NewOutgoingRepository(db)
-	outgoingController := controllers.NewOutgoingController(outgoingRepo)
+	outgoingController := controllers.NewOutgoingController(outgoingRepo, eventRepo)
 	api.Post("/outgoings", outgoingController.CreateOutgoing)
 	api.Get("/outgoings", outgoingController.GetOutgoings)
 

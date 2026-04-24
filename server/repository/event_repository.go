@@ -32,6 +32,16 @@ func (r *EventRepository) FindByID(id int, event *models.Event) error {
 	return r.db.First(event, id).Error
 }
 
+// IsOpen returns true if the event is open.
+func (r *EventRepository) IsOpen(eventID int) (bool, error) {
+	var event models.Event
+	err := r.db.First(&event, eventID).Error
+	if err != nil {
+		return false, err
+	}
+	return event.Open, nil
+}
+
 // Close sets Open=false for the event.
 func (r *EventRepository) Close(id int) error {
 	return r.db.Model(&models.Event{ID: id}).Update("Open", false).Error
