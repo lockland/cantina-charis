@@ -1,4 +1,5 @@
 dist/
+.gotmp/
 cantina-bkp.db
 server/views/
 server/server

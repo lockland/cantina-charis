@@ -1,5 +1,5 @@
 import { Box, Flex, Space, Table, Title, useMantineTheme } from "@mantine/core"
-import { DatePickerInput } from "@mantine/dates"
+import { AppDatePickerInput } from "../../../ui"
 import DecimalFormatter from "../../../helpers/Decimal"
 import { OutgoingRow } from "./outgoingsReport"
 
@@ -24,7 +24,7 @@ export default function ReportOutgoingsTab({
         <Title order={2}>Total no período: {outgoingsTotal}</Title>
       </Flex>
       <Box maw={320} mb="md">
-        <DatePickerInput
+        <AppDatePickerInput
           type="range"
           label="Datas"
           placeholder="Data inicial – Data final"

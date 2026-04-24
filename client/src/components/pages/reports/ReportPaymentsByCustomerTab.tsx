@@ -1,4 +1,5 @@
-import { Center, Select, Space, Table, Title, useMantineTheme } from "@mantine/core"
+import { Center, Space, Table, Title, useMantineTheme } from "@mantine/core"
+import { AppSelect } from "../../../ui"
 import CustomerPayment from "../../../models/CustomerPayment"
 import { CustomerNamesOptionType } from "../../../models/Customer"
 
@@ -19,7 +20,7 @@ export default function ReportPaymentsByCustomerTab({
       <Center>
         <Title>Pagamentos por cliente</Title>
       </Center>
-      <Select
+      <AppSelect
         size="md"
         data={customerNames}
         creatable

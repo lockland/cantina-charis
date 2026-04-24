@@ -1,7 +1,7 @@
 import { ActionIcon, Box, Button, Card, Divider, Menu, Stack, Text, Tooltip } from "@mantine/core"
 import { CreditCardIcon, EllipsisIcon } from "@primer/octicons-react"
 import { useState } from "react"
-import { showNotification } from "@mantine/notifications"
+import { showNotification } from "../ui"
 import DecimalFormatter from "../helpers/Decimal"
 import { ORDERS_CARD_MENU_RAIL_PX, ordersCardMenuActionIconStyles } from "../helpers/ordersCardMenuButtonStyles"
 import { payOrder } from "../hooks/useAPI"
