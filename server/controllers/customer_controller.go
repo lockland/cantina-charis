@@ -3,14 +3,14 @@ package controllers
 import (
 	"github.com/gofiber/fiber/v3"
 	"github.com/lockland/cantina-charis/server/models"
-	"github.com/lockland/cantina-charis/server/repository"
+	"github.com/lockland/cantina-charis/server/service"
 )
 
 type CustomerController struct {
-	customers *repository.CustomerRepository
+	customers *service.CustomerService
 }
 
-func NewCustomerController(customers *repository.CustomerRepository) CustomerController {
+func NewCustomerController(customers *service.CustomerService) CustomerController {
 	return CustomerController{customers: customers}
 }
 

@@ -8,15 +8,23 @@ import (
 // OrderService coordinates order placement; persistence stays on OrderRepository.
 type OrderService struct {
 	*repository.OrderRepository
+	*repository.EventRepository
 }
 
 // NewOrderService wraps the order repository.
-func NewOrderService(repo *repository.OrderRepository) *OrderService {
-	return &OrderService{OrderRepository: repo}
+func NewOrderService(orderRepo *repository.OrderRepository, eventRepo *repository.EventRepository) *OrderService {
+	return &OrderService{
+		OrderRepository: orderRepo,
+		EventRepository: eventRepo,
+	}
 }
 
 // PlaceOrder ensures the customer exists, then persists the order and lines (merge via models.MergeOrderProductLines in the repository).
 func (s *OrderService) PlaceOrder(customerName string, order *models.Order, lines []models.OrderProduct) error {
+	if err := ensureEventOpenForCreate(s.EventRepository, order.EventID); err != nil {
+		return err
+	}
+
 	err := s.FirstOrCreateCustomerByName(customerName, &order.Customer)
 	if err != nil {
 		return err

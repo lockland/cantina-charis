@@ -19,7 +19,7 @@ func TestOrderService_PlaceOrder(t *testing.T) {
 		p := models.Product{Name: "P", Price: dec("1")}
 		require.NoError(t, db.Create(&p).Error)
 		repo := repository.NewOrderRepository(db)
-		svc := NewOrderService(repo)
+		svc := NewOrderService(repo, repository.NewEventRepository(db))
 		order := models.Order{
 			EventID:     ev.ID,
 			OrderAmount: dec("10"),
@@ -33,12 +33,31 @@ func TestOrderService_PlaceOrder(t *testing.T) {
 		require.NoError(t, db.Where("name = ?", "NewCust").First(&cust).Error)
 		assert.Equal(t, cust.ID, order.CustomerID)
 	})
+
+	t.Run("given closed event when placing order then event closed error", func(t *testing.T) {
+		db := testutil.OpenSQLite(t)
+		ev := models.Event{Name: "Closed"}
+		require.NoError(t, db.Create(&ev).Error)
+		// Explicit close: GORM may omit Open=false on insert when column has default:true.
+		require.NoError(t, db.Model(&models.Event{}).Where("id = ?", ev.ID).Update("open", false).Error)
+		p := models.Product{Name: "P2", Price: dec("1")}
+		require.NoError(t, db.Create(&p).Error)
+		svc := NewOrderService(repository.NewOrderRepository(db), repository.NewEventRepository(db))
+		order := models.Order{
+			EventID:     ev.ID,
+			OrderAmount: dec("5"),
+			PaidValue:   dec("0"),
+		}
+		lines := []models.OrderProduct{{ProductID: p.ID, ProductQuantity: 1}}
+		err := svc.PlaceOrder("C", &order, lines)
+		assert.ErrorIs(t, err, ErrEventClosed)
+	})
 }
 
 func TestOrderService_PayOrderFull(t *testing.T) {
 	t.Run("given no order for id when paying full then record not found", func(t *testing.T) {
 		db := testutil.OpenSQLite(t)
-		svc := NewOrderService(repository.NewOrderRepository(db))
+		svc := NewOrderService(repository.NewOrderRepository(db), repository.NewEventRepository(db))
 		_, err := svc.PayOrderFull(999)
 		assert.ErrorIs(t, err, gorm.ErrRecordNotFound)
 	})
@@ -56,7 +75,7 @@ func TestOrderService_PayOrderFull(t *testing.T) {
 			PaidValue:   dec("10"),
 		}
 		require.NoError(t, db.Create(&order).Error)
-		svc := NewOrderService(repository.NewOrderRepository(db))
+		svc := NewOrderService(repository.NewOrderRepository(db), repository.NewEventRepository(db))
 		_, err := svc.PayOrderFull(order.ID)
 		assert.ErrorIs(t, err, ErrOrderAlreadyFullyPaid)
 	})
@@ -74,7 +93,7 @@ func TestOrderService_PayOrderFull(t *testing.T) {
 			PaidValue:   dec("3"),
 		}
 		require.NoError(t, db.Create(&order).Error)
-		svc := NewOrderService(repository.NewOrderRepository(db))
+		svc := NewOrderService(repository.NewOrderRepository(db), repository.NewEventRepository(db))
 		out, err := svc.PayOrderFull(order.ID)
 		require.NoError(t, err)
 		require.NotNil(t, out)
