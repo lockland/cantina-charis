@@ -33,7 +33,7 @@ function OrdersCardList() {
     if (!openEventHydrated || eventId <= 0) {
       return
     }
-    getActiveOrders().then((response: OrdersCardType[]) => {
+    getActiveOrders(eventId).then((response: OrdersCardType[]) => {
       setOrders(response)
     })
   }, [eventId, openEventHydrated])

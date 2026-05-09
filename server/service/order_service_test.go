@@ -58,7 +58,7 @@ func TestOrderService_PayOrderFull(t *testing.T) {
 	t.Run("given no order for id when paying full then record not found", func(t *testing.T) {
 		db := testutil.OpenSQLite(t)
 		svc := NewOrderService(repository.NewOrderRepository(db), repository.NewEventRepository(db))
-		_, err := svc.PayOrderFull(999)
+		_, _, err := svc.PayOrderFull(999)
 		assert.ErrorIs(t, err, gorm.ErrRecordNotFound)
 	})
 
@@ -76,7 +76,7 @@ func TestOrderService_PayOrderFull(t *testing.T) {
 		}
 		require.NoError(t, db.Create(&order).Error)
 		svc := NewOrderService(repository.NewOrderRepository(db), repository.NewEventRepository(db))
-		_, err := svc.PayOrderFull(order.ID)
+		_, _, err := svc.PayOrderFull(order.ID)
 		assert.ErrorIs(t, err, ErrOrderAlreadyFullyPaid)
 	})
 
@@ -94,9 +94,10 @@ func TestOrderService_PayOrderFull(t *testing.T) {
 		}
 		require.NoError(t, db.Create(&order).Error)
 		svc := NewOrderService(repository.NewOrderRepository(db), repository.NewEventRepository(db))
-		out, err := svc.PayOrderFull(order.ID)
+		out, wasUndelivered, err := svc.PayOrderFull(order.ID)
 		require.NoError(t, err)
 		require.NotNil(t, out)
+		assert.True(t, wasUndelivered)
 		assert.True(t, out.PaidValue.Equal(dec("10")))
 		var reload models.Order
 		require.NoError(t, db.First(&reload, order.ID).Error)

@@ -104,8 +104,8 @@ export function getPendingOrders(eventId: number) {
   return fetcher(`/api/events/${eventId}/orders/pending`)
 }
 
-export function getActiveOrders() {
-  return fetcher(`/api/orders/active`)
+export function getActiveOrders(eventId: number) {
+  return fetcher(`/api/events/${eventId}/orders/active`)
 }
 
 export function deliveryOrder(orderId: number) {

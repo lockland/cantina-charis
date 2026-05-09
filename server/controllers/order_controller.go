@@ -106,7 +106,7 @@ func (c *OrderController) PayOrder(f fiber.Ctx) error {
 		return f.Status(fiber.StatusBadRequest).SendString("Invalid order id")
 	}
 
-	order, err := c.orders.PayOrderFull(id)
+	order, wasUndelivered, err := c.orders.PayOrderFull(id)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return f.Status(fiber.StatusNotFound).SendString("Order not found")
@@ -117,7 +117,7 @@ func (c *OrderController) PayOrder(f fiber.Ctx) error {
 		return f.Status(fiber.StatusInternalServerError).SendString(err.Error())
 	}
 
-	realtime.NotifyOrdersChanged(order.EventID)
+	realtime.NotifyOrdersChanged(order.EventID, wasUndelivered)
 
 	return f.Status(fiber.StatusOK).JSON(fiber.Map{"order_id": id, "paid_value": order.PaidValue})
 }
@@ -128,7 +128,7 @@ func (c *OrderController) DeleteOrder(f fiber.Ctx) error {
 		return f.Status(fiber.StatusBadRequest).SendString("Invalid order id")
 	}
 
-	eventID, err := c.orders.DeleteOrderWithProducts(id)
+	eventID, wasUndelivered, err := c.orders.DeleteOrderWithProducts(id)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return f.Status(fiber.StatusNotFound).SendString("Order not found")
@@ -136,7 +136,7 @@ func (c *OrderController) DeleteOrder(f fiber.Ctx) error {
 		return f.Status(fiber.StatusInternalServerError).SendString(err.Error())
 	}
 
-	realtime.NotifyOrdersChanged(eventID)
+	realtime.NotifyOrdersChanged(eventID, wasUndelivered)
 
 	return f.Status(fiber.StatusOK).JSON(fiber.Map{"order_id": id})
 }
@@ -147,7 +147,7 @@ func (c *OrderController) DeliveryOrder(f fiber.Ctx) error {
 		return f.Status(fiber.StatusBadRequest).SendString("Invalid id")
 	}
 
-	eventID, err := c.orders.MarkOrderDelivered(id)
+	eventID, wasUndelivered, err := c.orders.MarkOrderDelivered(id)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return f.Status(fiber.StatusNotFound).SendString("Order not found")
@@ -155,6 +155,6 @@ func (c *OrderController) DeliveryOrder(f fiber.Ctx) error {
 		return f.Status(fiber.StatusInternalServerError).SendString(err.Error())
 	}
 
-	realtime.NotifyOrdersChanged(eventID)
+	realtime.NotifyOrdersChanged(eventID, wasUndelivered)
 	return f.Status(fiber.StatusOK).JSON(fiber.Map{"order_id": id})
 }

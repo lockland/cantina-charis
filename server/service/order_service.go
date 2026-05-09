@@ -33,19 +33,20 @@ func (s *OrderService) PlaceOrder(customerName string, order *models.Order, line
 }
 
 // PayOrderFull loads the order, rejects if already fully paid, sets paid_value to order_amount, and persists.
-func (s *OrderService) PayOrderFull(orderID int) (*models.Order, error) {
-	order := &models.Order{}
-	if err := s.FindOrderByID(order, orderID); err != nil {
-		return nil, err
+func (s *OrderService) PayOrderFull(orderID int) (order *models.Order, wasUndelivered bool, err error) {
+	order = &models.Order{}
+	if err = s.FindOrderByID(order, orderID); err != nil {
+		return nil, false, err
 	}
 	if order.PaidValue.GreaterThanOrEqual(order.OrderAmount) {
-		return nil, ErrOrderAlreadyFullyPaid
+		return nil, false, ErrOrderAlreadyFullyPaid
 	}
+	wasUndelivered = !order.Deliveried
 	order.PaidValue = order.OrderAmount
-	if err := s.SaveOrder(order); err != nil {
-		return nil, err
+	if err = s.SaveOrder(order); err != nil {
+		return nil, false, err
 	}
-	return order, nil
+	return order, wasUndelivered, nil
 }
 
 // ListUndeliveredOrders returns all orders that are not yet delivered.

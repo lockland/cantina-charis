@@ -67,9 +67,10 @@ func TestOrderRepository_DeleteOrderWithProducts(t *testing.T) {
 		}
 		require.NoError(t, db.Create(&op).Error)
 		r := NewOrderRepository(db)
-		eventID, err := r.DeleteOrderWithProducts(order.ID)
+		eventID, wasUndelivered, err := r.DeleteOrderWithProducts(order.ID)
 		require.NoError(t, err)
 		assert.Equal(t, ev.ID, eventID)
+		assert.True(t, wasUndelivered)
 		assert.ErrorIs(t, db.First(&models.Order{}, order.ID).Error, gorm.ErrRecordNotFound)
 		var n int64
 		require.NoError(t, db.Model(&models.OrderProduct{}).Where("order_id = ?", order.ID).Count(&n).Error)
@@ -94,9 +95,10 @@ func TestOrderRepository_MarkOrderDelivered(t *testing.T) {
 		}
 		require.NoError(t, db.Create(&order).Error)
 		r := NewOrderRepository(db)
-		eventID, err := r.MarkOrderDelivered(order.ID)
+		eventID, wasUndelivered, err := r.MarkOrderDelivered(order.ID)
 		require.NoError(t, err)
 		assert.Equal(t, ev.ID, eventID)
+		assert.True(t, wasUndelivered)
 		var reload models.Order
 		require.NoError(t, db.First(&reload, order.ID).Error)
 		assert.True(t, reload.Deliveried)
