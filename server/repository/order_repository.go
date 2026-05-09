@@ -97,3 +97,16 @@ func (r *OrderRepository) MarkOrderDelivered(orderID int) (eventID int, err erro
 	}
 	return existing.EventID, nil
 }
+
+// FindUndeliveredOrders returns any undelivered orders from any event.
+func (r *OrderRepository) FindUndeliveredOrders() ([]models.Order, error) {
+	var orders []models.Order
+	err := r.db.
+		Where("deliveried = ?", false).
+		Preload("OrderProduct.Product").
+		Preload("Customer").
+		Preload("Event").
+		Order("created_at desc").
+		Find(&orders).Error
+	return orders, err
+}

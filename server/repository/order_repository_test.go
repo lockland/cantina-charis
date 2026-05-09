@@ -5,6 +5,7 @@ import (
 
 	"github.com/lockland/cantina-charis/server/internal/testutil"
 	"github.com/lockland/cantina-charis/server/models"
+	"github.com/shopspring/decimal"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"gorm.io/gorm"
@@ -87,8 +88,8 @@ func TestOrderRepository_MarkOrderDelivered(t *testing.T) {
 			EventID:     ev.ID,
 			CustomerID:  c.ID,
 			Customer:    c,
-			OrderAmount: dec("5"),
-			PaidValue:   dec("5"),
+			OrderAmount: decOrder("5"),
+			PaidValue:   decOrder("5"),
 			Deliveried:  false,
 		}
 		require.NoError(t, db.Create(&order).Error)
@@ -100,4 +101,32 @@ func TestOrderRepository_MarkOrderDelivered(t *testing.T) {
 		require.NoError(t, db.First(&reload, order.ID).Error)
 		assert.True(t, reload.Deliveried)
 	})
+}
+
+func TestOrderRepository_FindUndeliveredOrders(t *testing.T) {
+	t.Run("given orders across events when fetching undelivered orders then returns all undelivered orders", func(t *testing.T) {
+		db := testutil.OpenSQLite(t)
+		ev1 := models.Event{Name: "E1", Open: true}
+		ev2 := models.Event{Name: "E2", Open: true}
+		require.NoError(t, db.Create(&ev1).Error)
+		require.NoError(t, db.Create(&ev2).Error)
+		c := models.Customer{Name: "CustUndelivered"}
+		require.NoError(t, db.Create(&c).Error)
+		undelivered1 := models.Order{EventID: ev1.ID, CustomerID: c.ID, OrderAmount: decOrder("10"), PaidValue: decOrder("0"), Deliveried: false}
+		undelivered2 := models.Order{EventID: ev2.ID, CustomerID: c.ID, OrderAmount: decOrder("20"), PaidValue: decOrder("0"), Deliveried: false}
+		delivered := models.Order{EventID: ev2.ID, CustomerID: c.ID, OrderAmount: decOrder("30"), PaidValue: decOrder("30"), Deliveried: true}
+		require.NoError(t, db.Create(&undelivered1).Error)
+		require.NoError(t, db.Create(&undelivered2).Error)
+		require.NoError(t, db.Create(&delivered).Error)
+		r := NewOrderRepository(db)
+		got, err := r.FindUndeliveredOrders()
+		require.NoError(t, err)
+		assert.Len(t, got, 2)
+		assert.ElementsMatch(t, []int{undelivered1.ID, undelivered2.ID}, []int{got[0].ID, got[1].ID})
+	})
+}
+
+func decOrder(s string) decimal.Decimal {
+	d, _ := decimal.NewFromString(s)
+	return d
 }
