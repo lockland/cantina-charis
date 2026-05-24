@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"errors"
+	"strconv"
 
 	"github.com/gofiber/fiber/v3"
 	"github.com/lockland/cantina-charis/server/models"
@@ -86,6 +87,20 @@ func (c *OrderController) CreateOrder(f fiber.Ctx) error {
 func (c *OrderController) GetOrders(f fiber.Ctx) error {
 	orders := new([]models.Order)
 	err := c.orders.ListAllOrders(orders)
+	if err != nil {
+		return f.Status(fiber.StatusInternalServerError).SendString(err.Error())
+	}
+	return f.JSON(orders)
+}
+
+// GetActiveOrders returns active orders for the cash register: active orders for event_id
+// plus undelivered orders from other events (query param event_id = open event).
+func (c *OrderController) GetActiveOrders(f fiber.Ctx) error {
+	eventID, err := strconv.Atoi(f.Query("event_id"))
+	if err != nil || eventID <= 0 {
+		return f.Status(fiber.StatusBadRequest).SendString("Invalid or missing event_id")
+	}
+	orders, err := c.orders.ListActiveOrdersForCashRegister(eventID)
 	if err != nil {
 		return f.Status(fiber.StatusInternalServerError).SendString(err.Error())
 	}

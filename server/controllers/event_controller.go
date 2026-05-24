@@ -118,7 +118,7 @@ func (c *EventController) GetActiveOrders(f fiber.Ctx) error {
 	if id <= 0 {
 		return f.Status(401).SendString("Invalid id")
 	}
-	orders, err := c.events.FindActiveOrdersForEventWithUndelivered(id)
+	orders, err := c.events.FindActiveOrdersForEvent(id)
 	if err != nil {
 		return f.Status(fiber.StatusInternalServerError).SendString(err.Error())
 	}

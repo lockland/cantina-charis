@@ -48,3 +48,8 @@ func (s *OrderService) PayOrderFull(orderID int) (order *models.Order, wasUndeli
 	}
 	return order, wasUndelivered, nil
 }
+
+// ListActiveOrdersForCashRegister returns orders for the cash register view of the open event.
+func (s *OrderService) ListActiveOrdersForCashRegister(eventID int) ([]models.Order, error) {
+	return s.FindActiveOrdersForCashRegister(eventID)
+}

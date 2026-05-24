@@ -104,3 +104,23 @@ func TestOrderService_PayOrderFull(t *testing.T) {
 		assert.True(t, reload.PaidValue.Equal(dec("10")))
 	})
 }
+
+func TestOrderService_ListActiveOrdersForCashRegister(t *testing.T) {
+	db := testutil.OpenSQLite(t)
+	ev1 := models.Event{Name: "CashA", Open: true}
+	ev2 := models.Event{Name: "CashB", Open: true}
+	require.NoError(t, db.Create(&ev1).Error)
+	require.NoError(t, db.Create(&ev2).Error)
+	c := models.Customer{Name: "CustCash"}
+	require.NoError(t, db.Create(&c).Error)
+	active := models.Order{EventID: ev1.ID, CustomerID: c.ID, OrderAmount: dec("15"), PaidValue: dec("5"), Deliveried: false}
+	other := models.Order{EventID: ev2.ID, CustomerID: c.ID, OrderAmount: dec("25"), PaidValue: dec("0"), Deliveried: false}
+	require.NoError(t, db.Create(&active).Error)
+	require.NoError(t, db.Create(&other).Error)
+
+	svc := NewOrderService(repository.NewOrderRepository(db), repository.NewEventRepository(db))
+	got, err := svc.ListActiveOrdersForCashRegister(ev1.ID)
+	require.NoError(t, err)
+	assert.Len(t, got, 2)
+	assert.ElementsMatch(t, []int{active.ID, other.ID}, []int{got[0].ID, got[1].ID})
+}

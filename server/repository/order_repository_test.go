@@ -105,26 +105,31 @@ func TestOrderRepository_MarkOrderDelivered(t *testing.T) {
 	})
 }
 
-func TestOrderRepository_FindUndeliveredOrders(t *testing.T) {
-	t.Run("given orders across events when fetching undelivered orders then returns all undelivered orders", func(t *testing.T) {
+func TestOrderRepository_FindActiveOrdersForCashRegister(t *testing.T) {
+	t.Run("returns active orders for event plus undelivered from other events", func(t *testing.T) {
 		db := testutil.OpenSQLite(t)
-		ev1 := models.Event{Name: "E1", Open: true}
-		ev2 := models.Event{Name: "E2", Open: true}
+		ev1 := models.Event{Name: "EventA", Open: false}
+		ev2 := models.Event{Name: "EventB", Open: true}
 		require.NoError(t, db.Create(&ev1).Error)
 		require.NoError(t, db.Create(&ev2).Error)
-		c := models.Customer{Name: "CustUndelivered"}
+		c := models.Customer{Name: "CustC"}
 		require.NoError(t, db.Create(&c).Error)
-		undelivered1 := models.Order{EventID: ev1.ID, CustomerID: c.ID, OrderAmount: decOrder("10"), PaidValue: decOrder("0"), Deliveried: false}
-		undelivered2 := models.Order{EventID: ev2.ID, CustomerID: c.ID, OrderAmount: decOrder("20"), PaidValue: decOrder("0"), Deliveried: false}
-		delivered := models.Order{EventID: ev2.ID, CustomerID: c.ID, OrderAmount: decOrder("30"), PaidValue: decOrder("30"), Deliveried: true}
-		require.NoError(t, db.Create(&undelivered1).Error)
-		require.NoError(t, db.Create(&undelivered2).Error)
-		require.NoError(t, db.Create(&delivered).Error)
+		activeOrder := models.Order{EventID: ev1.ID, CustomerID: c.ID, OrderAmount: decOrder("30"), PaidValue: decOrder("10"), Deliveried: false}
+		otherUndelivered := models.Order{EventID: ev2.ID, CustomerID: c.ID, OrderAmount: decOrder("40"), PaidValue: decOrder("0"), Deliveried: false}
+		otherDelivered := models.Order{EventID: ev2.ID, CustomerID: c.ID, OrderAmount: decOrder("50"), PaidValue: decOrder("0"), Deliveried: true}
+		closedOnEv1 := models.Order{EventID: ev1.ID, CustomerID: c.ID, OrderAmount: decOrder("60"), PaidValue: decOrder("60"), Deliveried: true}
+		require.NoError(t, db.Create(&activeOrder).Error)
+		require.NoError(t, db.Create(&otherUndelivered).Error)
+		require.NoError(t, db.Create(&otherDelivered).Error)
+		require.NoError(t, db.Create(&closedOnEv1).Error)
+
 		r := NewOrderRepository(db)
-		got, err := r.FindUndeliveredOrders()
+		got, err := r.FindActiveOrdersForCashRegister(ev1.ID)
 		require.NoError(t, err)
 		assert.Len(t, got, 2)
-		assert.ElementsMatch(t, []int{undelivered1.ID, undelivered2.ID}, []int{got[0].ID, got[1].ID})
+		ids := []int{got[0].ID, got[1].ID}
+		assert.Contains(t, ids, activeOrder.ID)
+		assert.Contains(t, ids, otherUndelivered.ID)
 	})
 }
 

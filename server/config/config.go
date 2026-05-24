@@ -118,10 +118,11 @@ func setupApiRoutes(app *fiber.App) {
 	db := database.Conn
 	orderRepo := repository.NewOrderRepository(db)
 	eventRepo := repository.NewEventRepository(db)
-	eventSvc := service.NewEventService(eventRepo, orderRepo)
+	eventSvc := service.NewEventService(eventRepo)
 	orderController := controllers.NewOrderController(service.NewOrderService(orderRepo, eventRepo))
 	api.Post("/orders", orderController.CreateOrder)
 	api.Get("/orders", orderController.GetOrders)
+	api.Get("/orders/active", orderController.GetActiveOrders)
 	api.Put("/orders/:id/pay", orderController.PayOrder)
 	api.Delete("/orders/:id", orderController.DeleteOrder)
 	api.Put("/orders/:id/done", orderController.DeliveryOrder)
