@@ -9,6 +9,8 @@ export type OrdersSocketHandlers = {
   subscribedEventId: number
   onRefresh: () => void
   onOrderCreated?: () => void
+  /** Atualiza o caixa quando pedidos não entregues de outros eventos mudam. */
+  refreshOnForeignOrdersChanged?: boolean
 }
 
 function isOrdersSocketPayloadType(value: string): value is OrdersSocketPayloadType {
@@ -64,11 +66,14 @@ export function applyOrdersSocketPayload(
   payload: OrdersSocketPayload,
   handlers: OrdersSocketHandlers,
 ): void {
-  if (payload.event_id !== handlers.subscribedEventId) {
+  if (payload.type === "orders_changed") {
+    const isOwnEvent = payload.event_id === handlers.subscribedEventId
+    if (isOwnEvent || handlers.refreshOnForeignOrdersChanged) {
+      handlers.onRefresh()
+    }
     return
   }
-  if (payload.type === "orders_changed") {
-    handlers.onRefresh()
+  if (payload.event_id !== handlers.subscribedEventId) {
     return
   }
   if (payload.type === "order_created") {

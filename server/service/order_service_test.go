@@ -104,25 +104,3 @@ func TestOrderService_PayOrderFull(t *testing.T) {
 		assert.True(t, reload.PaidValue.Equal(dec("10")))
 	})
 }
-
-func TestOrderService_ListUndeliveredOrders(t *testing.T) {
-	db := testutil.OpenSQLite(t)
-	ev1 := models.Event{Name: "Global1", Open: true}
-	ev2 := models.Event{Name: "Global2", Open: true}
-	require.NoError(t, db.Create(&ev1).Error)
-	require.NoError(t, db.Create(&ev2).Error)
-	c := models.Customer{Name: "CustGlobal"}
-	require.NoError(t, db.Create(&c).Error)
-	undelivered1 := models.Order{EventID: ev1.ID, CustomerID: c.ID, OrderAmount: dec("10"), PaidValue: dec("0"), Deliveried: false}
-	undelivered2 := models.Order{EventID: ev2.ID, CustomerID: c.ID, OrderAmount: dec("20"), PaidValue: dec("0"), Deliveried: false}
-	require.NoError(t, db.Create(&undelivered1).Error)
-	require.NoError(t, db.Create(&undelivered2).Error)
-	invoiced := models.Order{EventID: ev2.ID, CustomerID: c.ID, OrderAmount: dec("30"), PaidValue: dec("30"), Deliveried: true}
-	require.NoError(t, db.Create(&invoiced).Error)
-
-	svc := NewOrderService(repository.NewOrderRepository(db), repository.NewEventRepository(db))
-	got, err := svc.ListUndeliveredOrders()
-	require.NoError(t, err)
-	assert.Len(t, got, 2)
-	assert.ElementsMatch(t, []int{undelivered1.ID, undelivered2.ID}, []int{got[0].ID, got[1].ID})
-}

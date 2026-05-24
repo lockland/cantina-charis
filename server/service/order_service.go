@@ -48,8 +48,3 @@ func (s *OrderService) PayOrderFull(orderID int) (order *models.Order, wasUndeli
 	}
 	return order, wasUndelivered, nil
 }
-
-// ListUndeliveredOrders returns all orders that are not yet delivered.
-func (s *OrderService) ListUndeliveredOrders() ([]models.Order, error) {
-	return s.FindUndeliveredOrders()
-}

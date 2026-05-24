@@ -104,6 +104,7 @@ export function getPendingOrders(eventId: number) {
   return fetcher(`/api/events/${eventId}/orders/pending`)
 }
 
+/** Caixa: pedidos ativos do evento + não entregues de outros eventos. */
 export function getActiveOrders(eventId: number) {
   return fetcher(`/api/events/${eventId}/orders/active`)
 }

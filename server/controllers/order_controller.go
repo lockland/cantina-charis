@@ -92,14 +92,6 @@ func (c *OrderController) GetOrders(f fiber.Ctx) error {
 	return f.JSON(orders)
 }
 
-func (c *OrderController) GetActiveOrders(f fiber.Ctx) error {
-	orders, err := c.orders.ListUndeliveredOrders()
-	if err != nil {
-		return f.Status(fiber.StatusInternalServerError).SendString(err.Error())
-	}
-	return f.JSON(orders)
-}
-
 func (c *OrderController) PayOrder(f fiber.Ctx) error {
 	id := fiber.Params[int](f, "id")
 	if id <= 0 {

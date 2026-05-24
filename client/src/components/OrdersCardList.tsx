@@ -89,7 +89,7 @@ function OrdersCardList() {
     fetchOrders()
   }, [fetchOrders])
 
-  useOrdersSocket(eventId, refreshOrders)
+  useOrdersSocket(eventId, refreshOrders, undefined, { refreshOnForeignOrdersChanged: true })
 
   const renderOrderCard = (order: OrdersCardType, group: OrderGroup, index: number) => (
     <OrdersCard

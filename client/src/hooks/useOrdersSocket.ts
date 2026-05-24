@@ -21,10 +21,15 @@ function buildOrdersWebSocketUrl(eventId: number): string {
   return `${webSocketProtocol}//${host}/api/ws/orders?event_id=${eventId}`
 }
 
+export type UseOrdersSocketOptions = {
+  refreshOnForeignOrdersChanged?: boolean
+}
+
 export function useOrdersSocket(
   eventId: number,
   onRefresh: () => void,
   onOrderCreated?: () => void,
+  options?: UseOrdersSocketOptions,
 ) {
   const onRefreshRef = useRef(onRefresh)
   onRefreshRef.current = onRefresh
@@ -51,6 +56,7 @@ export function useOrdersSocket(
         subscribedEventId: eventId,
         onRefresh: () => onRefreshRef.current(),
         onOrderCreated: onOrderCreatedRef.current,
+        refreshOnForeignOrdersChanged: options?.refreshOnForeignOrdersChanged,
       })
     }
 
@@ -94,5 +100,5 @@ export function useOrdersSocket(
       }
       activeSocket?.close()
     }
-  }, [eventId])
+  }, [eventId, options?.refreshOnForeignOrdersChanged])
 }
