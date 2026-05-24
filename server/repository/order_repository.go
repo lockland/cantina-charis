@@ -100,14 +100,14 @@ func (r *OrderRepository) MarkOrderDelivered(orderID int) (eventID int, wasUndel
 	return existing.EventID, wasUndelivered, nil
 }
 
-// cashRegisterOrdersWhere matches orders visible at the cash register for the open event:
-// active orders for that event, plus undelivered orders from other events.
-const cashRegisterOrdersWhere = `(event_id = ? AND (deliveried = ? OR CAST(paid_value AS REAL) < CAST(order_amount AS REAL)))
-	OR (event_id != ? AND deliveried = ?)`
-
 // FindActiveOrdersForCashRegister loads cash-register orders in a single filtered query.
 func (r *OrderRepository) FindActiveOrdersForCashRegister(eventID int) ([]models.Order, error) {
 	var orders []models.Order
+	// cashRegisterOrdersWhere matches orders visible at the cash register for the open event:
+	// active orders for that event, plus undelivered orders from other events.
+	cashRegisterOrdersWhere := `(event_id = ? AND (deliveried = ? OR CAST(paid_value AS REAL) < CAST(order_amount AS REAL)))
+	OR (event_id != ? AND deliveried = ?)`
+
 	err := r.db.
 		Where(cashRegisterOrdersWhere, eventID, false, eventID, false).
 		Preload("OrderProduct.Product").
