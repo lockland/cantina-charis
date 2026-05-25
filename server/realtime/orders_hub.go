@@ -56,7 +56,7 @@ func Unregister(eventID int, cc *clientConn) {
 	}
 }
 
-func broadcast(eventID int, typ string) {
+func broadcast(eventID int, typ string, allSubscribers bool) {
 	if eventID <= 0 {
 		return
 	}
@@ -69,7 +69,13 @@ func broadcast(eventID int, typ string) {
 	}
 	defaultHub.mu.Lock()
 	var list []*clientConn
-	if m, ok := defaultHub.subs[eventID]; ok {
+	if allSubscribers {
+		for _, subs := range defaultHub.subs {
+			for cc := range subs {
+				list = append(list, cc)
+			}
+		}
+	} else if m, ok := defaultHub.subs[eventID]; ok {
 		list = make([]*clientConn, 0, len(m))
 		for cc := range m {
 			list = append(list, cc)
@@ -81,37 +87,12 @@ func broadcast(eventID int, typ string) {
 	}
 }
 
-// broadcastAll sends a notification to all subscribers across all events.
-func broadcastAll(eventID int, typ string) {
-	if eventID <= 0 {
-		return
-	}
-	payload, err := json.Marshal(map[string]any{
-		"type":     typ,
-		"event_id": eventID,
-	})
-	if err != nil {
-		return
-	}
-	defaultHub.mu.Lock()
-	var list []*clientConn
-	for _, subs := range defaultHub.subs {
-		for cc := range subs {
-			list = append(list, cc)
-		}
-	}
-	defaultHub.mu.Unlock()
-	for _, cc := range list {
-		_ = cc.writeText(payload)
-	}
-}
-
 // NotifyOrderCreated avisa que um pedido novo foi registrado (ex.: notificação na cozinha).
 func NotifyOrderCreated(eventID int) {
-	broadcast(eventID, "order_created")
+	broadcast(eventID, "order_created", false)
 }
 
 // NotifyOrdersChanged avisa outras alterações (entrega, exclusão, pagamento, etc.).
 func NotifyOrdersChanged(eventID int) {
-	broadcastAll(eventID, "orders_changed")
+	broadcast(eventID, "orders_changed", true)
 }
