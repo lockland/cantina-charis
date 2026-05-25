@@ -122,7 +122,7 @@ func TestOrderRepository_FindActiveOrdersForCashRegister(t *testing.T) {
 		require.NoError(t, db.Create(&closedOnEv1).Error)
 
 		r := NewOrderRepository(db)
-		got, err := r.FindActiveOrdersForCashRegister(ev1.ID)
+		got, err := r.FindActiveOrdersForCashRegister(CashRegisterEventID(ev1.ID))
 		require.NoError(t, err)
 		assert.Len(t, got, 2)
 		ids := []int{got[0].ID, got[1].ID}

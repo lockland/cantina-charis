@@ -1,7 +1,6 @@
 package realtime
 
 import (
-	"encoding/json"
 	"sync"
 
 	"github.com/gofiber/contrib/websocket"
@@ -28,71 +27,93 @@ var defaultHub = &OrdersHub{subs: make(map[int]map[*clientConn]struct{})}
 
 // Register associa uma conexão WebSocket a um evento.
 func Register(eventID int, c *websocket.Conn) *clientConn {
-	if eventID <= 0 || c == nil {
-		return nil
-	}
-	cc := &clientConn{c: c}
-	defaultHub.mu.Lock()
-	defer defaultHub.mu.Unlock()
-	if defaultHub.subs[eventID] == nil {
-		defaultHub.subs[eventID] = make(map[*clientConn]struct{})
-	}
-	defaultHub.subs[eventID][cc] = struct{}{}
-	return cc
+	return defaultHub.register(EventID(eventID), c)
 }
 
 // Unregister remove a conexão da sala do evento.
 func Unregister(eventID int, cc *clientConn) {
-	if cc == nil {
+	defaultHub.unregister(EventID(eventID), cc)
+}
+
+func (h *OrdersHub) register(eventID EventID, c *websocket.Conn) *clientConn {
+	if !eventID.isValid() || c == nil {
+		return nil
+	}
+	client := &clientConn{c: c}
+	h.mu.Lock()
+	defer h.mu.Unlock()
+	if h.subs[int(eventID)] == nil {
+		h.subs[int(eventID)] = make(map[*clientConn]struct{})
+	}
+	h.subs[int(eventID)][client] = struct{}{}
+	return client
+}
+
+func (h *OrdersHub) unregister(eventID EventID, client *clientConn) {
+	if client == nil {
 		return
 	}
-	defaultHub.mu.Lock()
-	defer defaultHub.mu.Unlock()
-	if m, ok := defaultHub.subs[eventID]; ok {
-		delete(m, cc)
-		if len(m) == 0 {
-			delete(defaultHub.subs, eventID)
-		}
+	h.mu.Lock()
+	defer h.mu.Unlock()
+	room, roomExists := h.subs[int(eventID)]
+	if !roomExists {
+		return
+	}
+	delete(room, client)
+	if len(room) == 0 {
+		delete(h.subs, int(eventID))
 	}
 }
 
-func broadcast(eventID int, typ string, allSubscribers bool) {
-	if eventID <= 0 {
+func (h *OrdersHub) notify(eventID EventID, messageType ordersMessageType, audience broadcastAudience) {
+	if !eventID.isValid() {
 		return
 	}
-	payload, err := json.Marshal(map[string]any{
-		"type":     typ,
-		"event_id": eventID,
-	})
-	if err != nil {
+	payload := newOrdersPayload(messageType, eventID)
+	if payload == nil {
 		return
 	}
-	defaultHub.mu.Lock()
-	var list []*clientConn
-	if allSubscribers {
-		for _, subs := range defaultHub.subs {
-			for cc := range subs {
-				list = append(list, cc)
-			}
-		}
-	} else if m, ok := defaultHub.subs[eventID]; ok {
-		list = make([]*clientConn, 0, len(m))
-		for cc := range m {
-			list = append(list, cc)
+	recipients := h.snapshotRecipients(eventID, audience)
+	payload.deliverTo(recipients)
+}
+
+func (h *OrdersHub) snapshotRecipients(eventID EventID, audience broadcastAudience) []*clientConn {
+	h.mu.Lock()
+	defer h.mu.Unlock()
+	if audience == audienceAllRooms {
+		return h.allClients()
+	}
+	return h.clientsForEvent(eventID)
+}
+
+func (h *OrdersHub) allClients() []*clientConn {
+	var recipients []*clientConn
+	for _, room := range h.subs {
+		for client := range room {
+			recipients = append(recipients, client)
 		}
 	}
-	defaultHub.mu.Unlock()
-	for _, cc := range list {
-		_ = cc.writeText(payload)
+	return recipients
+}
+
+func (h *OrdersHub) clientsForEvent(eventID EventID) []*clientConn {
+	room, roomExists := h.subs[int(eventID)]
+	if !roomExists {
+		return nil
 	}
+	recipients := make([]*clientConn, 0, len(room))
+	for client := range room {
+		recipients = append(recipients, client)
+	}
+	return recipients
 }
 
 // NotifyOrderCreated avisa que um pedido novo foi registrado (ex.: notificação na cozinha).
 func NotifyOrderCreated(eventID int) {
-	broadcast(eventID, "order_created", false)
+	defaultHub.notify(EventID(eventID), messageOrderCreated, audienceEventRoom)
 }
 
 // NotifyOrdersChanged avisa outras alterações (entrega, exclusão, pagamento, etc.).
 func NotifyOrdersChanged(eventID int) {
-	broadcast(eventID, "orders_changed", true)
+	defaultHub.notify(EventID(eventID), messageOrdersChanged, audienceAllRooms)
 }

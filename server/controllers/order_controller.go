@@ -2,7 +2,6 @@ package controllers
 
 import (
 	"errors"
-	"strconv"
 
 	"github.com/gofiber/fiber/v3"
 	"github.com/lockland/cantina-charis/server/models"
@@ -26,62 +25,22 @@ func (c *OrderController) GetOrder(f fiber.Ctx) error {
 }
 
 func (c *OrderController) CreateOrder(f fiber.Ctx) error {
-	payload := struct {
-		EventID           int             `json:"event_id"`
-		CustomerName      string          `json:"customer_name"`
-		CustomerPaidValue decimal.Decimal `json:"customer_paid_value"`
-		Observation       string          `json:"observation"`
-		OrderAmount       decimal.Decimal `json:"order_amount"`
-		Products          []struct {
-			ID       int             `json:"id"`
-			Name     string          `json:"name"`
-			Quantity int             `json:"quantity"`
-			Price    decimal.Decimal `json:"price"`
-			Total    decimal.Decimal `json:"total"`
-		} `json:"products"`
-	}{}
-
-	if err := f.Bind().Body(&payload); err != nil {
-		return f.Status(fiber.StatusBadRequest).SendString(err.Error())
-	}
-
-	paidValue := payload.CustomerPaidValue
-
-	if payload.CustomerPaidValue.GreaterThan(payload.OrderAmount) {
-		paidValue = payload.OrderAmount
-
-	}
-
-	order := models.Order{
-		EventID:     payload.EventID,
-		PaidValue:   paidValue,
-		OrderAmount: payload.OrderAmount,
-		Observation: payload.Observation,
-	}
-
-	lines := make([]models.OrderProduct, 0, len(payload.Products))
-	for _, el := range payload.Products {
-		lines = append(lines, models.OrderProduct{
-			ProductID:       el.ID,
-			ProductQuantity: el.Quantity,
-		})
-	}
-
-	err := c.orders.PlaceOrder(payload.CustomerName, &order, lines)
+	payload, err := bindCreateOrderPayload(f)
 	if err != nil {
-		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return respondEventNotFoundJSON(f)
-		}
-		if errors.Is(err, service.ErrEventClosed) {
-			return respondEventClosedJSON(f)
-		}
 		return f.Status(fiber.StatusBadRequest).SendString(err.Error())
+	}
+
+	order := payload.toOrder()
+	lines := payload.toOrderProducts()
+
+	err = c.orders.PlaceOrder(payload.CustomerName, &order, lines)
+	if err != nil {
+		return respondPlaceOrderError(f, err)
 	}
 
 	realtime.NotifyOrderCreated(payload.EventID)
 
 	return f.JSON(order)
-
 }
 
 func (c *OrderController) GetOrders(f fiber.Ctx) error {
@@ -93,12 +52,11 @@ func (c *OrderController) GetOrders(f fiber.Ctx) error {
 	return f.JSON(orders)
 }
 
-// GetActiveOrders returns active orders for the cash register: active orders for event_id
-// plus undelivered orders from other events (query param event_id = open event).
+// GetActiveOrders returns active orders for the cash register (query param event_id = open event).
 func (c *OrderController) GetActiveOrders(f fiber.Ctx) error {
-	eventID, err := strconv.Atoi(f.Query("event_id"))
-	if err != nil || eventID <= 0 {
-		return f.Status(fiber.StatusBadRequest).SendString("Invalid or missing event_id")
+	eventID, ok := eventIDFromQuery(f)
+	if !ok {
+		return respondInvalidEventID(f)
 	}
 	orders, err := c.orders.ListActiveOrdersForCashRegister(eventID)
 	if err != nil {
@@ -108,60 +66,104 @@ func (c *OrderController) GetActiveOrders(f fiber.Ctx) error {
 }
 
 func (c *OrderController) PayOrder(f fiber.Ctx) error {
-	id := fiber.Params[int](f, "id")
-	if id <= 0 {
-		return f.Status(fiber.StatusBadRequest).SendString("Invalid order id")
+	orderID, ok := orderIDFromParams(f)
+	if !ok {
+		return respondInvalidOrderID(f)
 	}
 
-	order, err := c.orders.PayOrderFull(id)
+	order, err := c.orders.PayOrderFull(orderID)
 	if err != nil {
-		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return f.Status(fiber.StatusNotFound).SendString("Order not found")
-		}
-		if errors.Is(err, service.ErrOrderAlreadyFullyPaid) {
-			return f.Status(fiber.StatusBadRequest).SendString("Order already paid")
-		}
-		return f.Status(fiber.StatusInternalServerError).SendString(err.Error())
+		return respondOrderMutationError(f, err)
 	}
 
 	realtime.NotifyOrdersChanged(order.EventID)
 
-	return f.Status(fiber.StatusOK).JSON(fiber.Map{"order_id": id, "paid_value": order.PaidValue})
+	return f.Status(fiber.StatusOK).JSON(fiber.Map{"order_id": orderID, "paid_value": order.PaidValue})
 }
 
 func (c *OrderController) DeleteOrder(f fiber.Ctx) error {
-	id := fiber.Params[int](f, "id")
-	if id <= 0 {
-		return f.Status(fiber.StatusBadRequest).SendString("Invalid order id")
+	orderID, ok := orderIDFromParams(f)
+	if !ok {
+		return respondInvalidOrderID(f)
 	}
 
-	eventID, err := c.orders.DeleteOrderWithProducts(id)
+	eventID, err := c.orders.DeleteOrderWithProducts(orderID)
 	if err != nil {
-		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return f.Status(fiber.StatusNotFound).SendString("Order not found")
-		}
-		return f.Status(fiber.StatusInternalServerError).SendString(err.Error())
+		return respondOrderMutationError(f, err)
 	}
 
 	realtime.NotifyOrdersChanged(eventID)
 
-	return f.Status(fiber.StatusOK).JSON(fiber.Map{"order_id": id})
+	return f.Status(fiber.StatusOK).JSON(fiber.Map{"order_id": orderID})
 }
 
 func (c *OrderController) DeliveryOrder(f fiber.Ctx) error {
-	id := fiber.Params[int](f, "id")
-	if id <= 0 {
-		return f.Status(fiber.StatusBadRequest).SendString("Invalid id")
+	orderID, ok := orderIDFromParams(f)
+	if !ok {
+		return respondInvalidID(f)
 	}
 
-	eventID, err := c.orders.MarkOrderDelivered(id)
+	eventID, err := c.orders.MarkOrderDelivered(orderID)
 	if err != nil {
-		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return f.Status(fiber.StatusNotFound).SendString("Order not found")
-		}
-		return f.Status(fiber.StatusInternalServerError).SendString(err.Error())
+		return respondOrderMutationError(f, err)
 	}
 
 	realtime.NotifyOrdersChanged(eventID)
-	return f.Status(fiber.StatusOK).JSON(fiber.Map{"order_id": id})
+	return f.Status(fiber.StatusOK).JSON(fiber.Map{"order_id": orderID})
+}
+
+type createOrderPayload struct {
+	EventID           int             `json:"event_id"`
+	CustomerName      string          `json:"customer_name"`
+	CustomerPaidValue decimal.Decimal `json:"customer_paid_value"`
+	Observation       string          `json:"observation"`
+	OrderAmount       decimal.Decimal `json:"order_amount"`
+	Products          []createOrderProductPayload `json:"products"`
+}
+
+type createOrderProductPayload struct {
+	ID       int             `json:"id"`
+	Name     string          `json:"name"`
+	Quantity int             `json:"quantity"`
+	Price    decimal.Decimal `json:"price"`
+	Total    decimal.Decimal `json:"total"`
+}
+
+func bindCreateOrderPayload(f fiber.Ctx) (createOrderPayload, error) {
+	payload := createOrderPayload{}
+	err := f.Bind().Body(&payload)
+	if err != nil {
+		return createOrderPayload{}, err
+	}
+	return payload, nil
+}
+
+func (payload createOrderPayload) toOrder() models.Order {
+	return models.Order{
+		EventID:     payload.EventID,
+		PaidValue:   paidValueCapped(payload.CustomerPaidValue, payload.OrderAmount),
+		OrderAmount: payload.OrderAmount,
+		Observation: payload.Observation,
+	}
+}
+
+func (payload createOrderPayload) toOrderProducts() []models.OrderProduct {
+	lines := make([]models.OrderProduct, 0, len(payload.Products))
+	for _, product := range payload.Products {
+		lines = append(lines, models.OrderProduct{
+			ProductID:       product.ID,
+			ProductQuantity: product.Quantity,
+		})
+	}
+	return lines
+}
+
+func respondPlaceOrderError(f fiber.Ctx, err error) error {
+	if errors.Is(err, gorm.ErrRecordNotFound) {
+		return respondEventNotFoundJSON(f)
+	}
+	if errors.Is(err, service.ErrEventClosed) {
+		return respondEventClosedJSON(f)
+	}
+	return f.Status(fiber.StatusBadRequest).SendString(err.Error())
 }
