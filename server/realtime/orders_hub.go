@@ -82,7 +82,6 @@ func broadcast(eventID int, typ string) {
 }
 
 // broadcastAll sends a notification to all subscribers across all events.
-// Used when an order change affects multiple events (e.g., undelivered order status).
 func broadcastAll(eventID int, typ string) {
 	if eventID <= 0 {
 		return
@@ -113,12 +112,6 @@ func NotifyOrderCreated(eventID int) {
 }
 
 // NotifyOrdersChanged avisa outras alterações (entrega, exclusão, pagamento, etc.).
-// If notifyAllEvents is true, notifies all event subscribers instead of just the specific event.
-func NotifyOrdersChanged(eventID int, notifyAllEvents ...bool) {
-	shouldNotifyAll := len(notifyAllEvents) > 0 && notifyAllEvents[0]
-	if shouldNotifyAll {
-		broadcastAll(eventID, "orders_changed")
-	} else {
-		broadcast(eventID, "orders_changed")
-	}
+func NotifyOrdersChanged(eventID int) {
+	broadcastAll(eventID, "orders_changed")
 }

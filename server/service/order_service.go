@@ -33,20 +33,19 @@ func (s *OrderService) PlaceOrder(customerName string, order *models.Order, line
 }
 
 // PayOrderFull loads the order, rejects if already fully paid, sets paid_value to order_amount, and persists.
-func (s *OrderService) PayOrderFull(orderID int) (order *models.Order, wasUndelivered bool, err error) {
-	order = &models.Order{}
-	if err = s.FindOrderByID(order, orderID); err != nil {
-		return nil, false, err
+func (s *OrderService) PayOrderFull(orderID int) (*models.Order, error) {
+	order := &models.Order{}
+	if err := s.FindOrderByID(order, orderID); err != nil {
+		return nil, err
 	}
 	if order.PaidValue.GreaterThanOrEqual(order.OrderAmount) {
-		return nil, false, ErrOrderAlreadyFullyPaid
+		return nil, ErrOrderAlreadyFullyPaid
 	}
-	wasUndelivered = !order.Deliveried
 	order.PaidValue = order.OrderAmount
-	if err = s.SaveOrder(order); err != nil {
-		return nil, false, err
+	if err := s.SaveOrder(order); err != nil {
+		return nil, err
 	}
-	return order, wasUndelivered, nil
+	return order, nil
 }
 
 // ListActiveOrdersForCashRegister returns orders for the cash register view of the open event.

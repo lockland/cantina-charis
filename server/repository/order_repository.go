@@ -60,15 +60,14 @@ func (r *OrderRepository) SaveOrder(order *models.Order) error {
 }
 
 // DeleteOrderWithProducts removes order_products rows then the order inside a transaction.
-// Returns the order's event_id and wasUndelivered status for callers that need it after delete.
-func (r *OrderRepository) DeleteOrderWithProducts(orderID int) (eventID int, wasUndelivered bool, err error) {
+// Returns the order's event_id for callers that need it after delete.
+func (r *OrderRepository) DeleteOrderWithProducts(orderID int) (eventID int, err error) {
 	order := &models.Order{ID: orderID}
 	err = r.db.First(order).Error
 	if err != nil {
-		return 0, false, err
+		return 0, err
 	}
 	eventID = order.EventID
-	wasUndelivered = !order.Deliveried
 
 	err = r.db.Transaction(func(tx *gorm.DB) error {
 		if err := tx.Where("order_id = ?", orderID).Delete(&models.OrderProduct{}).Error; err != nil {
@@ -77,27 +76,26 @@ func (r *OrderRepository) DeleteOrderWithProducts(orderID int) (eventID int, was
 		return tx.Delete(order).Error
 	})
 	if err != nil {
-		return 0, false, err
+		return 0, err
 	}
-	return eventID, wasUndelivered, nil
+	return eventID, nil
 }
 
-// MarkOrderDelivered sets deliveried and done_at; returns event_id and wasUndelivered status.
-func (r *OrderRepository) MarkOrderDelivered(orderID int) (eventID int, wasUndelivered bool, err error) {
+// MarkOrderDelivered sets deliveried and done_at; returns event_id for notifications.
+func (r *OrderRepository) MarkOrderDelivered(orderID int) (eventID int, err error) {
 	var existing models.Order
-	err = r.db.Select("id", "event_id", "deliveried").First(&existing, orderID).Error
+	err = r.db.Select("id", "event_id").First(&existing, orderID).Error
 	if err != nil {
-		return 0, false, err
+		return 0, err
 	}
-	wasUndelivered = !existing.Deliveried
 	err = r.db.Model(&models.Order{ID: orderID}).Updates(models.Order{
 		Deliveried: true,
 		DoneAt:     time.Now(),
 	}).Error
 	if err != nil {
-		return 0, false, err
+		return 0, err
 	}
-	return existing.EventID, wasUndelivered, nil
+	return existing.EventID, nil
 }
 
 // FindActiveOrdersForCashRegister loads cash-register orders in a single filtered query.
