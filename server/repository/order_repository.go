@@ -115,10 +115,9 @@ func (r *OrderRepository) FindActiveOrdersForCashRegister(openEvent CashRegister
 	}
 	var orders []models.Order
 	err := r.db.
-		Where(cashRegisterOrdersScope, int(openEvent), false, int(openEvent), false).
+		Where(cashRegisterOrdersScope, false, int(openEvent)).
 		Preload("OrderProduct.Product").
 		Preload("Customer").
-		Order("created_at desc").
 		Find(&orders).Error
 	return orders, err
 }
