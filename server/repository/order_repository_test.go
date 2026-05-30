@@ -5,6 +5,7 @@ import (
 
 	"github.com/lockland/cantina-charis/server/internal/testutil"
 	"github.com/lockland/cantina-charis/server/models"
+	"github.com/shopspring/decimal"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"gorm.io/gorm"
@@ -87,8 +88,8 @@ func TestOrderRepository_MarkOrderDelivered(t *testing.T) {
 			EventID:     ev.ID,
 			CustomerID:  c.ID,
 			Customer:    c,
-			OrderAmount: dec("5"),
-			PaidValue:   dec("5"),
+			OrderAmount: decOrder("5"),
+			PaidValue:   decOrder("5"),
 			Deliveried:  false,
 		}
 		require.NoError(t, db.Create(&order).Error)
@@ -100,4 +101,37 @@ func TestOrderRepository_MarkOrderDelivered(t *testing.T) {
 		require.NoError(t, db.First(&reload, order.ID).Error)
 		assert.True(t, reload.Deliveried)
 	})
+}
+
+func TestOrderRepository_FindActiveOrdersForCashRegister(t *testing.T) {
+	t.Run("returns active orders for event plus undelivered from other events", func(t *testing.T) {
+		db := testutil.OpenSQLite(t)
+		ev1 := models.Event{Name: "EventA", Open: false}
+		ev2 := models.Event{Name: "EventB", Open: true}
+		require.NoError(t, db.Create(&ev1).Error)
+		require.NoError(t, db.Create(&ev2).Error)
+		c := models.Customer{Name: "CustC"}
+		require.NoError(t, db.Create(&c).Error)
+		activeOrder := models.Order{EventID: ev1.ID, CustomerID: c.ID, OrderAmount: decOrder("30"), PaidValue: decOrder("10"), Deliveried: false}
+		otherUndelivered := models.Order{EventID: ev2.ID, CustomerID: c.ID, OrderAmount: decOrder("40"), PaidValue: decOrder("0"), Deliveried: false}
+		otherDelivered := models.Order{EventID: ev2.ID, CustomerID: c.ID, OrderAmount: decOrder("50"), PaidValue: decOrder("0"), Deliveried: true}
+		closedOnEv1 := models.Order{EventID: ev1.ID, CustomerID: c.ID, OrderAmount: decOrder("60"), PaidValue: decOrder("60"), Deliveried: true}
+		require.NoError(t, db.Create(&activeOrder).Error)
+		require.NoError(t, db.Create(&otherUndelivered).Error)
+		require.NoError(t, db.Create(&otherDelivered).Error)
+		require.NoError(t, db.Create(&closedOnEv1).Error)
+
+		r := NewOrderRepository(db)
+		got, err := r.FindActiveOrdersForCashRegister(CashRegisterEventID(ev1.ID))
+		require.NoError(t, err)
+		assert.Len(t, got, 2)
+		ids := []int{got[0].ID, got[1].ID}
+		assert.Contains(t, ids, activeOrder.ID)
+		assert.Contains(t, ids, otherUndelivered.ID)
+	})
+}
+
+func decOrder(s string) decimal.Decimal {
+	d, _ := decimal.NewFromString(s)
+	return d
 }

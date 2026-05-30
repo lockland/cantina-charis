@@ -18,7 +18,7 @@ export interface OrdersCardType {
   observation?: string,
   deliveried?: boolean,
   created_at?: string,
-  /** Itens retornados por GET .../orders/active (preload OrderProduct). */
+  /** Itens retornados por GET /api/orders/active (preload OrderProduct). */
   order_items?: ProductType[],
   customer: {
     customer_id: number,

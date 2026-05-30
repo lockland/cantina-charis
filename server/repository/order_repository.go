@@ -61,24 +61,34 @@ func (r *OrderRepository) SaveOrder(order *models.Order) error {
 
 // DeleteOrderWithProducts removes order_products rows then the order inside a transaction.
 // Returns the order's event_id for callers that need it after delete.
-func (r *OrderRepository) DeleteOrderWithProducts(orderID int) (eventID int, err error) {
-	order := &models.Order{ID: orderID}
-	err = r.db.First(order).Error
+func (r *OrderRepository) DeleteOrderWithProducts(orderID int) (int, error) {
+	eventID, err := r.findOrderEventID(orderID)
 	if err != nil {
 		return 0, err
 	}
-	eventID = order.EventID
-
-	err = r.db.Transaction(func(tx *gorm.DB) error {
-		if err := tx.Where("order_id = ?", orderID).Delete(&models.OrderProduct{}).Error; err != nil {
-			return err
-		}
-		return tx.Delete(order).Error
-	})
+	err = r.deleteOrderAndLines(orderID)
 	if err != nil {
 		return 0, err
 	}
 	return eventID, nil
+}
+
+func (r *OrderRepository) findOrderEventID(orderID int) (int, error) {
+	order := &models.Order{ID: orderID}
+	err := r.db.Select("event_id").First(order).Error
+	if err != nil {
+		return 0, err
+	}
+	return order.EventID, nil
+}
+
+func (r *OrderRepository) deleteOrderAndLines(orderID int) error {
+	return r.db.Transaction(func(tx *gorm.DB) error {
+		if err := tx.Where("order_id = ?", orderID).Delete(&models.OrderProduct{}).Error; err != nil {
+			return err
+		}
+		return tx.Delete(&models.Order{ID: orderID}).Error
+	})
 }
 
 // MarkOrderDelivered sets deliveried and done_at; returns event_id for notifications.
@@ -96,4 +106,18 @@ func (r *OrderRepository) MarkOrderDelivered(orderID int) (eventID int, err erro
 		return 0, err
 	}
 	return existing.EventID, nil
+}
+
+// FindActiveOrdersForCashRegister loads cash-register orders in a single filtered query.
+func (r *OrderRepository) FindActiveOrdersForCashRegister(openEvent CashRegisterEventID) ([]models.Order, error) {
+	if !openEvent.isValid() {
+		return nil, nil
+	}
+	var orders []models.Order
+	err := r.db.
+		Where(cashRegisterOrdersScope, false, int(openEvent)).
+		Preload("OrderProduct.Product").
+		Preload("Customer").
+		Find(&orders).Error
+	return orders, err
 }
