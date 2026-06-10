@@ -28,10 +28,10 @@ type BalanceDayRow struct {
 	Outgoing decimal.Decimal `json:"outgoing"`
 }
 
-// PaymentReportRow is one row from the customer payments report.
-type PaymentReportRow struct {
+// ConsumptionReportRow is one row from the customer consumption report.
+type ConsumptionReportRow struct {
 	OrderDate       string          `json:"order_date"`
-	PaymentDate     string          `json:"payment_date"`
+	ConsumptionDate string          `json:"consumption_date"`
 	ProductName     string          `json:"product_name"`
 	ProductPrice    decimal.Decimal `json:"product_price"`
 	ProductQuantity int             `json:"product_quantity"`
@@ -125,11 +125,11 @@ order by
 
 `
 
-const paymentsSQL = `
+const consumptionSQL = `
 select
 	c.name as customer_name,
 	date(o.created_at) as order_date,
-	date(o.updated_at) as payment_date,
+	date(o.created_at) as consumption_date,
 	p.name as product_name,
 	p.price as product_price,
 	op.product_quantity as product_quantity
@@ -141,10 +141,9 @@ from
 		on p.id = op.product_id
 	join customers c on c.id = op.customer_id
 where
-	o.paid_value = o.order_amount
-		and c.id = ?
+	c.id = ?
 order by
-	o.updated_at desc
+	o.created_at desc
 
 `
 
@@ -162,10 +161,10 @@ func (r *ReportRepository) ListBalanceSinceDay(fromDate string) ([]BalanceDayRow
 	return result, err
 }
 
-// ListPaymentsByCustomer returns paid order line items for a customer.
-func (r *ReportRepository) ListPaymentsByCustomer(customerID int) ([]PaymentReportRow, error) {
-	var result []PaymentReportRow
-	err := r.db.Raw(paymentsSQL, customerID).Scan(&result).Error
+// ListConsumptionByCustomer returns all consumption (order line items) for a customer regardless of payment status.
+func (r *ReportRepository) ListConsumptionByCustomer(customerID int) ([]ConsumptionReportRow, error) {
+	var result []ConsumptionReportRow
+	err := r.db.Raw(consumptionSQL, customerID).Scan(&result).Error
 	return result, err
 }
 

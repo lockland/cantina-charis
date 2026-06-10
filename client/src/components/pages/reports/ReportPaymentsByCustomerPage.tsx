@@ -1,15 +1,15 @@
 import { Text } from "@mantine/core"
 import { useEffect, useState } from "react"
 import BackToReportsLink from "./BackToReportsLink"
-import { getCustomerNames, getCustomerPayments } from "../../../hooks/useAPI"
+import { getCustomerNames, getCustomerConsumption } from "../../../hooks/useAPI"
 import { CustomerNamesOptionType, CustomerType } from "../../../models/Customer"
 import { buildReportCustomerNamesList } from "../../../helpers/SelectLists"
-import CustomerPayment from "../../../models/CustomerPayment"
-import ReportPaymentsByCustomerTab from "./ReportPaymentsByCustomerTab"
+import CustomerConsumption from "../../../models/CustomerPayment"
+import ReportConsumptionByCustomerTab from "./ReportPaymentsByCustomerTab"
 
-export default function ReportPaymentsByCustomerPage() {
+export default function ReportConsumptionByCustomerPage() {
   const [customerNames, setCustomerNames] = useState<CustomerNamesOptionType[]>([])
-  const [paymentsByCustomer, setPaymentsByCustomer] = useState<CustomerPayment[]>([])
+  const [consumptionByCustomer, setConsumptionByCustomer] = useState<CustomerConsumption[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
@@ -24,9 +24,10 @@ export default function ReportPaymentsByCustomerPage() {
       .finally(() => setLoading(false))
   }, [])
 
-  const handleCustomerChange = (customerId: string) => {
-    getCustomerPayments(customerId).then((response: CustomerPayment[]) => {
-      setPaymentsByCustomer(response.map((entryData) => CustomerPayment.buildFromData(entryData)))
+  const handleCustomerChange = (customerId: string | null) => {
+    if (!customerId) return
+    getCustomerConsumption(customerId).then((response: CustomerConsumption[]) => {
+      setConsumptionByCustomer(response.map((entryData) => CustomerConsumption.buildFromData(entryData)))
     })
   }
 
@@ -36,9 +37,9 @@ export default function ReportPaymentsByCustomerPage() {
       {loading && <Text c="dimmed">Carregando...</Text>}
       {error && <Text c="red" mb="md">{error}</Text>}
       {!loading && !error && (
-        <ReportPaymentsByCustomerTab
+        <ReportConsumptionByCustomerTab
           customerNames={customerNames}
-          paymentsByCustomer={paymentsByCustomer}
+          consumptionByCustomer={consumptionByCustomer}
           onCustomerChange={handleCustomerChange}
         />
       )}

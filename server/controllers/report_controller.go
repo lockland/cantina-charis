@@ -40,13 +40,13 @@ func (c *ReportController) GetBalance(f fiber.Ctx) error {
 	return f.JSON(result)
 }
 
-func (c *ReportController) GetPayments(f fiber.Ctx) error {
+func (c *ReportController) GetConsumption(f fiber.Ctx) error {
 	customerID := fiber.Params[int](f, "customer_id")
 	if customerID <= 0 {
 		return f.Status(401).SendString("Invalid id")
 	}
 
-	result, err := c.reports.ListPaymentsByCustomer(customerID)
+	result, err := c.reports.ListConsumptionByCustomer(customerID)
 	if err != nil {
 		return f.Status(fiber.StatusInternalServerError).SendString(err.Error())
 	}
