@@ -19,7 +19,7 @@ import {
 const reports = [
   { path: "summary", label: "Sumário de eventos", icon: GraphIcon },
   { path: "balance", label: "Balanço últimos 7 dias", icon: NumberIcon },
-  { path: "payments-by-customer", label: "Pedidos pagos por cliente", icon: PersonIcon },
+  { path: "consumption-by-customer", label: "Consumo por cliente", icon: PersonIcon },
   { path: "sold-products", label: "Produtos vendidos", icon: PackageIcon },
   { path: "outgoings", label: "Despesas do evento", icon: CreditCardIcon },
 ]

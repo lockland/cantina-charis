@@ -161,14 +161,14 @@ func setupApiRoutes(app *fiber.App) {
 	api.Get("/debits", debitController.GetDebits)
 	api.Put("/debits/:customer_id/pay", debitController.PayDebits)
 
-	// Grupo /reports: rotas fixas antes de :param (balance/:lastDays, payments/:customer_id)
+	// Grupo /reports: rotas fixas antes de :param (balance/:lastDays, consumption/:customer_id)
 	reportRepo := repository.NewReportRepository(db)
 	reportController := controllers.NewReportController(service.NewReportService(reportRepo))
 	reports := api.Group("/reports")
 	reports.Get("/summaries", reportController.GetSummaries)
 	reports.Get("/outgoings", reportController.GetOutgoingsByDateRange)
 	reports.Get("/balance/:lastDays", reportController.GetBalance)
-	reports.Get("/payments/:customer_id", reportController.GetPayments)
+	reports.Get("/consumption/:customer_id", reportController.GetConsumption)
 }
 
 func setupSPAAndStatic(app *fiber.App) {

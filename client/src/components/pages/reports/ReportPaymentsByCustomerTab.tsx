@@ -1,24 +1,24 @@
 import { Center, Space, Table, Title, useMantineTheme } from "@mantine/core"
 import { AppSelect } from "../../../ui"
-import CustomerPayment from "../../../models/CustomerPayment"
+import CustomerConsumption from "../../../models/CustomerPayment"
 import { CustomerNamesOptionType } from "../../../models/Customer"
 
-interface ReportPaymentsByCustomerTabProps {
+interface ReportConsumptionByCustomerTabProps {
   customerNames: CustomerNamesOptionType[]
-  paymentsByCustomer: CustomerPayment[]
-  onCustomerChange: (customerId: string) => void
+  consumptionByCustomer: CustomerConsumption[]
+  onCustomerChange: (customerId: string | null) => void
 }
 
-export default function ReportPaymentsByCustomerTab({
+export default function ReportConsumptionByCustomerTab({
   customerNames,
-  paymentsByCustomer,
+  consumptionByCustomer,
   onCustomerChange,
-}: ReportPaymentsByCustomerTabProps) {
+}: ReportConsumptionByCustomerTabProps) {
   const theme = useMantineTheme()
   return (
     <>
       <Center>
-        <Title>Pagamentos por cliente</Title>
+        <Title>Consumo por cliente</Title>
       </Center>
       <AppSelect
         size="md"
@@ -40,7 +40,7 @@ export default function ReportPaymentsByCustomerTab({
         <thead>
           <tr>
             <th>PEDIDO(S)</th>
-            <th>PAGO EM</th>
+            <th>CONSUMIDO EM</th>
             <th>PRODUTO</th>
             <th>PREÇO</th>
             <th>QUANTIDADE</th>
@@ -48,14 +48,14 @@ export default function ReportPaymentsByCustomerTab({
           </tr>
         </thead>
         <tbody>
-          {paymentsByCustomer.map((payment: CustomerPayment, index: number) => (
+          {consumptionByCustomer.map((consumption: CustomerConsumption, index: number) => (
             <tr key={index}>
-              <td>{payment.getFormattedOrderDate()}</td>
-              <td>{payment.getFormattedPaymentDate()}</td>
-              <td>{payment.product_name}</td>
-              <td>{payment.getFormattedPrice()}</td>
-              <td>{payment.product_quantity}</td>
-              <td>{payment.getFormattedSubTotal()}</td>
+              <td>{consumption.getFormattedOrderDate()}</td>
+              <td>{consumption.getFormattedConsumptionDate()}</td>
+              <td>{consumption.product_name}</td>
+              <td>{consumption.getFormattedPrice()}</td>
+              <td>{consumption.product_quantity}</td>
+              <td>{consumption.getFormattedSubTotal()}</td>
             </tr>
           ))}
         </tbody>

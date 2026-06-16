@@ -167,6 +167,6 @@ export function getBalance(days: number) {
   return fetcher(`/api/reports/balance/${days}`)
 }
 
-export function getCustomerPayments(customerId: string) {
-  return fetcher(`/api/reports/payments/${customerId}`)
+export function getCustomerConsumption(customerId: string) {
+  return fetcher(`/api/reports/consumption/${customerId}`)
 }
