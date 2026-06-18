@@ -10,7 +10,7 @@ from itertools import combinations
 # Configuração da página
 st.set_page_config(page_title="Dashboard Cantina", layout="wide")
 
-# Função para capturar argumentos
+
 def get_db_path():
     parser = argparse.ArgumentParser(description="Dashboard Cantina")
     parser.add_argument(
@@ -22,7 +22,7 @@ def get_db_path():
 
 db_path = get_db_path()
 
-# Carregamento de dados com tratamento de fuso horário
+
 @st.cache_data
 def carregar_dados(path):
     conn = sqlite3.connect(path)
@@ -33,17 +33,14 @@ def carregar_dados(path):
     customers = pd.read_sql_query("SELECT * FROM customers WHERE id <> 1", conn)
     conn.close()
 
-    # Conversão de tipos e normalização de datas (removendo o fuso horário)
     orders["created_at_dt"] = pd.to_datetime(
         orders["created_at"], errors="coerce"
     ).dt.tz_localize(None)
     orders["order_amount"] = pd.to_numeric(orders["order_amount"], errors="coerce")
-
     outgoings["created_at_dt"] = pd.to_datetime(
         outgoings["created_at"], errors="coerce"
     ).dt.tz_localize(None)
     outgoings["amount"] = pd.to_numeric(outgoings["amount"], errors="coerce")
-
     return orders, outgoings, order_products, products, customers
 
 
@@ -51,7 +48,7 @@ orders, outgoings, order_products, products, customers = carregar_dados(db_path)
 
 st.title("📊 Dashboard da Cantina")
 
-# 2. Processamento Financeiro
+# Processamento Financeiro
 orders["mes"] = orders["created_at_dt"].dt.to_period("M").astype(str)
 outgoings["mes"] = outgoings["created_at_dt"].dt.to_period("M").astype(str)
 
@@ -61,19 +58,27 @@ df_fin = pd.DataFrame(
         "Despesa": outgoings.groupby("mes")["amount"].sum(),
     }
 ).fillna(0)
+
+if "NaT" in df_fin.index:
+    df_fin = df_fin.drop("NaT")
+
 df_fin["Lucro"] = df_fin["Receita"] - df_fin["Despesa"]
 
 col1, col2 = st.columns(2)
 
 with col1:
-    # 1. Ticket Médio
     ticket_medio = orders["order_amount"].mean()
     st.metric("Ticket Médio", f"R$ {ticket_medio:.2f}")
 
 with col2:
-    # --- PONTO DE EQUILÍBRIO (BREAK-EVEN) ---
-    custo_fixo_medio = df_fin["Despesa"].mean()
-    st.metric("Custo Fixo Médio Mensal (Break-even alvo)", f"R$ {custo_fixo_medio:.2f}")
+    # --- NOVO BREAK-EVEN (PLACAR) ---
+    ultimo_mes = df_fin.index[-1]
+
+    receita_mes = df_fin.loc[ultimo_mes, "Receita"]
+    despesa_mes = df_fin.loc[ultimo_mes, "Despesa"]
+
+    falta_para_meta = max(0, despesa_mes - receita_mes)
+    st.metric("Falta para atingir o Break-even (Meta)", f"R$ {falta_para_meta:.2f}")
 
 st.divider()
 
@@ -88,9 +93,44 @@ st.plotly_chart(fig1)
 # 3. Margem de Lucro
 df_fin["Margem (%)"] = (df_fin["Lucro"] / df_fin["Receita"]) * 100
 fig2 = px.line(
-    df_fin, x=df_fin.index, y="Margem (%)", title="Margem de Lucro por Mês (%)"
+    df_fin,
+    x=df_fin.index,
+    y="Margem (%)",
+    title="Margem de Lucro por Mês (%)",
+    markers=True,
 )
 st.plotly_chart(fig2)
+
+# --- ALMOÇOS (SOMA TOTAL) ---
+data_limite = datetime.now() - timedelta(days=90)
+df_almoco = orders[orders["created_at_dt"] >= data_limite]
+df_almoco = df_almoco.merge(order_products, left_on="id", right_on="order_id")
+df_almoco = df_almoco.merge(products, left_on="product_id", right_on="id")
+
+# Filtra apenas almoços (ala ou prato)
+df_almoco = df_almoco[
+    df_almoco["name"].str.contains("ala|prato", case=False, na=False)
+].copy()
+
+# Agrega por data sem distinguir o nome do produto
+df_almoco_total = (
+    df_almoco.groupby(df_almoco["created_at_dt"].dt.date)["product_quantity"]
+    .sum()
+    .reset_index()
+)
+
+if not df_almoco_total.empty:
+    fig_almoco = px.line(
+        df_almoco_total,
+        x="created_at_dt",
+        y="product_quantity",
+        title="Total de Almoços Vendidos por Dia (Últimos 90 dias)",
+        labels={"created_at_dt": "Data", "product_quantity": "Quantidade Total"},
+        markers=True,
+    )
+    st.plotly_chart(fig_almoco)
+else:
+    st.info("Nenhum almoço encontrado nos últimos 90 dias.")
 
 # 4. Almoços últimos 90 dias
 data_limite = datetime.now() - timedelta(days=90)
@@ -103,7 +143,6 @@ df_almoco = df_almoco[
     df_almoco["name"].str.contains("ala|prato", case=False, na=False)
 ].copy()
 
-# AQUI ESTÁ A MUDANÇA: Agregamos os dados por Data e Nome do Produto
 df_almoco_agregado = (
     df_almoco.groupby([df_almoco["created_at_dt"].dt.date, "name"])["product_quantity"]
     .sum()
@@ -134,7 +173,11 @@ top_clientes = (
 )
 top_clientes = top_clientes.merge(customers, left_on="customer_id", right_on="id")
 fig3 = px.line(
-    top_clientes, x="name", y="order_amount", title="Top 10 Clientes (Valor Gasto)"
+    top_clientes,
+    x="name",
+    y="order_amount",
+    title="Top 10 Clientes (Valor Gasto)",
+    markers=True,
 )
 st.plotly_chart(fig3)
 
@@ -147,7 +190,11 @@ top_produtos = (
 )
 top_produtos = top_produtos.merge(products, left_on="product_id", right_on="id")
 fig4 = px.line(
-    top_produtos, x="name", y="product_quantity", title="Top 10 Produtos (Quantidade)"
+    top_produtos,
+    x="name",
+    y="product_quantity",
+    title="Top 10 Produtos (Quantidade)",
+    markers=True,
 )
 st.plotly_chart(fig4)
 
