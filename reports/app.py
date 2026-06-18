@@ -132,17 +132,6 @@ if not df_almoco_total.empty:
 else:
     st.info("Nenhum almoço encontrado nos últimos 90 dias.")
 
-# 4. Almoços últimos 90 dias
-data_limite = datetime.now() - timedelta(days=90)
-df_almoco = orders[orders["created_at_dt"] >= data_limite]
-df_almoco = df_almoco.merge(order_products, left_on="id", right_on="order_id")
-df_almoco = df_almoco.merge(products, left_on="product_id", right_on="id")
-
-# Filtra apenas almoços
-df_almoco = df_almoco[
-    df_almoco["name"].str.contains("ala|prato", case=False, na=False)
-].copy()
-
 df_almoco_agregado = (
     df_almoco.groupby([df_almoco["created_at_dt"].dt.date, "name"])["product_quantity"]
     .sum()
