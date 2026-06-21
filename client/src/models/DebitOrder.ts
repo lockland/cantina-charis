@@ -39,7 +39,7 @@ export default class DebitOrder implements DebitOrderType {
   }
 
   getFormattedCreatedAt(): string {
-    return this.order_date.toLocaleDateString('pt-BR')
+    return this.order_date.toLocaleString('pt-BR')
   }
 
   getDebitValue(): number {

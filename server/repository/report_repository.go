@@ -30,8 +30,8 @@ type BalanceDayRow struct {
 
 // ConsumptionReportRow is one row from the customer consumption report.
 type ConsumptionReportRow struct {
-	OrderDate       string          `json:"order_date"`
-	ConsumptionDate string          `json:"consumption_date"`
+	OrderDate       time.Time       `json:"order_date"`
+	ConsumptionDate time.Time       `json:"consumption_date"`
 	ProductName     string          `json:"product_name"`
 	ProductPrice    decimal.Decimal `json:"product_price"`
 	ProductQuantity int             `json:"product_quantity"`
@@ -128,8 +128,8 @@ order by
 const consumptionSQL = `
 select
 	c.name as customer_name,
-	date(o.created_at) as order_date,
-	date(o.created_at) as consumption_date,
+	o.created_at as order_date,
+	o.updated_at as consumption_date,
 	p.name as product_name,
 	p.price as product_price,
 	op.product_quantity as product_quantity
