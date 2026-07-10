@@ -9,8 +9,8 @@ export default class CustomerConsumption {
     public product_price: any,
     public product_quantity: any,
   ) {
-    this.order_date = new Date(order_date + "T00:00:00")
-    this.consumption_date = new Date(consumption_date + "T00:00:00")
+    this.order_date = new Date(order_date)
+    this.consumption_date = new Date(consumption_date)
     this.product_name = product_name
     this.product_price = parseFloat(product_price)
     this.product_quantity = parseInt(product_quantity)
@@ -27,11 +27,11 @@ export default class CustomerConsumption {
   }
 
   getFormattedOrderDate(): string {
-    return this.order_date.toLocaleDateString('pt-BR')
+    return this.order_date.toLocaleString('pt-BR')
   }
 
   getFormattedConsumptionDate(): string {
-    return this.consumption_date.toLocaleDateString('pt-BR')
+    return this.consumption_date.toLocaleString('pt-BR')
   }
 
   getFormattedPrice() {
