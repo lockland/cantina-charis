@@ -51,7 +51,7 @@ def carregar_dados(path):
 orders, outgoings, order_products, products, customers = carregar_dados(get_db_path())
 
 # --- FILTROS E PROCESSAMENTO GLOBAL ---
-dias_filtro = st.sidebar.slider("Janela de Análise (Dias)", 1, 365, 90)
+dias_filtro = st.sidebar.slider("Janela de Análise (Dias)", 1, 365, 365)
 top_x = st.sidebar.slider("Itens no Top", 1, 50, 10)
 
 data_limite = datetime.now() - timedelta(days=dias_filtro)
@@ -94,6 +94,8 @@ margem_lucro = 0
 if total_receita_periodo > 0:
     margem_lucro = lucro_periodo / total_receita_periodo * 100
 
+ultimo_mes = df_fin.iloc[-1]
+
 # Processamento Almoços Filtrado
 df_alm = orders_f.merge(order_products_f, left_on="id", right_on="order_id").merge(
     products, left_on="product_id", right_on="id"
@@ -113,8 +115,8 @@ c2.metric(
     help=f"A margem de lucro atual é de {margem_lucro:.1f}%",
 )
 c3.metric(
-    "Meta Break-even",
-    f"R$ {max(0, total_despesa_periodo - total_receita_periodo):.2f}",
+    "Meta Break-Even mês",
+    f"R$ {max(0, ultimo_mes['Despesa'] - ultimo_mes['Receita']):.2f}",
 )
 c4.metric(
     "Valor em Aberto",
