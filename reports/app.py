@@ -246,6 +246,94 @@ with r2[1]:
     )
     st.plotly_chart(fig_sazonal, use_container_width=True)
 
+# --- ANÁLISE DE TEMPO DE ENTREGA (DISPERSÃO + PERCENTIS) ---
+st.markdown("---")
+
+# 1. Tratamento e conversão de datas
+orders_f["done_at_dt"] = pd.to_datetime(
+    orders_f["done_at"].str[:19], errors="coerce", format="%Y-%m-%d %H:%M:%S"
+).dt.tz_localize(None)
+
+# 2. Filtra pedidos concluídos
+df_tempo = orders_f.dropna(subset=["created_at_dt", "done_at_dt"]).copy()
+
+# 3. Calcula o tempo em minutos
+df_tempo["tempo_minutos"] = (
+    df_tempo["done_at_dt"] - df_tempo["created_at_dt"]
+).dt.total_seconds() / 60.0
+
+# 4. Filtra tempos válidos (maiores que 0 e dentro do limite de 3h)
+df_tempo = df_tempo[
+    (df_tempo["tempo_minutos"] > 0) & (df_tempo["tempo_minutos"] <= 180)
+]
+
+if not df_tempo.empty:
+    # 5. Cálculo dos percentis
+    p25 = df_tempo["tempo_minutos"].quantile(0.25)
+    p50 = df_tempo["tempo_minutos"].quantile(0.50)  # Mediana
+    p75 = df_tempo["tempo_minutos"].quantile(0.75)
+    p90 = df_tempo["tempo_minutos"].quantile(0.90)
+    p99 = df_tempo["tempo_minutos"].quantile(0.99)
+
+    # 6. Gráfico de Dispersão focado apenas no tempo
+    fig_disp = go.Figure()
+
+    fig_disp.add_trace(
+        go.Scatter(
+            x=df_tempo["created_at_dt"],
+            y=df_tempo["tempo_minutos"],
+            mode="markers",
+            marker=dict(
+                size=7,
+                color="#1f77b4",  # Azul sólido único
+                opacity=0.6,
+            ),
+            text=[
+                f"Pedido #{row['id']}<br>Tempo: {row['tempo_minutos']:.1f} min"
+                for _, row in df_tempo.iterrows()
+            ],
+            hoverinfo="text+x",
+        )
+    )
+
+    # 7. Adiciona as linhas horizontais de percentis
+    fig_disp.add_hline(
+        y=p50,
+        line_dash="dash",
+        line_color="green",
+        annotation_text=f"Mediana (P50): {p50:.1f} min",
+    )
+    fig_disp.add_hline(
+        y=p75,
+        line_dash="dot",
+        line_color="orange",
+        annotation_text=f"P75: {p75:.1f} min",
+    )
+    fig_disp.add_hline(
+        y=p90,
+        line_dash="dot",
+        line_color="red",
+        annotation_text=f"P90: {p90:.1f} min",
+    )
+    fig_disp.add_hline(
+        y=p99,
+        line_dash="dashdot",
+        line_color="darkred",
+        annotation_text=f"P99: {p99:.1f} min",
+    )
+
+    # Layout
+    fig_disp.update_layout(
+        title="Tempo de Conclusão dos Pedidos ao Longo do Tempo",
+        xaxis_title="Data/Hora do Pedido",
+        yaxis_title="Tempo de Conclusão (minutos)",
+    )
+
+    st.plotly_chart(fig_disp, use_container_width=True)
+else:
+    st.info("Não há pedidos concluídos com datas válidas no período selecionado.")
+
+
 # Linha 3: Tops, Combinações e Despesas
 r3 = st.columns([1, 1, 1])
 with r3[0]:
