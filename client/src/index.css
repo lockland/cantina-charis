@@ -44,8 +44,10 @@
   }
 
   body {
-    background: #fff !important;
+    background: transparent !important;
     color: #000 !important;
+    print-color-adjust: economy;
+    -webkit-print-color-adjust: economy;
   }
 
   body > :not(.order-ticket-print--active) {
@@ -59,6 +61,9 @@
     background-color: transparent !important;
     box-shadow: none !important;
     text-shadow: none !important;
+    font-size: inherit !important;
+    print-color-adjust: economy;
+    -webkit-print-color-adjust: economy;
   }
 
   .order-ticket-print--active {
@@ -69,10 +74,10 @@
     box-sizing: border-box;
     width: 80mm;
     padding: 3mm;
-    background: #fff !important;
+    background-color: transparent !important;
     color: #000;
     font-family: Arial, sans-serif;
-    font-size: 9pt;
+    font-size: 12pt;
     line-height: 1.35;
   }
 
@@ -80,9 +85,9 @@
     text-align: center;
   }
 
-  .order-ticket-print__title {
+  .order-ticket-print--active .order-ticket-print__title {
     margin-bottom: 2mm;
-    font-size: 13pt;
+    font-size: 16pt;
     font-weight: 700;
   }
 
@@ -127,10 +132,10 @@
     text-align: right;
   }
 
-  .order-ticket-print__total {
+  .order-ticket-print--active .order-ticket-print__total {
     display: flex;
     justify-content: space-between;
     gap: 2mm;
-    font-size: 10pt;
+    font-size: 13pt;
   }
 }
