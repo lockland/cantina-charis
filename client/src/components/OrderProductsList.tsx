@@ -4,6 +4,8 @@ import type { ProductType } from "../models/Product"
 export interface OrderProductsSlice {
   orderId: number
   items: ProductType[]
+  createdAt?: string
+  observation?: string
 }
 
 const nameColor = "#1f2937"
