@@ -67,32 +67,65 @@ export function OrderPrintMenuItem({ customerName, orders, totalAmount }: OrderP
             <Text component="h1" className="order-ticket-print__title">
               COMANDA
             </Text>
-            <Text className="order-ticket-print__customer">Cliente: {customerName || "Não informado"}</Text>
+          </header>
+
+          <div className="order-ticket-print__divider" />
+          <section className="order-ticket-print__customer-section">
+            <Text className="order-ticket-print__customer-name">
+              {customerName || "Não informado"}
+            </Text>
+          </section>
+          <div className="order-ticket-print__divider" />
+
+          <header className="order-ticket-print__header">
             {orders.map((order) => (
               <div className="order-ticket-print__order" key={order.orderId}>
                 <Text>Pedido #{order.orderId}</Text>
                 {order.createdAt && <Text>{formatOrderCreatedAt(order.createdAt)}</Text>}
-                {order.observation && (
-                  <Text className="order-ticket-print__observation">Obs.: {order.observation}</Text>
-                )}
               </div>
             ))}
           </header>
 
           <div className="order-ticket-print__divider" />
 
-          <Stack spacing={4} className="order-ticket-print__products">
-            {products.length > 0 ? (
-              products.map((product) => (
-                <div className="order-ticket-print__product" key={product.productId}>
-                  <Text className="order-ticket-print__product-name">{product.name}</Text>
-                  <Text className="order-ticket-print__quantity">{product.quantity}×</Text>
-                </div>
-              ))
-            ) : (
-              <Text>Nenhum item neste pedido.</Text>
-            )}
-          </Stack>
+          {orders.some((order) => order.observation) && (
+            <>
+              <section className="order-ticket-print__observations">
+                <Text component="h2" className="order-ticket-print__observation-title">
+                  Observação
+                </Text>
+                <div className="order-ticket-print__divider" />
+                {orders.map((order) =>
+                  order.observation && (
+                    <Text className="order-ticket-print__observation" key={order.orderId}>
+                      {order.observation}
+                    </Text>
+                  )
+                )}
+              </section>
+              <div className="order-ticket-print__divider" />
+            </>
+          )}
+
+          <section className="order-ticket-print__products-section">
+            <div className="order-ticket-print__product order-ticket-print__product--heading">
+              <Text className="order-ticket-print__product-name">Produto</Text>
+              <Text className="order-ticket-print__quantity">Qtd.</Text>
+            </div>
+            <div className="order-ticket-print__divider" />
+            <Stack spacing={4} className="order-ticket-print__products">
+              {products.length > 0 ? (
+                products.map((product) => (
+                  <div className="order-ticket-print__product" key={product.productId}>
+                    <Text className="order-ticket-print__product-name">{product.name}</Text>
+                    <Text className="order-ticket-print__quantity">{product.quantity}×</Text>
+                  </div>
+                ))
+              ) : (
+                <Text>Nenhum item neste pedido.</Text>
+              )}
+            </Stack>
+          </section>
 
           <div className="order-ticket-print__divider" />
           <div className="order-ticket-print__total">
