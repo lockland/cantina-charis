@@ -32,3 +32,127 @@
   --button-color: #0505b8;
   --main-color: azure;
 }
+
+.order-ticket-print {
+  display: none;
+}
+
+@media print {
+  @page {
+    size: 58mm auto;
+    margin: 0;
+  }
+
+  body {
+    background: transparent !important;
+    color: #000 !important;
+    print-color-adjust: economy;
+    -webkit-print-color-adjust: economy;
+  }
+
+  body > :not(.order-ticket-print--active) {
+    display: none !important;
+  }
+
+  .order-ticket-print--active,
+  .order-ticket-print--active * {
+    visibility: visible !important;
+    color: #000 !important;
+    background-color: transparent !important;
+    box-shadow: none !important;
+    text-shadow: none !important;
+    font-size: inherit !important;
+    print-color-adjust: economy;
+    -webkit-print-color-adjust: economy;
+  }
+
+  .order-ticket-print--active {
+    position: absolute;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    display: block !important;
+    box-sizing: border-box;
+    width: 48mm;
+    padding: 0 2mm;
+    background-color: transparent !important;
+    color: #000;
+    font-family: Arial, sans-serif;
+    font-size: 12pt;
+    line-height: 1.35;
+  }
+
+  .order-ticket-print__header {
+    text-align: center;
+  }
+
+  .order-ticket-print--active .order-ticket-print__title {
+    margin-bottom: 2mm;
+    font-size: 16pt !important;
+    font-weight: 700;
+  }
+
+  .order-ticket-print__customer-section {
+    text-align: left;
+  }
+
+  .order-ticket-print__customer-name {
+    font-weight: 700;
+    overflow-wrap: anywhere;
+  }
+
+  .order-ticket-print__order {
+    margin-top: 1mm;
+    overflow-wrap: anywhere;
+  }
+
+  .order-ticket-print__observations {
+    text-align: left;
+  }
+
+  .order-ticket-print--active .order-ticket-print__observation-title {
+    font-size: 12pt !important;
+    font-weight: 700;
+  }
+
+  .order-ticket-print--active .order-ticket-print__observation {
+    margin-top: 1mm;
+    font-size: 14pt !important;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+  }
+
+  .order-ticket-print__divider {
+    margin: 2mm 0;
+    border-top: 1px dashed #000;
+  }
+
+  .order-ticket-print__product {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 2mm;
+  }
+
+  .order-ticket-print__product--heading {
+    font-weight: 700;
+  }
+
+  .order-ticket-print__product-name {
+    flex: 1;
+    overflow-wrap: anywhere;
+  }
+
+  .order-ticket-print__quantity {
+    flex-shrink: 0;
+    font-weight: 700;
+    text-align: right;
+  }
+
+  .order-ticket-print--active .order-ticket-print__total {
+    display: flex;
+    justify-content: space-between;
+    gap: 2mm;
+    font-size: 13pt !important;
+  }
+}

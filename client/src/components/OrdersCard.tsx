@@ -21,6 +21,7 @@ import { useState } from "react"
 import DecimalFormatter from "../helpers/Decimal"
 import { formatOrderCreatedAt } from "../helpers/formatOrderCreatedAt"
 import { OrderItemsModal } from "./OrderItemsModal"
+import { OrderPrintMenuItem } from "./OrderPrintButton"
 import type { ProductType } from "../models/Product"
 import { ORDERS_CARD_MENU_RAIL_PX, ordersCardMenuActionIconStyles } from "../helpers/ordersCardMenuButtonStyles"
 import { payOrder, deleteOrder, deliveryOrder } from "../hooks/useAPI"
@@ -155,7 +156,7 @@ function OrdersCard({
 
   const cardBg = isPaid ? "var(--orders-card-paid-background-color)" : "var(--orders-card-background-color)"
   const dividerColor = isPaid ? "var(--orders-card-divider-on-paid)" : "var(--orders-card-divider-on-teal)"
-  const productSlices = [{ orderId, items: order_items ?? [] }]
+  const productSlices = [{ orderId, items: order_items ?? [], createdAt: created_at, observation }]
 
   const PaidButton = () => (
     <Tooltip label="Pedido já pago">
@@ -307,6 +308,11 @@ function OrdersCard({
                 <Menu.Item onClick={() => setItemsModalOpen(true)} aria-label="Exibir itens do pedido em um modal">
                   Exibir itens
                 </Menu.Item>
+                <OrderPrintMenuItem
+                  customerName={customer_name}
+                  orders={productSlices}
+                  totalAmount={amount}
+                />
                 {canMerge && onMergeCustomer && (
                   <Menu.Item onClick={onMergeCustomer}>Agrupar pedidos do cliente</Menu.Item>
                 )}

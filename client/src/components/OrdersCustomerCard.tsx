@@ -6,6 +6,7 @@ import DecimalFormatter from "../helpers/Decimal"
 import { ORDERS_CARD_MENU_RAIL_PX, ordersCardMenuActionIconStyles } from "../helpers/ordersCardMenuButtonStyles"
 import { payOrder } from "../hooks/useAPI"
 import { OrderItemsModal } from "./OrderItemsModal"
+import { OrderPrintMenuItem } from "./OrderPrintButton"
 import type { OrderProductsSlice } from "./OrderProductsList"
 
 function MenuDotsIcon() {
@@ -137,6 +138,11 @@ function OrdersCustomerCard({
                 <Menu.Item onClick={() => setItemsModalOpen(true)} aria-label="Exibir itens de todas as comandas em um modal">
                   Exibir itens
                 </Menu.Item>
+                <OrderPrintMenuItem
+                  customerName={customer_name}
+                  orders={productSlices}
+                  totalAmount={totalAmount}
+                />
                 {onUnmerge && <Menu.Item onClick={onUnmerge}>Desagrupar cliente</Menu.Item>}
               </Menu.Dropdown>
             </Menu>

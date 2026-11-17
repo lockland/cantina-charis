@@ -117,6 +117,8 @@ function OrdersCardList() {
     const productSlices = group.orders.map((order) => ({
       orderId: order.order_id ?? 0,
       items: order.order_items ?? [],
+      createdAt: order.created_at,
+      observation: order.observation,
     }))
 
     return (
